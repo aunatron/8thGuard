@@ -1,0 +1,25 @@
+:root {
+  color-scheme: light;
+}
+
+body {
+  margin: 0;
+  font-family: Arial, sans-serif;
+  background: #f6f8fb;
+  color: #102a43;
+}
+
+main {
+  max-width: 860px;
+  margin: 2rem auto;
+  padding: 1.5rem;
+  background: white;
+  border-radius: 12px;
+  box-shadow: 0 4px 16px rgba(16, 42, 67, 0.08);
+}
+
+h1, h2 {
+  margin-top: 0;
+}
+
+ul { padding-left: 1.2rem; }
