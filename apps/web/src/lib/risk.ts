@@ -1,8 +1,17 @@
+import { getSolanaTransactionExplorerLink, getTransactionExplorerLinks, type ExplorerLink } from "./wallet/explorers";
+import { runWalletIntelligenceCheck, type WalletRiskResult } from "./wallet/realCheck";
+
 export type RiskResult = {
   score: number;
   level: "Low" | "Medium" | "High" | "Unknown";
   reasons: string[];
   disclaimer: string;
+};
+
+export type TransactionRiskResult = RiskResult & {
+  likelyNetworks: string[];
+  liveDataUsed: boolean;
+  explorerLinks: ExplorerLink[];
 };
 
 function levelFromScore(score: number): RiskResult["level"] {
@@ -12,33 +21,29 @@ function levelFromScore(score: number): RiskResult["level"] {
   return "Unknown";
 }
 
-export function checkWalletRisk(address: string): RiskResult {
-  const trimmed = address.trim();
-  const looksHex = /^(0x)?[a-fA-F0-9]{30,80}$/.test(trimmed);
-  const score = looksHex ? 42 : 64;
-  return {
-    score,
-    level: levelFromScore(score),
-    reasons: [
-      looksHex ? "Address format detected" : "Address format not recognized confidently",
-      "No live intelligence source connected yet"
-    ],
-    disclaimer: "MVP result only. This is not final fraud proof."
-  };
+export async function checkWalletRisk(address: string): Promise<WalletRiskResult> {
+  return runWalletIntelligenceCheck(address);
 }
 
-export function checkTransactionRisk(hash: string): RiskResult {
+export function checkTransactionRisk(hash: string): TransactionRiskResult {
   const trimmed = hash.trim();
-  const looksTx = /^(0x)?[a-fA-F0-9]{40,100}$/.test(trimmed);
-  const score = looksTx ? 48 : 68;
+  const hex64 = /^(0x)?[a-fA-F0-9]{64}$/.test(trimmed);
+  const solanaLike = /^[1-9A-HJ-NP-Za-km-z]{80,100}$/.test(trimmed);
+  const score = hex64 || solanaLike ? 45 : 68;
+  const explorerLinks = solanaLike ? [getSolanaTransactionExplorerLink(trimmed)] : hex64 ? getTransactionExplorerLinks(trimmed) : [];
+
   return {
     score,
     level: levelFromScore(score),
     reasons: [
-      looksTx ? "Transaction hash format detected" : "Transaction hash shape appears unusual",
-      "Live blockchain lookup not connected in this MVP"
+      hex64 ? "64-character hex transaction hash detected" : solanaLike ? "Solana signature-like format detected" : "Transaction hash shape appears unusual",
+      "Explorer links are provided where the format is recognized",
+      "Live transaction lookup will be added after wallet intelligence v0 stabilizes"
     ],
-    disclaimer: "MVP result only. Live chain data integration is pending."
+    likelyNetworks: hex64 ? ["Ethereum/EVM", "Bitcoin", "XRPL"] : solanaLike ? ["Solana"] : ["Unknown"],
+    liveDataUsed: false,
+    explorerLinks,
+    disclaimer: "MVP result only. This is not final fraud proof."
   };
 }
 

@@ -8,4 +8,4 @@ export function getEnv() {
   };
 }
 
-export const MAX_INPUT_LENGTH = 180;
+export const MAX_INPUT_LENGTH = 220;

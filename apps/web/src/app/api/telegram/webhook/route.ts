@@ -24,7 +24,7 @@ export async function POST(req: Request) {
       return NextResponse.json({ ok: true, skipped: true });
     }
 
-    const reply = buildBotReply(text, env.appName);
+    const reply = await buildBotReply(text, env.appName);
 
     await logAuditEvent({
       event_type: "telegram_command_received",
@@ -34,6 +34,7 @@ export async function POST(req: Request) {
       timestamp: new Date().toISOString(),
       metadata: {
         chat_id: chatId,
+        has_argument: Boolean(text.trim().split(/\s+/).slice(1).join(" ")),
         ...getActorMeta(user)
       }
     });

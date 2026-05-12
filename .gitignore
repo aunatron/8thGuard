@@ -69,6 +69,11 @@ web_modules/
 .env
 .env.*
 !.env.example
+.env.local
+.env.production
+env.txt
+*.pem
+*.key
 
 # parcel-bundler cache (https://parceljs.org/)
 .cache
