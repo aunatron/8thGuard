@@ -41,11 +41,11 @@ function baseResult(address: string): WalletRiskResult {
     sources: [],
     reasons: [
       detection.isValidFormat ? "Address format recognized" : "Address format not recognized confidently",
-      "Internal report lookup placeholder is not connected yet",
-      "External scam database placeholder is not connected yet"
+      "No verified adverse report is included in this automated check",
+      "Use explorer links and payment context before sending funds"
     ],
     explorerLinks: getWalletExplorerLinks(detection.detectedChain, detection.normalizedAddress),
-    disclaimer: "MVP result only. This is not final fraud proof."
+    disclaimer: "This is not final fraud proof."
   };
 }
 
@@ -66,14 +66,14 @@ export async function runWalletIntelligenceCheck(address: string): Promise<Walle
     const evm = await fetchEthereumBalance(detection.normalizedAddress);
     result.sources.push(evm.source);
     if (!evm.ok) {
-      result.reasons.push(evm.reason);
+      result.reasons.push("Live Ethereum balance data was not available for this check");
       result.reasons.push("Explorer links are provided for Ethereum, BNB Smart Chain, Base, and Polygon");
       return finish(result, 45);
     }
 
     result.liveDataUsed = true;
-    result.reasons.push(`Ethereum balance preview: ${evm.data.eth.toFixed(6)} ETH`);
-    result.reasons.push("Ethereum live balance source connected; BSC/Base/Polygon links are explorer-ready");
+    result.reasons.push(`Ethereum balance observed: ${evm.data.eth.toFixed(6)} ETH`);
+    result.reasons.push("Explorer links are available for the main EVM networks");
     return finish(result, evm.data.eth > 0 ? 35 : 55);
   }
 
@@ -81,14 +81,14 @@ export async function runWalletIntelligenceCheck(address: string): Promise<Walle
     const btc = await fetchBitcoinAddress(detection.normalizedAddress);
     result.sources.push(btc.source);
     if (!btc.ok) {
-      result.reasons.push(btc.reason);
+      result.reasons.push("Live Bitcoin network data was not available for this check");
       return finish(result, 45);
     }
 
     result.liveDataUsed = true;
-    result.reasons.push(`Transaction count: ${btc.data.txCount}`);
-    result.reasons.push(`Mempool transaction count: ${btc.data.mempoolTxCount}`);
-    if (typeof btc.data.balanceSats === "number") result.reasons.push(`Estimated balance: ${btc.data.balanceSats} sats`);
+    result.reasons.push(`Confirmed transaction count: ${btc.data.txCount}`);
+    result.reasons.push(`Pending transaction count: ${btc.data.mempoolTxCount}`);
+    if (typeof btc.data.balanceSats === "number") result.reasons.push(`Observed balance: ${btc.data.balanceSats} sats`);
     return finish(result, btc.data.txCount > 0 ? 35 : 55);
   }
 
@@ -96,12 +96,12 @@ export async function runWalletIntelligenceCheck(address: string): Promise<Walle
     const sol = await fetchSolanaBalance(detection.normalizedAddress);
     result.sources.push(sol.source);
     if (!sol.ok) {
-      result.reasons.push(sol.reason);
+      result.reasons.push("Live Solana balance data was not available for this check");
       return finish(result, 45);
     }
 
     result.liveDataUsed = true;
-    result.reasons.push(`Balance preview: ${sol.data.lamports} lamports (${sol.data.sol.toFixed(6)} SOL)`);
+    result.reasons.push(`Observed balance: ${sol.data.lamports} lamports (${sol.data.sol.toFixed(6)} SOL)`);
     return finish(result, sol.data.lamports > 0 ? 35 : 55);
   }
 
@@ -109,7 +109,7 @@ export async function runWalletIntelligenceCheck(address: string): Promise<Walle
     const xrp = await fetchXrpAccount(detection.normalizedAddress);
     result.sources.push(xrp.source);
     if (!xrp.ok) {
-      result.reasons.push(xrp.reason);
+      result.reasons.push("Live XRP account data was not available for this check");
       return finish(result, 45);
     }
 
@@ -119,7 +119,7 @@ export async function runWalletIntelligenceCheck(address: string): Promise<Walle
       return finish(result, 55);
     }
 
-    if (typeof xrp.data.balanceXrp === "number") result.reasons.push(`Balance preview: ${xrp.data.balanceXrp.toFixed(6)} XRP`);
+    if (typeof xrp.data.balanceXrp === "number") result.reasons.push(`Observed balance: ${xrp.data.balanceXrp.toFixed(6)} XRP`);
     if (typeof xrp.data.sequence === "number") result.reasons.push(`Account sequence: ${xrp.data.sequence}`);
     return finish(result, 35);
   }
@@ -128,16 +128,16 @@ export async function runWalletIntelligenceCheck(address: string): Promise<Walle
     const tron = await fetchTronAccount(detection.normalizedAddress);
     result.sources.push(tron.source);
     if (!tron.ok) {
-      result.reasons.push(tron.reason);
-      result.reasons.push("USDT TRC20 activity requires token-specific checks later");
+      result.reasons.push("Live TRON account data was not available for this check");
+      result.reasons.push("Confirm any USDT TRC20 payment using the exact token transfer details");
       return finish(result, 45);
     }
 
     result.liveDataUsed = true;
     result.reasons.push(tron.data.exists ? "TRON account found" : "TRON account may be new or unfunded");
-    if (typeof tron.data.balanceTrx === "number") result.reasons.push(`Balance preview: ${tron.data.balanceTrx.toFixed(6)} TRX`);
-    if (typeof tron.data.txCount === "number") result.reasons.push(`Transaction count preview: ${tron.data.txCount}`);
-    result.reasons.push("USDT TRC20 activity requires token-specific checks later");
+    if (typeof tron.data.balanceTrx === "number") result.reasons.push(`Observed balance: ${tron.data.balanceTrx.toFixed(6)} TRX`);
+    if (typeof tron.data.txCount === "number") result.reasons.push(`Transaction count observed: ${tron.data.txCount}`);
+    result.reasons.push("Confirm any USDT TRC20 payment using the exact token transfer details");
     return finish(result, tron.data.exists ? 35 : 55);
   }
 
@@ -145,16 +145,16 @@ export async function runWalletIntelligenceCheck(address: string): Promise<Walle
     const ton = await fetchTonAccount(detection.normalizedAddress);
     result.sources.push(ton.source);
     if (!ton.ok) {
-      result.reasons.push(ton.reason);
-      result.reasons.push("USDT on TON token checks will be added later");
+      result.reasons.push("Live TON account data was not available for this check");
+      result.reasons.push("Confirm any USDT on TON payment using the exact token transfer details");
       return finish(result, 45);
     }
 
     result.liveDataUsed = true;
     result.reasons.push(ton.data.exists ? "TON account found" : "TON account may be new or uninitialized");
-    if (typeof ton.data.balanceTon === "number") result.reasons.push(`Balance preview: ${ton.data.balanceTon.toFixed(6)} TON`);
+    if (typeof ton.data.balanceTon === "number") result.reasons.push(`Observed balance: ${ton.data.balanceTon.toFixed(6)} TON`);
     if (ton.data.status) result.reasons.push(`Account status: ${ton.data.status}`);
-    result.reasons.push("USDT on TON token checks will be added later");
+    result.reasons.push("Confirm any USDT on TON payment using the exact token transfer details");
     return finish(result, ton.data.exists ? 35 : 55);
   }
 

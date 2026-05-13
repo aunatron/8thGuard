@@ -1,13 +1,6 @@
 import { MAX_INPUT_LENGTH, getEnv } from "./config";
 import { getPaymentContact, getPaystackPaymentLinks, getPublicCryptoWallets } from "./payments/config";
-import {
-  FREE_MVP_OFFER as FREE_BASIC_OFFER,
-  PRODUCTS,
-  PRODUCT_BY_ID,
-  PRICING_NOTES,
-  formatUsd,
-  type ProductId
-} from "./payments/products";
+import { PRODUCTS, PRODUCT_BY_ID, formatUsd, type ProductId } from "./payments/products";
 import { checkAgentRisk, checkTransactionRisk, checkWalletRisk } from "./risk";
 import {
   mainMenuKeyboard,
@@ -38,48 +31,40 @@ export function parseCommand(text: string): { command: string; arg: string } {
 
 export function buildCommandHelp(appName: string): string {
   return [
-    `${appName} commands:`,
+    `${appName} Safety Desk`,
     "",
-    "/start - Start 8thGuard",
-    "/help - See available commands",
-    "/check_wallet <address> - Check a crypto wallet address",
-    "/check_tx <transaction_hash> - Review a transaction hash",
-    "/check_agent <name_or_username> - Check a P2P agent or username",
-    "/report_scam - Learn what evidence to prepare",
-    "/pricing - See service pricing",
+    "/check_wallet <address> - Wallet risk intelligence",
+    "/check_tx <transaction_hash> - Transaction review",
+    "/check_agent <name_or_username> - P2P agent check",
+    "/report_scam - Evidence checklist",
+    "/pricing - Review services",
     "/pay - Pay with Paystack/local rails",
-    "/crypto_pay - View official crypto payment rails",
-    "/payment_warning - Read payment safety warnings",
-    "/submit_payment - Learn how to submit payment proof",
-    "/tonight_offer - See current offer stack",
+    "/crypto_pay - Official crypto payment rails",
+    "/payment_warning - Payment safety guidance",
+    "/submit_payment - Submit payment proof instructions",
     "/contact - Official contact options",
     "",
-    "Results are early risk indicators, not final fraud proof. Check before you send."
+    "Use 8thGuard to pause, verify the details, and make a safer decision before funds leave your wallet."
   ].join("\n");
 }
 
 function buildStartMessage(): string {
   return [
-    "Welcome to 8thGuard.",
+    "8thGuard Safety Desk",
     "",
     "Check before you send.",
     "",
-    "I help you review crypto wallets, transaction hashes, and P2P agents for early risk signals before you move funds.",
+    "Review a wallet, transaction hash, or P2P agent before you move funds. 8thGuard helps you slow down high-pressure crypto decisions and look for early risk signals.",
     "",
-    "Crypto scams move fast. 8thGuard helps you pause, check, and make a safer decision before money leaves your wallet.",
+    "Start with one of the checks below:",
     "",
-    "What you can do now:",
-    "- /check_wallet <address> - Check a crypto wallet address",
-    "- /check_tx <transaction_hash> - Review a transaction hash",
-    "- /check_agent <name_or_username> - Check a P2P agent or username",
-    "- /pricing - See service pricing",
-    "- /pay - Pay with Paystack/local rails",
-    "- /crypto_pay - View official crypto payment rails",
-    "- /report_scam - Learn what evidence to prepare",
+    "- /check_wallet <address>",
+    "- /check_tx <transaction_hash>",
+    "- /check_agent <name_or_username>",
     "",
-    "Results are early risk indicators, not final fraud proof.",
+    "For paid review support, use /pricing. For scam-report guidance, use /report_scam.",
     "",
-    "Use the buttons below, or type /help to see all commands."
+    "Results are risk indicators, not final fraud proof."
   ].join("\n");
 }
 
@@ -90,12 +75,14 @@ function productLine(productId: ProductId): string {
 
 function buildPricingMessage(): string {
   return [
-    "8thGuard Service Pricing",
-    `${FREE_BASIC_OFFER.name}: Free`,
+    "8thGuard Review Services",
+    "Basic checks: Free",
     ...PRODUCTS.map((product) => `${product.name} - ${formatUsd(product.priceUsd)}`),
     "",
-    ...PRICING_NOTES.map((note) => note.replace("MVP", "service")),
-    "Results are early risk indicators, not final fraud proof."
+    "USD is the reference price.",
+    "Local rails may convert at checkout.",
+    "Crypto payments use USDT/USDC equivalent or quoted crypto amount.",
+    "Results are risk indicators, not final fraud proof."
   ].join("\n");
 }
 
@@ -112,9 +99,9 @@ function buildPayMessage(): string {
   const configuredLinks = PRODUCTS.filter((product) => links[product.id]);
 
   const base = [
-    "Paystack is used for paying 8thGuard service fees.",
+    "Paystack is used for 8thGuard review service payments.",
     "Supported local rails may include MoMo, card, bank transfer, and other Paystack-supported methods.",
-    "This is for digital services only.",
+    "Payments are for 8thGuard digital services only.",
     "Not crypto trading, exchange, escrow, custody, or user-to-user settlement."
   ];
 
@@ -122,7 +109,7 @@ function buildPayMessage(): string {
     return [
       ...base,
       "",
-      "Payment links are being activated. Users should use official 8thGuard contact only.",
+      "Use official 8thGuard contact for payment instructions.",
       buildContactMessage()
     ].join("\n");
   }
@@ -149,7 +136,7 @@ function buildCryptoPayMessage(): string {
     "Confirm the exact network before sending.",
     "Wrong-network payments may be unrecoverable.",
     "Never send seed phrases or private keys.",
-    "No escrow, no custody, no exchange."
+    "8thGuard does not provide escrow, custody, exchange, or trading services."
   ].join("\n");
 }
 
@@ -161,13 +148,14 @@ function buildPaymentWarningMessage(): string {
     "Only pay through official 8thGuard bot/website instructions.",
     "8thGuard will never ask for seed phrases/private keys.",
     "Crypto payments are for 8thGuard digital services only.",
-    "No escrow, no custody, no exchange."
+    "8thGuard does not provide escrow, custody, exchange, or trading services."
   ].join("\n");
 }
 
 function buildSubmitPaymentMessage(): string {
   return [
-    "Automated payment verification is not fully live yet.",
+    "Payment Proof Checklist",
+    "",
     "After payment, prepare:",
     "- product selected",
     "- Paystack reference or crypto transaction hash",
@@ -176,13 +164,13 @@ function buildSubmitPaymentMessage(): string {
     "- short context",
     "",
     "Do not collect or send sensitive documents in Telegram yet.",
-    "Use official contact or future form."
+    "Use official contact for submission instructions."
   ].join("\n");
 }
 
 function buildTonightOfferMessage(): string {
   return [
-    "Current Service Offer Stack",
+    "Current Review Services",
     productLine("detailed_wallet_review").replace("Detailed Wallet Review", "Detailed Review"),
     productLine("priority_scam_report_review").replace("Priority Scam Report Review", "Priority Scam Review"),
     productLine("weekly_early_access_supporter"),
@@ -190,13 +178,8 @@ function buildTonightOfferMessage(): string {
     productLine("group_community_safety_review"),
     productLine("founding_supporter_package"),
     "",
-    "$200 sprint math:",
-    "2 Founding Supporters ~= $200",
-    "4 Group Safety Reviews ~= $200",
-    "7 Agent Reviews ~= $210",
-    "14 Weekly Supporters ~= $210",
-    "",
-    "This is current service access, not a fake discount. Results are early risk signals, not final fraud proof."
+    "Choose the level of review that matches the risk and urgency of the situation.",
+    "Results are risk indicators, not final fraud proof."
   ].join("\n");
 }
 
@@ -205,8 +188,15 @@ function formatExplorerLinks(links: { label: string; url: string }[]): string {
   return links.map((link) => `${link.label}: ${link.url}`).join("\n");
 }
 
-function removeMvpPrefix(text: string): string {
-  return text.replace("MVP result only. ", "");
+function levelLabel(score: number): string {
+  if (score >= 70) return `${score}/100 - High caution`;
+  if (score >= 50) return `${score}/100 - Medium caution`;
+  if (score >= 35) return `${score}/100 - Low-to-medium caution`;
+  return `${score}/100 - Lower immediate risk`;
+}
+
+function liveDataLabel(liveDataUsed: boolean): string {
+  return liveDataUsed ? "Network data included" : "Format and explorer review";
 }
 
 export async function buildBotReply(text: string, appName: string): Promise<TelegramBotReply> {
@@ -220,52 +210,69 @@ export async function buildBotReply(text: string, appName: string): Promise<Tele
   }
 
   if (command === "/check_wallet") {
-    if (!arg) return { command, message: "Send /check_wallet <address>\n\nExample: /check_wallet 0x1234...", reply_markup: undefined };
+    if (!arg) return { command, message: "Send a wallet address with the command.\n\nExample: /check_wallet 0x1234...", reply_markup: undefined };
     const risk = await checkWalletRisk(arg);
     return {
       command,
       message: [
-        "Wallet Intelligence Preview",
+        "8thGuard Wallet Review",
+        "",
         `Network: ${risk.detectedChain}${risk.possibleNetworks.length > 1 ? ` (${risk.possibleNetworks.join(", ")})` : ""}`,
-        `Risk: ${risk.score}/100 - ${risk.level}`,
-        `Live data: ${risk.liveDataUsed ? "Yes" : "No"}`,
-        "Signals:",
-        ...risk.reasons.map((reason) => `- ${removeMvpPrefix(reason)}`),
+        `Assessment: ${levelLabel(risk.score)}`,
+        `Review depth: ${liveDataLabel(risk.liveDataUsed)}`,
+        "",
+        "What we observed:",
+        ...risk.reasons.map((reason) => `- ${reason}`),
+        "",
         "Explorer links:",
         formatExplorerLinks(risk.explorerLinks),
-        removeMvpPrefix(risk.disclaimer),
-        "For deeper manual review, use /pricing."
+        "",
+        risk.disclaimer,
+        "Next step: match the wallet, network, amount, and counterparty before sending. For a manual review, use /pricing."
       ].join("\n"),
       reply_markup: walletCheckKeyboard
     };
   }
 
   if (command === "/check_tx") {
-    if (!arg) return { command, message: "Send /check_tx <transaction_hash>", reply_markup: undefined };
+    if (!arg) return { command, message: "Send a transaction hash with the command.\n\nExample: /check_tx <transaction_hash>", reply_markup: undefined };
     const risk = checkTransactionRisk(arg);
     return {
       command,
       message: [
-        "Transaction Intelligence Preview",
+        "8thGuard Transaction Review",
+        "",
         `Likely networks: ${risk.likelyNetworks.join(", ")}`,
-        `Risk: ${risk.score}/100 - ${risk.level}`,
-        `Live data: ${risk.liveDataUsed ? "Yes" : "No"}`,
-        "Signals:",
+        `Assessment: ${levelLabel(risk.score)}`,
+        `Review depth: ${liveDataLabel(risk.liveDataUsed)}`,
+        "",
+        "What we observed:",
         ...risk.reasons.map((reason) => `- ${reason}`),
+        "",
         "Explorer links:",
         formatExplorerLinks(risk.explorerLinks),
-        removeMvpPrefix(risk.disclaimer),
-        "For deeper manual review, use /pricing."
+        "",
+        risk.disclaimer,
+        "Next step: verify recipient, token, amount, and timestamp before trusting a screenshot. For a manual review, use /pricing."
       ].join("\n")
     };
   }
 
   if (command === "/check_agent") {
-    if (!arg) return { command, message: "Send /check_agent <name_or_username>", reply_markup: undefined };
+    if (!arg) return { command, message: "Send an agent name or username with the command.\n\nExample: /check_agent @username", reply_markup: undefined };
     const risk = checkAgentRisk(arg);
     return {
       command,
-      message: `Agent Risk Check: ${risk.score}/100 - ${risk.level} Risk. ${removeMvpPrefix(risk.disclaimer)} Reasons: ${risk.reasons.join("; ")}.`
+      message: [
+        "8thGuard Agent Review",
+        "",
+        `Assessment: ${levelLabel(risk.score)}`,
+        "What we observed:",
+        ...risk.reasons.map((reason) => `- ${reason}`),
+        "",
+        risk.disclaimer,
+        "Next step: confirm identity through independent channels before sending funds."
+      ].join("\n")
     };
   }
 
@@ -273,7 +280,7 @@ export async function buildBotReply(text: string, appName: string): Promise<Tele
     return {
       command,
       message:
-        "Prepare this evidence: wallet address, Telegram username, transaction hash, amount, screenshots, and a short story of what happened. Do not send sensitive documents in Telegram yet. File upload support is coming soon.",
+        "Scam Report Evidence Checklist\n\nPrepare: wallet address, Telegram username, transaction hash, amount, screenshots, and a short timeline of what happened.\n\nDo not send sensitive documents in Telegram. Keep original screenshots and transaction links available for review.",
       reply_markup: scamReportKeyboard
     };
   }
@@ -295,15 +302,15 @@ export async function buildBotReply(text: string, appName: string): Promise<Tele
 
 export async function buildCallbackReply(callbackData: string | undefined, appName: string): Promise<TelegramBotReply> {
   if (callbackData === "check_wallet") {
-    return { command: "check_wallet", message: "Send /check_wallet <address>\n\nExample: /check_wallet 0x1234..." };
+    return { command: "check_wallet", message: "Send a wallet address with the command.\n\nExample: /check_wallet 0x1234..." };
   }
 
   if (callbackData === "check_tx") {
-    return { command: "check_tx", message: "Send /check_tx <transaction_hash>" };
+    return { command: "check_tx", message: "Send a transaction hash with the command.\n\nExample: /check_tx <transaction_hash>" };
   }
 
   if (callbackData === "check_agent") {
-    return { command: "check_agent", message: "Send /check_agent <name_or_username>" };
+    return { command: "check_agent", message: "Send an agent name or username with the command.\n\nExample: /check_agent @username" };
   }
 
   const commandByCallback: Record<string, string> = {

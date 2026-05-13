@@ -38,12 +38,12 @@ export function checkTransactionRisk(hash: string): TransactionRiskResult {
     reasons: [
       hex64 ? "64-character hex transaction hash detected" : solanaLike ? "Solana signature-like format detected" : "Transaction hash shape appears unusual",
       "Explorer links are provided where the format is recognized",
-      "Live transaction lookup will be added after wallet intelligence v0 stabilizes"
+      "Use the matching explorer to confirm amount, recipient, token, and timestamp"
     ],
     likelyNetworks: hex64 ? ["Ethereum/EVM", "Bitcoin", "XRPL"] : solanaLike ? ["Solana"] : ["Unknown"],
     liveDataUsed: false,
     explorerLinks,
-    disclaimer: "MVP result only. This is not final fraud proof."
+    disclaimer: "This is not final fraud proof."
   };
 }
 
@@ -56,8 +56,8 @@ export function checkAgentRisk(agent: string): RiskResult {
     level: levelFromScore(score),
     reasons: [
       suspicious ? "Name contains high-impersonation keywords" : "No obvious impersonation keyword pattern",
-      "Verified agent registry integration is coming soon"
+      "Confirm identity, payment terms, and community references before sending funds"
     ],
-    disclaimer: "MVP result only. Registry verification is not active yet."
+    disclaimer: "This is not final fraud proof."
   };
 }
