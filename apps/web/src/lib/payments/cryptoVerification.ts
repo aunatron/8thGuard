@@ -53,9 +53,9 @@ function notConfigured(rail: CryptoRailId, txHash: string): CryptoPaymentVerific
   return {
     status: "partial",
     rail,
-    source: "8thGuard config",
+    source: "8thGuard payment desk",
     txHash,
-    notes: ["Official receiving address is not published yet, so the bot cannot match this transaction to 8thGuard automatically."]
+    notes: ["This rail requires 8thGuard support confirmation. Use an official published address before sending."]
   };
 }
 
@@ -77,10 +77,10 @@ export async function verifyCryptoPayment(rail: CryptoRailId, txHash: string): P
   return {
     status: "partial",
     rail,
-    source: "manual review",
+    source: "8thGuard payment desk",
     txHash: cleanHash,
     expectedAddress,
-    notes: ["Automated verification for this rail is not live yet. Submit the hash for manual review."]
+    notes: ["This rail requires payment desk confirmation. Submit the transaction hash with your session ID."]
   };
 }
 
@@ -119,7 +119,7 @@ async function verifyBitcoinPayment(txHash: string, expectedAddress: string): Pr
       txHash,
       expectedAddress,
       explorerUrl,
-      notes: ["Bitcoin lookup failed or timed out. Use the explorer link and manual review."]
+      notes: ["Bitcoin confirmation needs payment desk review. Keep the explorer link and session ID ready."]
     };
   }
 }
@@ -168,7 +168,7 @@ async function verifyXrpPayment(txHash: string, expectedAddress: string): Promis
       txHash,
       expectedAddress,
       explorerUrl,
-      notes: ["XRPL lookup failed or timed out. Use the explorer link and manual review."]
+      notes: ["XRP confirmation needs payment desk review. Keep the explorer link and session ID ready."]
     };
   }
 }
@@ -185,7 +185,7 @@ async function verifyEvmNativePayment(txHash: string, expectedAddress: string): 
       txHash,
       expectedAddress,
       explorerUrl,
-      notes: ["ETHERSCAN_API_KEY is not configured, so native EVM payment matching needs manual review."]
+      notes: ["EVM confirmation needs payment desk review. Keep the transaction hash and session ID ready."]
     };
   }
 
@@ -222,7 +222,7 @@ async function verifyEvmNativePayment(txHash: string, expectedAddress: string): 
       txHash,
       expectedAddress,
       explorerUrl,
-      notes: ["EVM lookup failed or timed out. Use the explorer link and manual review."]
+      notes: ["EVM confirmation needs payment desk review. Keep the explorer link and session ID ready."]
     };
   }
 }
@@ -239,7 +239,7 @@ async function verifyTronPayment(txHash: string, expectedAddress: string): Promi
       txHash,
       expectedAddress,
       explorerUrl,
-      notes: ["TRONGRID_API_KEY is not configured, so TRON payment matching needs manual review."]
+      notes: ["TRON confirmation needs payment desk review. Keep the transaction hash and session ID ready."]
     };
   }
 
@@ -273,7 +273,7 @@ async function verifyTronPayment(txHash: string, expectedAddress: string): Promi
       txHash,
       expectedAddress,
       explorerUrl,
-      notes: ["TRON lookup failed or timed out. Use the explorer link and manual review."]
+      notes: ["TRON confirmation needs payment desk review. Keep the explorer link and session ID ready."]
     };
   }
 }
@@ -313,7 +313,7 @@ async function verifySolanaPayment(txHash: string, expectedAddress: string): Pro
       observedTo: matchedAccount,
       explorerUrl,
       notes: matchedAccount
-        ? ["Official Solana address appears in the transaction accounts. Manual amount confirmation is still required."]
+        ? ["Official Solana address appears in the transaction accounts. Amount confirmation is required before service release."]
         : ["Solana transaction was found, but the official address was not detected in account keys."]
     };
   } catch {
@@ -324,7 +324,7 @@ async function verifySolanaPayment(txHash: string, expectedAddress: string): Pro
       txHash,
       expectedAddress,
       explorerUrl,
-      notes: ["Solana lookup failed or timed out. Use the explorer link and manual review."]
+      notes: ["Solana confirmation needs payment desk review. Keep the explorer link and session ID ready."]
     };
   }
 }
@@ -334,7 +334,7 @@ export function formatCryptoPaymentVerification(result: CryptoPaymentVerificatio
     result.status === "verified"
       ? "Verified match"
       : result.status === "partial"
-        ? "Partial evidence"
+        ? "Review needed"
         : "Not verified";
 
   return [
@@ -343,7 +343,6 @@ export function formatCryptoPaymentVerification(result: CryptoPaymentVerificatio
     sessionId ? `Session ID: ${sessionId}` : undefined,
     `Rail: ${result.rail}`,
     `Status: ${statusLabel}`,
-    `Source: ${result.source}`,
     `Tx hash: ${result.txHash}`,
     result.expectedAddress ? `Expected address: ${result.expectedAddress}` : undefined,
     result.observedTo ? `Observed recipient: ${result.observedTo}` : undefined,
@@ -354,7 +353,7 @@ export function formatCryptoPaymentVerification(result: CryptoPaymentVerificatio
     "Notes:",
     ...result.notes.map((note) => `- ${note}`),
     "",
-    "This is payment evidence, not a custody or escrow flow. 8thGuard still reviews paid service fulfillment manually until auto-unlock is enabled."
+    "This confirms payment evidence only. 8thGuard does not provide custody, escrow, exchange, trading, or user-to-user settlement."
   ]
     .filter((line): line is string => Boolean(line))
     .join("\n");

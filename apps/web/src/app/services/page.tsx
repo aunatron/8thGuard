@@ -1,4 +1,4 @@
-import { PRODUCTS, formatGhs, formatUsd } from "@/lib/payments/products";
+import { PRODUCTS, formatGlobalPrice } from "@/lib/payments/products";
 
 const featuredIds = [
   "quick_wallet_check",
@@ -26,7 +26,7 @@ export default function ServicesPage() {
       <ul>
         {featuredProducts.map((product) => (
           <li key={product.id}>
-            <strong>{product.name}</strong> - {formatUsd(product.priceUsd)} / {formatGhs(product.priceGhs)}
+            <strong>{product.name}</strong> - {formatGlobalPrice(product)}
             <br />
             {product.description}
           </li>
@@ -37,9 +37,9 @@ export default function ServicesPage() {
       <ol>
         <li>Open the 8thGuard Telegram bot.</li>
         <li>Choose the paid check or review that matches the risk.</li>
-        <li>Choose the review service that matches the risk and urgency.</li>
-        <li>Use `/pay` or `/crypto_pay` for official payment instructions.</li>
-        <li>Use `/submit_payment` and official contact to send payment proof and review context.</li>
+        <li>Pay through official checkout or crypto wallet rails.</li>
+        <li>Continue the review session with the wallet, transaction, agent, or case context.</li>
+        <li>Receive risk indicators and review guidance.</li>
       </ol>
 
       <h2>Important Boundaries</h2>

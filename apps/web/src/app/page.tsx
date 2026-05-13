@@ -1,5 +1,5 @@
 import Image from "next/image";
-import { PRODUCTS, formatGhs, formatUsd } from "@/lib/payments/products";
+import { PRODUCTS, formatGlobalPrice } from "@/lib/payments/products";
 
 const productCards = [
   "Wallet Intelligence",
@@ -8,10 +8,10 @@ const productCards = [
   "Guarded Send",
   "Payment Sessions",
   "Group Safety",
-  "Future Protected Transactions"
+  "Protected Transactions"
 ];
 
-const paymentRails = ["Paystack", "Crypto wallets", "BTC", "XRP", "USDT TRC20", "USDT BEP20/EVM", "TON", "Solana"];
+const paymentRails = ["Card / Mobile Money", "Crypto wallets", "BTC", "XRP", "USDT TRC20", "USDT BEP20/EVM", "TON", "Solana"];
 
 export default function HomePage() {
   return (
@@ -21,9 +21,9 @@ export default function HomePage() {
           <Image className="brand-mark" src="/assets/logo_dark-removebg-preview.png" alt="8thGuard" width={172} height={64} priority />
           <h1>Check before you send.</h1>
           <p className="hero-subhead">
-            8thGuard helps users review wallets, transactions, agents, and future guarded transactions for early risk signals before funds move.
+            8thGuard helps users review wallets, transactions, agents, and protected payment flows for early risk signals before funds move.
           </p>
-          <p className="trust-line">Paid crypto safety. No private keys. No exchange. No custody in MVP.</p>
+          <p className="trust-line">Paid crypto safety. No private keys. No exchange. No custody.</p>
           <div className="hero-actions">
             <a className="button primary" href="/pay">View Paid Services</a>
             <a className="button secondary" href="/services">Explore Reviews</a>
@@ -38,9 +38,9 @@ export default function HomePage() {
           <div className="signal-bar"><span /></div>
           <ul>
             <li>Detected network: EVM</li>
-            <li>Live data: Partial</li>
-            <li>Sources: explorer routing, public-chain signals</li>
-            <li>MVP result: early risk signals only</li>
+            <li>Coverage: Enhanced</li>
+            <li>Network intelligence active</li>
+            <li>Early risk signals only</li>
           </ul>
         </div>
       </section>
@@ -67,14 +67,14 @@ export default function HomePage() {
           <p className="eyebrow">Pricing</p>
           <h2>Free education. Paid utility.</h2>
           <p>
-            Checks and reviews are paid services. Public pricing uses USD reference pricing, with fixed GHS reference values for local rails.
+            Checks and reviews are paid services. Public pricing is shown across major global reference currencies.
           </p>
         </div>
         <div className="pricing-list">
           {PRODUCTS.map((product) => (
             <div className="price-row" key={product.id}>
               <span>{product.name}</span>
-              <strong>{formatUsd(product.priceUsd)} / {formatGhs(product.priceGhs)}</strong>
+              <strong>{formatGlobalPrice(product)}</strong>
             </div>
           ))}
         </div>
@@ -104,8 +104,8 @@ export default function HomePage() {
           <li>Choose service</li>
           <li>Pay through official rail</li>
           <li>Submit wallet, transaction, agent, or session context</li>
-          <li>Receive risk signals or manual review</li>
-          <li>Future: automated unlock and guarded transaction flow</li>
+          <li>Receive risk indicators or detailed review</li>
+          <li>Continue the protected review flow</li>
         </ol>
       </section>
 
@@ -124,10 +124,10 @@ export default function HomePage() {
       </section>
 
       <section className="miniapp-section">
-        <p className="eyebrow">Mini App Readiness</p>
-        <h2>Built for Telegram bot today. Designed for mini app, web app, and future protected transaction flows.</h2>
+        <p className="eyebrow">Platform Coverage</p>
+        <h2>Built for Telegram, web, and protected transaction flows.</h2>
         <p>
-          The current MVP keeps payments, wallet intelligence, audit logging, and future guarded transaction architecture separated so the product can grow without breaking trust boundaries.
+          8thGuard combines payments, wallet intelligence, review sessions, and protected-flow readiness without crossing into exchange, custody, or trading.
         </p>
       </section>
     </main>

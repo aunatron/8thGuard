@@ -2,23 +2,22 @@
 
 This is the current real-payment setup for 8thGuard.
 
-Telegram creates the guided payment session. Paystack or the user's own crypto wallet completes the actual payment. 8thGuard then uses the Paystack webhook, Paystack reference, or public-chain crypto transaction hash as payment evidence.
+Telegram creates the guided payment session. Card/mobile money checkout or the user's own crypto wallet completes the actual payment. 8thGuard then uses the payment reference or public-chain crypto transaction hash as payment evidence.
 
-## Automatic Paystack Checkout
+## Button-First Checkout
 
-The premium Telegram flow does not need static Paystack product pages when `PAYSTACK_SECRET_KEY` is configured.
+The premium Telegram flow should be button-first. Static product links are optional backup rails.
 
 User flow:
-1. User types `/payment_session quick_wallet_check customer@email.com`.
-2. Bot creates a session ID.
-3. Backend calls Paystack Initialize Transaction API.
-4. Bot returns a `Pay Now with Paystack` button.
-5. User pays through Paystack.
-6. Paystack redirects to `/pay/callback`.
-7. Paystack sends `charge.success` to `/api/paystack/webhook`.
-8. Backend verifies the reference and messages the Telegram chat if the payment is successful.
+1. User opens `/payment_session`.
+2. User taps a paid service button.
+3. Bot creates a session ID and shows the global guide price.
+4. Bot returns a `Pay Now` checkout button plus official crypto rail buttons.
+5. User pays through checkout or from their own crypto wallet.
+6. User returns to Telegram to continue the review session.
+7. If support confirmation is needed, the user sends the payment reference or public-chain transaction hash with the session ID.
 
-Static Paystack pages are still useful as fallback links in `/pay`.
+Static Paystack pages are still useful as backup links in `/pay`.
 
 ## What To Create In Paystack
 
@@ -81,7 +80,7 @@ Public Paystack links:
 - `NEXT_PUBLIC_PAYSTACK_LINK_GROUP_SAFETY_REVIEW`
 - `NEXT_PUBLIC_PAYSTACK_LINK_FOUNDING_PARTNER`
 
-Paystack server keys for future API/webhook automation:
+Paystack server keys:
 - `PAYSTACK_PUBLIC_KEY`
 - `PAYSTACK_SECRET_KEY`
 - `PAYSTACK_CALLBACK_URL`
@@ -124,20 +123,19 @@ Never put secrets in `NEXT_PUBLIC_` env vars. Only public links, public addresse
 User flow:
 1. User opens `/payment_session`.
 2. User taps a product button.
-3. Bot asks them to type `/payment_session <product_id> <email>` for automatic Paystack checkout.
-4. Bot creates a session ID like `8G-260513-X7K2`.
-5. Bot shows product price, automatic Paystack checkout button, and crypto rail buttons.
-6. User pays through Paystack or from their own crypto wallet.
-7. User submits fallback proof if needed:
+3. Bot creates a session ID like `8G-260513-X7K2`.
+4. Bot shows global guide price, `Pay Now`, and crypto rail buttons.
+5. User pays through checkout or from their own crypto wallet.
+6. User returns to Telegram and continues the review session.
+7. User submits payment confirmation only when needed:
    - Paystack: `/submit_payment 8G-260513-X7K2 <paystack_reference>`
    - Paystack verification: `/verify_paystack_payment <paystack_reference> 8G-260513-X7K2`
    - Crypto: `/verify_crypto_payment xrp <tx_hash> 8G-260513-X7K2`
-8. Bot checks Paystack/public-chain evidence where supported.
-9. Manual review/fulfillment happens until full entitlement auto-unlock is built.
+8. Bot checks payment/public-chain evidence where supported and routes the paid service.
 
 Test commands:
 - `/payment_session`
-- `/payment_session quick_wallet_check customer@email.com`
+- `/payment_session quick_wallet_check`
 - `/verify_paystack_payment <reference> <session_id>`
 - `/verify_crypto_payment xrp <tx_hash> <session_id>`
 
@@ -152,9 +150,9 @@ Supported verifier rails:
 - `xrp`: checks XRPL destination against official XRP address.
 - `evm`: checks native Ethereum recipient if `ETHERSCAN_API_KEY` is configured.
 - `usdt_trc20`: checks TRON transfer evidence if `TRONGRID_API_KEY` is configured.
-- `solana`: checks whether official address appears in transaction accounts and flags manual amount review.
-- `usdt_bep20` and `ton`: currently manual/partial evidence until dedicated provider matching is added.
+- `solana`: checks whether official address appears in transaction accounts and flags amount review.
+- `usdt_bep20` and `ton`: use payment desk confirmation with the submitted transaction hash.
 
 ## Important Boundary
 
-Telegram is not holding or sending user funds. The user pays through Paystack or their own wallet. 8thGuard reads public payment evidence and handles service fulfillment. This keeps the MVP away from exchange, custody, escrow, trading, and user-to-user settlement behavior.
+Telegram is not holding or sending user funds. The user pays through official checkout or their own wallet. 8thGuard reads public payment evidence and handles service fulfillment. This keeps 8thGuard away from exchange, custody, escrow, trading, and user-to-user settlement behavior.

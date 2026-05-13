@@ -1,23 +1,20 @@
 import { MAX_INPUT_LENGTH, getEnv } from "./config";
 import { getPaymentContact, getPaystackPaymentLinks, getPublicCryptoWallets } from "./payments/config";
 import { formatCryptoPaymentVerification, verifyCryptoPayment } from "./payments/cryptoVerification";
-import { formatPaystackVerification, initializePaystackTransaction, verifyPaystackReference } from "./payments/paystackVerification";
+import { formatPaystackVerification, initializePaystackTransaction, paymentEmailForTelegram, verifyPaystackReference } from "./payments/paystackVerification";
 import {
   PRODUCTS,
   PRODUCT_BY_ID,
   PRICING_NOTES,
-  formatGhs,
+  formatGlobalPrice,
   formatProductLine,
-  formatUsd,
   type ProductId
 } from "./payments/products";
 import {
   buildCryptoRailMessage,
   buildInitializedSessionPaymentKeyboard,
-  buildPaymentSessionMessage as buildProductPaymentSessionMessage,
   buildPaystackInitializedMessage,
   buildProductSessionKeyboard,
-  buildSessionPaymentKeyboard,
   createPaymentSessionDraft,
   parseCryptoRailId,
   productIdFromCallback,
@@ -72,21 +69,20 @@ export function buildCommandHelp(appName: string): string {
     "",
     "Payments:",
     "/pricing - Paid service catalog",
-    "/pay - Paystack/local service payment links",
+    "/pay - Card and mobile money checkout",
     "/crypto_pay - Official crypto wallet service-payment rails",
     "/payment_warning - Payment safety guidance",
-    "/submit_payment - Structured payment proof instructions",
-    "/verify_paystack_payment <reference> [session_id] - Verify Paystack payment status",
-    "/verify_crypto_payment <rail> <tx_hash> [session_id] - Check public-chain payment evidence",
+    "/submit_payment - Confirm payment",
+    "/verify_paystack_payment <reference> [session_id] - Check payment reference",
+    "/verify_crypto_payment <rail> <tx_hash> [session_id] - Confirm crypto payment",
     "/tonight_offer - Priority premium review paths",
     "/contact - Official contact options",
     "",
-    "Future guarded flow:",
-    "/guarded_send - Guarded Send readiness",
-    "/payment_session - Payment Session v0 readiness",
-    "/payment_session <product_id> <email> - Create automatic Paystack checkout",
+    "Protected flow:",
+    "/guarded_send - Guarded Send",
+    "/payment_session - Choose service",
     "/fee_quote - Service and protection fee guidance",
-    "/protected_flow - Future protected transaction flow",
+    "/protected_flow - Protected flow",
     "",
     "Free education. Paid utility. Early risk signals, not final fraud proof."
   ].join("\n");
@@ -98,7 +94,7 @@ function buildStartMessage(): string {
     "",
     "Check before you send.",
     "",
-    "8thGuard helps you review crypto wallets, transaction hashes, P2P agents, and future guarded transactions for early risk signals before funds move.",
+    "8thGuard helps you review crypto wallets, transaction hashes, P2P agents, and protected payment flows for early risk signals before funds move.",
     "",
     "This is a paid crypto safety and fraud-intelligence service. Public scam education may be free, but checks, reviews, payment sessions, and protected flows are paid products.",
     "",
@@ -121,23 +117,9 @@ function buildPricingMessage(): string {
     ...PRODUCTS.map((product) => formatProductLine(product)),
     "",
     ...PRICING_NOTES,
-    "Paystack is for 8thGuard digital service payments only.",
+    "Card and mobile money checkout is for 8thGuard digital service payments only.",
     "Crypto wallets are for 8thGuard digital service payments only.",
     "Early risk signals, not final fraud proof."
-  ].join("\n");
-}
-
-function buildProductSelectionMessage(): string {
-  return [
-    "Create a Payment Session",
-    "",
-    "Choose the paid 8thGuard service below. The bot will generate a session ID, show the price, and give Paystack/crypto payment options.",
-    "",
-    "You can also type:",
-    "/payment_session quick_wallet_check",
-    "/payment_session detailed_wallet_review",
-    "",
-    "Keep the session ID with the Paystack reference or crypto transaction hash."
   ].join("\n");
 }
 
@@ -146,7 +128,7 @@ function buildContactMessage(): string {
   if (contactHandle && officialTelegram) return `Official contact: ${contactHandle}\nOfficial Telegram: ${officialTelegram}`;
   if (contactHandle) return `Official contact: ${contactHandle}`;
   if (officialTelegram) return `Official Telegram: ${officialTelegram}`;
-  return "Official contact will be published on the 8thGuard website.";
+  return "Use the official 8thGuard Telegram bot or website contact channel for support.";
 }
 
 function buildPayMessage(): string {
@@ -154,20 +136,18 @@ function buildPayMessage(): string {
   const configuredLinks = PRODUCTS.filter((product) => links[product.id]);
 
   const base = [
-    "Paystack Service Payments",
+    "Card / Mobile Money",
     "",
-    "Paystack is used for 8thGuard digital service payments only.",
-    "Supported rails may include MoMo, card, bank transfer, and other Paystack-supported methods.",
+    "Use the buttons below to pay for 8thGuard digital services through supported local checkout rails.",
     "No trading, exchange, custody, escrow, or user-to-user settlement.",
-    "For a guided product-specific payment, use /payment_session."
+    "For the smoothest flow, choose a service from /payment_session."
   ];
 
   if (configuredLinks.length === 0) {
     return [
       ...base,
       "",
-      "Paystack product links are being activated.",
-      "Use /pricing to choose a service, then use official contact for current payment instructions.",
+      "Choose a service from /payment_session for available checkout options, or use Crypto Pay.",
       "",
       buildContactMessage()
     ].join("\n");
@@ -176,8 +156,8 @@ function buildPayMessage(): string {
   return [
     ...base,
     "",
-    "Paystack service payment links:",
-    ...configuredLinks.map((product) => `${product.name} (${formatUsd(product.priceUsd)} / ${formatGhs(product.priceGhs)}): ${links[product.id]}`)
+    "Service payment links:",
+    ...configuredLinks.map((product) => `${product.name} (${formatGlobalPrice(product)}): ${links[product.id]}`)
   ].join("\n");
 }
 
@@ -206,10 +186,10 @@ function buildPaystackPaymentKeyboard(): InlineKeyboardMarkup {
     inline_keyboard: [
       ...rows,
       [
-        { text: "Crypto Pay", callback_data: "crypto_pay" },
-        { text: "Submit Payment", callback_data: "submit_payment" }
+        { text: "Crypto Wallets", callback_data: "crypto_pay" },
+        { text: "Confirm Payment", callback_data: "submit_payment" }
       ],
-      [{ text: "Payment Warning", callback_data: "payment_warning" }]
+      [{ text: "Payment Safety", callback_data: "payment_warning" }]
     ]
   };
 }
@@ -238,48 +218,38 @@ function buildCryptoPayMessage(): string {
     "8thGuard never asks for seed phrases or private keys.",
     "No trading, exchange, custody, escrow, or user-to-user settlement.",
     "",
-    "For the real Telegram payment flow:",
-    "1. Use /payment_session and choose a product.",
-    "2. Tap the crypto rail button.",
-    "3. Pay from your wallet.",
-    "4. Submit the tx hash with /verify_crypto_payment."
+    "Choose a rail below. After sending, tap Confirm Crypto Payment."
   ].join("\n");
 }
 
 function buildPaymentWarningMessage(): string {
   return [
-    "Payment Safety Warning",
+    "Payment Safety",
     "",
     "Never pay random admins.",
     "Never trust screenshots alone.",
     "Only pay through official 8thGuard bot/website instructions.",
     "8thGuard will never ask for seed phrases or private keys.",
-    "Crypto payments and Paystack payments are for 8thGuard digital services only.",
+    "Crypto and card/mobile money payments are for 8thGuard digital services only.",
     "No trading, exchange, custody, escrow, or user-to-user settlement."
   ].join("\n");
 }
 
 function buildSubmitPaymentMessage(): string {
   return [
-    "Submit Payment Proof",
+    "Confirm Payment",
     "",
-    "Prepare one clean message with:",
-    "- product selected",
-    "- Paystack reference or crypto transaction hash",
-    "- wallet, transaction hash, agent, or session being reviewed",
-    "- Telegram contact",
-    "- short context",
+    "Use this when you need to confirm a payment reference or crypto transaction hash.",
     "",
-    "Command format:",
+    "Send:",
     "/submit_payment <session_id> <paystack_reference_or_crypto_tx_hash>",
     "",
-    "For Paystack, use:",
+    "For card / mobile money reference:",
     "/verify_paystack_payment <reference> <session_id>",
     "",
-    "For crypto, use the public-chain verifier too:",
+    "For crypto transaction hash:",
     "/verify_crypto_payment <rail> <tx_hash> <session_id>",
     "",
-    "Full auto-unlock is being built. For now, the payment proof flow is manual, structured, and handled through official contact only.",
     "Never send seed phrases, private keys, wallet passwords, or unnecessary identity documents."
   ].join("\n");
 }
@@ -302,24 +272,18 @@ function buildGuardedSendMessage(): string {
   return [
     "Guarded Send",
     "",
-    "Guarded Send is the future 8thGuard flow where a user enters chain, token, amount, receiver wallet, and optional agent before sending.",
+    "Guarded Send is the 8thGuard pre-send review flow for chain, token, amount, receiver wallet, and optional agent context.",
     "8thGuard checks risk, quotes service/protection fees, and helps the user decide before funds move.",
     "",
-    "No full automated protected sending is live yet.",
-    "No production escrow or custody is implemented."
+    "No private keys. No seed phrases. No exchange, custody, escrow, trading, or user-to-user settlement."
   ].join("\n");
 }
 
 function buildPaymentSessionMessage(): string {
   return [
-    "Payment Session v0",
+    "Choose Your 8thGuard Service",
     "",
-    "Payment Session v0 is live as a Telegram-guided session flow.",
-    "It creates a session ID, shows product price, points to official Paystack/crypto rails, and tells the user how to submit proof.",
-    "",
-    "Choose a product below or type /payment_session quick_wallet_check.",
-    "To generate a real Paystack checkout button, type /payment_session quick_wallet_check your@email.com.",
-    "Future persistence will connect the session ID to invoices, ledger entries, audit logs, and entitlements."
+    "Select a service below. Your session and official payment options will be prepared instantly."
   ].join("\n");
 }
 
@@ -349,8 +313,8 @@ function buildFeeQuoteMessage(): string {
     "",
     "Quick checks start at $4.99.",
     "Detailed reviews start at $9.99.",
-    "Future guarded payment sessions may charge a fixed fee or percentage.",
-    "Future protected transactions may charge a service/protection fee.",
+    "Guarded payment sessions may use a fixed fee or percentage-based protection fee.",
+    "Protected review flows may include a service/protection fee.",
     "Network/gas fees are separate and paid to networks, not 8thGuard."
   ].join("\n");
 }
@@ -359,29 +323,91 @@ function buildProtectedFlowMessage(): string {
   return [
     "Protected Flow",
     "",
-    "Future protected transaction flow may use smart contracts, multisig, or chain-specific protection systems after legal, security, and compliance gates.",
-    "No production escrow or custody is live yet.",
+    "Protected Flow gives users a structured pre-send safety layer before funds move.",
+    "8thGuard reviews wallet, transaction, agent, payment, and network context before the user makes a decision.",
+    "No private keys. No seed phrases. No exchange, custody, escrow, trading, or user-to-user settlement.",
     "",
     "Every transaction has a before and after. 8thGuard lives in the before."
   ].join("\n");
 }
 
-function formatExplorerLinks(links: { label: string; url: string }[]): string {
-  if (links.length === 0) return "Not available for this format yet.";
-  return links.map((link) => `${link.label}: ${link.url}`).join("\n");
+function walletLiveDataLabel(liveDataUsed: boolean, sources: string[]): "Enhanced" | "Standard" {
+  if (liveDataUsed || sources.length > 0) return "Enhanced";
+  return "Standard";
 }
 
-function levelLabel(score: number): string {
-  if (score >= 70) return `${score}/100 - High caution`;
-  if (score >= 50) return `${score}/100 - Medium caution`;
-  if (score >= 35) return `${score}/100 - Low-to-medium caution`;
-  return `${score}/100 - Lower immediate risk`;
+function confidenceLabel(score: number): string {
+  if (score >= 70) return "High caution";
+  if (score >= 50) return "Elevated caution";
+  if (score >= 35) return "Watchlist review";
+  return "Lower immediate risk";
 }
 
-function walletLiveDataLabel(liveDataUsed: boolean, sources: string[]): "Yes" | "No" | "Partial" {
-  if (liveDataUsed) return "Yes";
-  if (sources.length > 0) return "Partial";
-  return "No";
+function actionSummary(score: number): string {
+  if (score >= 70) return "Pause before sending. Use a detailed review before moving funds.";
+  if (score >= 50) return "Proceed carefully. Verify counterparty, network, token, and payment context.";
+  if (score >= 35) return "No severe automated signal surfaced, but verify details before sending.";
+  return "Lower immediate risk surfaced in this check. Keep standard transaction hygiene.";
+}
+
+function formatSignals(reasons: string[]): string[] {
+  return reasons.slice(0, 4).map((reason) => `- ${polishSignal(reason)}`);
+}
+
+function polishSignal(reason: string): string {
+  const lower = reason.toLowerCase();
+  if (lower.includes("api not configured") || lower.includes("api key not configured") || lower.includes("data was not available")) {
+    return "Extended network confirmation requires a deeper review pass";
+  }
+  if (lower.includes("address format recognized")) return "Recognized wallet format";
+  if (lower.includes("format not recognized")) return "Wallet format requires caution";
+  if (lower.includes("explorer links are provided")) return "Network reference views are available";
+  if (lower.includes("use the matching explorer")) return "Confirm amount, recipient, token, and timestamp before sending";
+  if (lower.includes("64-character hex transaction hash detected")) return "Recognized transaction hash pattern";
+  if (lower.includes("solana signature-like format detected")) return "Recognized Solana transaction signature pattern";
+  if (lower.includes("no obvious impersonation keyword pattern")) return "No obvious impersonation keyword pattern surfaced";
+  if (lower.includes("name contains high-impersonation keywords")) return "High-impersonation keyword pattern surfaced";
+  return reason;
+}
+
+function explorerSummary(count: number): string {
+  if (count === 0) return "Explorer route: unavailable for this format";
+  return `Explorer coverage: ${count} network view${count === 1 ? "" : "s"} available`;
+}
+
+function paymentEmailNotice(user?: TelegramUser): string {
+  if (user?.username) return `Checkout contact: @${user.username}`;
+  return "Checkout contact: Telegram user";
+}
+
+function userFacingNetwork(chain: string, possibleNetworks: string[]): string {
+  if (possibleNetworks.length > 1) return `${chain} family`;
+  return chain;
+}
+
+function userFriendlyDisclaimer(): string {
+  return "8thGuard provides early risk signals, not final fraud proof.";
+}
+
+function userFriendlyPaidCta(): string {
+  return "For deeper review, choose Get Detailed Review below.";
+}
+
+function paymentSessionEmail(context: TelegramReplyContext): string {
+  return paymentEmailForTelegram({
+    telegramChatId: context.chatId,
+    telegramUserId: context.user?.id,
+    telegramUsername: context.user?.username
+  });
+}
+
+function paymentSessionContactLine(context: TelegramReplyContext): string {
+  return paymentEmailNotice(context.user);
+}
+
+function formatReferenceLinks(score: number, links: { label: string; url: string }[]): string[] {
+  if (score < 50 || links.length === 0) return [];
+  return ["Reference links:", ...links.slice(0, 3).map((link) => `${link.label}: ${link.url}`)];
 }
 
 export async function buildBotReply(text: string, appName: string, context: TelegramReplyContext = {}): Promise<TelegramBotReply> {
@@ -402,23 +428,21 @@ export async function buildBotReply(text: string, appName: string, context: Tele
       message: [
         "Wallet Intelligence Preview",
         "",
-        `Detected network: ${risk.detectedChain}${risk.possibleNetworks.length > 1 ? ` (${risk.possibleNetworks.join(", ")})` : ""}`,
+        `Network: ${userFacingNetwork(risk.detectedChain, risk.possibleNetworks)}`,
         `Risk score: ${risk.score}/100`,
-        `Risk level: ${risk.level}`,
-        `Live data used: ${walletLiveDataLabel(risk.liveDataUsed, risk.sources)}`,
+        `Assessment: ${confidenceLabel(risk.score)}`,
+        `Coverage: ${walletLiveDataLabel(risk.liveDataUsed, risk.sources)}`,
         "",
-        "Key signals:",
-        ...risk.reasons.map((reason) => `- ${reason}`),
+        "Risk indicators:",
+        ...formatSignals(risk.reasons),
         "",
-        "Explorer links:",
-        formatExplorerLinks(risk.explorerLinks),
+        actionSummary(risk.score),
         "",
-        "Sources used:",
-        risk.sources.length > 0 ? risk.sources.join(", ") : "Format detection and explorer routing only",
+        explorerSummary(risk.explorerLinks.length),
+        ...formatReferenceLinks(risk.score, risk.explorerLinks),
         "",
-        `${risk.disclaimer} Early risk signals, not final fraud proof.`,
-        "MVP preview. Paid checks and detailed reviews are available through /pricing.",
-        "For a paid detailed review, use /pricing."
+        userFriendlyDisclaimer(),
+        userFriendlyPaidCta()
       ].join("\n"),
       reply_markup: walletCheckKeyboard
     };
@@ -432,18 +456,20 @@ export async function buildBotReply(text: string, appName: string, context: Tele
       message: [
         "8thGuard Transaction Review",
         "",
-        `Likely networks: ${risk.likelyNetworks.join(", ")}`,
-        `Assessment: ${levelLabel(risk.score)}`,
-        `Review depth: ${risk.liveDataUsed ? "Network data included" : "Format and explorer review"}`,
+        `Network family: ${risk.likelyNetworks.join(", ")}`,
+        `Risk score: ${risk.score}/100`,
+        `Assessment: ${confidenceLabel(risk.score)}`,
         "",
-        "What we observed:",
-        ...risk.reasons.map((reason) => `- ${reason}`),
+        "Risk indicators:",
+        ...formatSignals(risk.reasons),
         "",
-        "Explorer links:",
-        formatExplorerLinks(risk.explorerLinks),
+        actionSummary(risk.score),
         "",
-        `${risk.disclaimer} Early risk signals, not final fraud proof.`,
-        "MVP preview. Paid checks and detailed reviews are available through /pricing."
+        explorerSummary(risk.explorerLinks.length),
+        ...formatReferenceLinks(risk.score, risk.explorerLinks),
+        "",
+        userFriendlyDisclaimer(),
+        userFriendlyPaidCta()
       ].join("\n"),
       reply_markup: walletCheckKeyboard
     };
@@ -457,12 +483,15 @@ export async function buildBotReply(text: string, appName: string, context: Tele
       message: [
         "8thGuard Agent Risk Review",
         "",
-        `Assessment: ${levelLabel(risk.score)}`,
-        "What we observed:",
-        ...risk.reasons.map((reason) => `- ${reason}`),
+        `Risk score: ${risk.score}/100`,
+        `Assessment: ${confidenceLabel(risk.score)}`,
+        "Risk indicators:",
+        ...formatSignals(risk.reasons),
         "",
-        `${risk.disclaimer} Early risk signals, not final fraud proof.`,
-        "MVP preview. Paid checks and detailed reviews are available through /pricing."
+        actionSummary(risk.score),
+        "",
+        userFriendlyDisclaimer(),
+        userFriendlyPaidCta()
       ].join("\n"),
       reply_markup: walletCheckKeyboard
     };
@@ -488,9 +517,9 @@ export async function buildBotReply(text: string, appName: string, context: Tele
       return {
         command,
         message: [
-          "Send the Paystack reference.",
+          "Send the payment reference.",
           "",
-          "Format:",
+          "Use:",
           "/verify_paystack_payment <reference> <session_id>",
           "",
           "Example:",
@@ -514,7 +543,7 @@ export async function buildBotReply(text: string, appName: string, context: Tele
         message: [
           "Send the crypto rail and transaction hash.",
           "",
-          "Format:",
+          "Use:",
           "/verify_crypto_payment <rail> <tx_hash> <session_id>",
           "",
           "Rails: xrp, btc, usdt_trc20, usdt_bep20, evm, ton, solana",
@@ -554,28 +583,24 @@ export async function buildBotReply(text: string, appName: string, context: Tele
     }
     const validProductId = parsed.productId;
 
-    if (parsed.email) {
-      const session = createPaymentSessionDraft(validProductId);
-      const initialized = await initializePaystackTransaction({
-        productId: validProductId,
-        sessionId: session.sessionId,
-        email: parsed.email,
-        telegramChatId: context.chatId,
-        telegramUserId: context.user?.id,
-        telegramUsername: context.user?.username
-      });
-
-      return {
-        command,
-        message: buildPaystackInitializedMessage(initialized),
-        reply_markup: buildInitializedSessionPaymentKeyboard(validProductId, initialized.ok ? initialized.authorizationUrl : undefined)
-      };
-    }
+    const session = createPaymentSessionDraft(validProductId);
+    const initialized = await initializePaystackTransaction({
+      productId: validProductId,
+      sessionId: session.sessionId,
+      email: parsed.email || paymentSessionEmail(context),
+      telegramChatId: context.chatId,
+      telegramUserId: context.user?.id,
+      telegramUsername: context.user?.username
+    });
 
     return {
       command,
-      message: buildProductPaymentSessionMessage(validProductId),
-      reply_markup: buildSessionPaymentKeyboard(validProductId)
+      message: [
+        buildPaystackInitializedMessage(initialized),
+        "",
+        paymentSessionContactLine(context)
+      ].join("\n"),
+      reply_markup: buildInitializedSessionPaymentKeyboard(validProductId, initialized.ok ? initialized.authorizationUrl : undefined)
     };
   }
   if (command === "/fee_quote") return { command, message: buildFeeQuoteMessage(), reply_markup: guardedFlowKeyboard };
@@ -592,10 +617,24 @@ export async function buildCallbackReply(callbackData: string | undefined, appNa
   if (callbackData) {
     const productId = productIdFromCallback(callbackData);
     if (productId) {
+      const session = createPaymentSessionDraft(productId);
+      const initialized = await initializePaystackTransaction({
+        productId,
+        sessionId: session.sessionId,
+        email: paymentSessionEmail(context),
+        telegramChatId: context.chatId,
+        telegramUserId: context.user?.id,
+        telegramUsername: context.user?.username
+      });
+
       return {
         command: "payment_session",
-        message: buildProductPaymentSessionMessage(productId),
-        reply_markup: buildSessionPaymentKeyboard(productId)
+        message: [
+          buildPaystackInitializedMessage(initialized),
+          "",
+          paymentSessionContactLine(context)
+        ].join("\n"),
+        reply_markup: buildInitializedSessionPaymentKeyboard(productId, initialized.ok ? initialized.authorizationUrl : undefined)
       };
     }
 

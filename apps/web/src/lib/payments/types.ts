@@ -1,6 +1,6 @@
 import type { PaymentProduct } from "./products";
 
-export type PaymentProvider = "paystack" | "crypto_wallet" | "manual" | "future_gateway";
+export type PaymentProvider = "paystack" | "crypto_wallet" | "manual" | "gateway";
 
 export type PaymentStatus =
   | "draft"

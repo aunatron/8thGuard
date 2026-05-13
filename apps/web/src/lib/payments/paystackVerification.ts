@@ -49,6 +49,17 @@ async function fetchJsonWithTimeout<T>(url: string, init?: RequestInit, timeoutM
   }
 }
 
+export function paymentEmailForTelegram(input: {
+  telegramChatId?: number;
+  telegramUserId?: number;
+  telegramUsername?: string;
+}): string {
+  const handle = input.telegramUsername?.trim().replace(/^@/, "").toLowerCase().replace(/[^a-z0-9._-]/g, "");
+  const id = input.telegramUserId || input.telegramChatId || Date.now();
+  const localPart = handle ? `${handle}.${id}` : `telegram.${id}`;
+  return `${localPart}@payments.8thguard.com`;
+}
+
 export async function verifyPaystackReference(reference: string): Promise<PaystackVerificationResult> {
   const cleanReference = reference.trim();
   const secretKey = process.env.PAYSTACK_SECRET_KEY?.trim();
@@ -58,7 +69,7 @@ export async function verifyPaystackReference(reference: string): Promise<Paysta
       configured: false,
       reference: cleanReference,
       status: "unknown",
-      notes: ["PAYSTACK_SECRET_KEY is not configured, so the bot cannot verify this reference automatically yet."]
+      notes: ["Reference confirmation is not available in chat right now. Contact 8thGuard support with this reference."]
     };
   }
 
@@ -130,7 +141,7 @@ export async function initializePaystackTransaction(input: {
       ok: false,
       sessionId: input.sessionId,
       productId: input.productId,
-      reason: "PAYSTACK_SECRET_KEY is not configured."
+      reason: "Paystack checkout is temporarily unavailable."
     };
   }
 
@@ -139,7 +150,7 @@ export async function initializePaystackTransaction(input: {
       ok: false,
       sessionId: input.sessionId,
       productId: input.productId,
-      reason: "Unknown product."
+      reason: "This service is not available for checkout."
     };
   }
 
@@ -149,7 +160,7 @@ export async function initializePaystackTransaction(input: {
       ok: false,
       sessionId: input.sessionId,
       productId: input.productId,
-      reason: "A valid customer email is required for Paystack checkout."
+      reason: "A valid checkout contact is required."
     };
   }
 
@@ -199,7 +210,7 @@ export async function initializePaystackTransaction(input: {
         ok: false,
         sessionId: input.sessionId,
         productId: input.productId,
-        reason: json.message || "Paystack did not return a checkout URL."
+        reason: json.message || "Paystack checkout is temporarily unavailable."
       };
     }
 
@@ -216,7 +227,7 @@ export async function initializePaystackTransaction(input: {
       ok: false,
       sessionId: input.sessionId,
       productId: input.productId,
-      reason: "Paystack checkout initialization failed or timed out."
+      reason: "Paystack checkout is temporarily unavailable."
     };
   }
 }
@@ -235,7 +246,7 @@ export function formatPaystackVerification(result: PaystackVerificationResult, s
     sessionId ? `Session ID: ${sessionId}` : undefined,
     `Reference: ${result.reference}`,
     `Status: ${result.status}`,
-    result.configured ? "Verifier: Paystack API" : "Verifier: Not configured",
+    result.configured ? "Check: Payment reference lookup" : "Check: Support confirmation needed",
     amount ? `Amount: ${amount}` : undefined,
     result.currency ? `Currency: ${result.currency}` : undefined,
     result.channel ? `Channel: ${result.channel}` : undefined,
@@ -245,7 +256,7 @@ export function formatPaystackVerification(result: PaystackVerificationResult, s
     "Notes:",
     ...result.notes.map((note) => `- ${note}`),
     "",
-    "Only fulfill the paid service once the reference is confirmed and not already used."
+    "Your review continues once the payment reference is confirmed."
   ]
     .filter((line): line is string => Boolean(line))
     .join("\n");

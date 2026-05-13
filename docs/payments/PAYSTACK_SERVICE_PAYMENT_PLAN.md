@@ -2,15 +2,15 @@
 
 Paystack is used for 8thGuard service fees, not crypto trading or user-to-user settlement.
 
-## MVP flow
+## Button-first flow
 1. User selects a product from `/pricing` or the website.
-2. Bot shows configured Paystack payment links from `NEXT_PUBLIC_PAYSTACK_LINK_*`.
-3. User pays through Paystack-supported rails.
-4. User submits the Paystack reference through official contact or a future form.
-5. 8thGuard manually matches the reference to the requested review.
+2. Bot prepares a payment session and shows a `Pay Now` checkout button where server keys are configured.
+3. Static Paystack links from `NEXT_PUBLIC_PAYSTACK_LINK_*` can appear as backup checkout links.
+4. User pays through supported checkout rails.
+5. 8thGuard confirms the reference and routes the requested review.
 
-## Future API readiness
-Server-only variables are reserved for API and webhook work:
+## Server-side checkout
+Server-only variables:
 - `PAYSTACK_PUBLIC_KEY`
 - `PAYSTACK_SECRET_KEY`
 - `PAYSTACK_CALLBACK_URL`

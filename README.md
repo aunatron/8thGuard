@@ -46,13 +46,13 @@ npx tsc --noEmit -p apps/web/tsconfig.json
 - `/verify_crypto_payment <rail> <tx_hash> [session_id]`
 - `/guarded_send`, `/payment_session`, `/fee_quote`, `/protected_flow`
 
-Automatic Paystack checkout:
+Button-first checkout:
 ```text
-/payment_session quick_wallet_check customer@email.com
+/payment_session
 ```
 
 ## Vercel envs
-Add Paystack product links as `NEXT_PUBLIC_PAYSTACK_LINK_*` values after the founder creates the pages. Add approved public wallet addresses as `NEXT_PUBLIC_CRYPTO_*` values only after they are ready for publication. Keep `PAYSTACK_SECRET_KEY`, blockchain API keys, and webhook secrets server-only.
+Add checkout backup links as `NEXT_PUBLIC_PAYSTACK_LINK_*` values. Add approved public wallet addresses as `NEXT_PUBLIC_CRYPTO_*` values only after they are ready for publication. Keep `PAYSTACK_SECRET_KEY`, blockchain API keys, and webhook secrets server-only.
 
 Optional wallet data source envs:
 - `ETHERSCAN_API_KEY`

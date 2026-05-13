@@ -1,6 +1,6 @@
 import { getPaystackPaymentLinks, getPublicCryptoWallets } from "./config";
 import type { PaystackInitializeResult } from "./paystackVerification";
-import { PRODUCTS, PRODUCT_BY_ID, formatGhs, formatUsd, type PaymentProduct, type ProductId } from "./products";
+import { PRODUCTS, PRODUCT_BY_ID, formatGlobalPrice, type PaymentProduct, type ProductId } from "./products";
 import type { InlineKeyboardMarkup } from "../telegram-keyboards";
 
 export type CryptoRailId = "xrp" | "btc" | "usdt_trc20" | "usdt_bep20" | "ton" | "solana" | "evm";
@@ -41,7 +41,7 @@ export function createPaymentSessionDraft(productId: ProductId): PaymentSessionD
 export function buildProductSessionKeyboard(): InlineKeyboardMarkup {
   const rows = PRODUCTS.map((product) => [
     {
-      text: `${product.name} ${formatUsd(product.priceUsd)}`,
+      text: product.name,
       callback_data: productCallbackData(product.id)
     }
   ]);
@@ -50,8 +50,8 @@ export function buildProductSessionKeyboard(): InlineKeyboardMarkup {
     inline_keyboard: [
       ...rows,
       [
-        { text: "Crypto Pay", callback_data: "crypto_pay" },
-        { text: "Payment Warning", callback_data: "payment_warning" }
+        { text: "Crypto Wallets", callback_data: "crypto_pay" },
+        { text: "Payment Safety", callback_data: "payment_warning" }
       ]
     ]
   };
@@ -63,7 +63,7 @@ export function buildSessionPaymentKeyboard(productId: ProductId): InlineKeyboar
   const rows: InlineKeyboardMarkup["inline_keyboard"] = [];
 
   if (paystackLink) {
-    rows.push([{ text: "Pay with Paystack", url: paystackLink }]);
+    rows.push([{ text: "Pay by Card / Mobile Money", url: paystackLink }]);
   }
 
   rows.push(
@@ -79,7 +79,7 @@ export function buildSessionPaymentKeyboard(productId: ProductId): InlineKeyboar
       { text: "Pay TON", callback_data: "crypto:ton" },
       { text: "Pay Solana", callback_data: "crypto:solana" }
     ],
-    [{ text: "Submit Tx Hash", callback_data: "verify_crypto_payment" }]
+    [{ text: "Confirm Crypto Payment", callback_data: "verify_crypto_payment" }]
   );
 
   return { inline_keyboard: rows };
@@ -89,7 +89,7 @@ export function buildInitializedSessionPaymentKeyboard(productId: ProductId, pay
   const rows: InlineKeyboardMarkup["inline_keyboard"] = [];
 
   if (paystackUrl) {
-    rows.push([{ text: "Pay Now with Paystack", url: paystackUrl }]);
+    rows.push([{ text: "Pay Now", url: paystackUrl }]);
   }
 
   rows.push(
@@ -101,7 +101,7 @@ export function buildInitializedSessionPaymentKeyboard(productId: ProductId, pay
       { text: "Pay USDT TRC20", callback_data: "crypto:usdt_trc20" },
       { text: "Pay USDT BEP20/EVM", callback_data: "crypto:usdt_bep20" }
     ],
-    [{ text: "Submit Tx Hash", callback_data: "verify_crypto_payment" }]
+    [{ text: "Confirm Crypto Payment", callback_data: "verify_crypto_payment" }]
   );
 
   return { inline_keyboard: rows };
@@ -111,67 +111,53 @@ export function buildPaystackInitializedMessage(result: PaystackInitializeResult
   const product = PRODUCT_BY_ID[result.productId];
   if (!result.ok) {
     return [
-      "8thGuard Paystack Checkout",
+      "8thGuard Checkout",
       "",
       `Session ID: ${result.sessionId}`,
       `Product: ${product.name}`,
       "",
-      "Automatic Paystack checkout is not ready for this session.",
-      `Reason: ${result.reason}`,
+      result.reason,
       "",
-      "Use /pay for configured payment links or /crypto_pay for official crypto rails."
+      "Choose Crypto Wallets or contact 8thGuard support for assistance."
     ].join("\n");
   }
 
   return [
-    "8thGuard Paystack Checkout",
+    "8thGuard Checkout",
     "",
     `Session ID: ${result.sessionId}`,
     `Product: ${product.name}`,
-    `Price: ${formatUsd(product.priceUsd)} / ${formatGhs(product.priceGhs)}`,
-    `Paystack reference: ${result.reference}`,
+    `Price guide: ${formatGlobalPrice(product)}`,
     "",
-    "Tap Pay Now with Paystack below.",
-    "After payment, Paystack redirects to the 8thGuard callback page and sends a webhook to the backend.",
+    "Tap Pay Now to complete payment securely.",
+    "After payment, return to this chat and continue your review session.",
     "",
-    "If the automatic webhook is delayed, use:",
+    "Payment reference:",
+    result.reference,
+    "",
+    "Need confirmation support?",
     `/verify_paystack_payment ${result.reference} ${result.sessionId}`,
     "",
-    "Paystack is for 8thGuard digital service payments only. No exchange, custody, escrow, trading, or user-to-user settlement."
+    "Checkout is for 8thGuard digital service payments only. No exchange, custody, escrow, trading, or user-to-user settlement."
   ].join("\n");
 }
 
 export function buildPaymentSessionMessage(productId: ProductId): string {
   const session = createPaymentSessionDraft(productId);
   const paystackLinks = getPaystackPaymentLinks();
-  const paystackStatus = paystackLinks[productId] ? "Paystack button is active below." : "Paystack link is not active yet for this product.";
+  const paystackStatus = paystackLinks[productId] ? "Choose Card / Mobile Money below, or select an official crypto wallet rail." : "Choose an official crypto wallet rail below, or contact 8thGuard support for assisted payment.";
 
   return [
     "8thGuard Payment Session",
     "",
     `Session ID: ${session.sessionId}`,
     `Product: ${session.product.name}`,
-    `Price: ${formatUsd(session.product.priceUsd)} / ${formatGhs(session.product.priceGhs)}`,
-    `Input needed: ${session.product.requiresInput ? session.product.inputLabel : "Telegram contact"}`,
+    `Price guide: ${formatGlobalPrice(session.product)}`,
+    `Review input: ${session.product.requiresInput ? session.product.inputLabel : "Telegram contact"}`,
     "",
     paystackStatus,
-    "For automatic Paystack checkout, send:",
-    `/payment_session ${productId} your@email.com`,
     "",
-    "Crypto payments use official wallet rails only. Put the session ID in the wallet note/memo if your wallet supports it.",
-    "",
-    "After payment, send:",
-    `/submit_payment ${session.sessionId} <paystack_reference_or_crypto_tx_hash>`,
-    "",
-    "For Paystack verification, use:",
-    `/verify_paystack_payment <reference> ${session.sessionId}`,
-    "",
-    "For crypto chain verification, use:",
-    `/verify_crypto_payment <rail> <tx_hash> ${session.sessionId}`,
-    "",
-    "Examples:",
-    `/verify_crypto_payment xrp ABC123... ${session.sessionId}`,
-    `/verify_crypto_payment btc abc123... ${session.sessionId}`,
+    "Keep this session ID for your review.",
     "",
     "No private keys. No seed phrases. No exchange, custody, escrow, trading, or user-to-user settlement."
   ].join("\n");
@@ -201,9 +187,9 @@ export function buildCryptoRailMessage(railId: CryptoRailId): string {
     "",
     "Only send the exact network shown here.",
     "Wrong-network payments may be unrecoverable.",
-    "Use the session ID in memo/note if your wallet supports it.",
+    "Use your session ID in memo/note if your wallet supports it.",
     "",
-    "After sending, submit the transaction hash:",
+    "After sending, tap Confirm Crypto Payment or use:",
     `/verify_crypto_payment ${railId} <tx_hash> <session_id>`,
     "",
     "8thGuard never asks for private keys or seed phrases."

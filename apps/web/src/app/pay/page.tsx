@@ -1,5 +1,5 @@
 import { getPaystackPaymentLinks, getPublicCryptoWallets } from "@/lib/payments/config";
-import { PRODUCTS, formatGhs, formatUsd } from "@/lib/payments/products";
+import { PRODUCTS, formatGlobalPrice } from "@/lib/payments/products";
 
 export default function PayPage() {
   const paystackLinks = getPaystackPaymentLinks();
@@ -11,15 +11,15 @@ export default function PayPage() {
         <p className="eyebrow">Official Payments</p>
         <h1>Pay for 8thGuard services.</h1>
         <p>
-          Checks, reviews, payment sessions, and future protected flows are paid products. Pay through official rails only.
+          Checks, reviews, payment sessions, and protected flows are paid products. Pay through official rails only.
         </p>
       </section>
 
       <section className="section-band">
         <div className="section-heading">
-          <p className="eyebrow">Paystack</p>
-          <h2>Service payment links</h2>
-          <p>Paystack is for 8thGuard digital service payments only. Product pages are activated by the founder.</p>
+          <p className="eyebrow">Card / Mobile Money</p>
+          <h2>Official checkout</h2>
+          <p>Use official 8thGuard checkout rails for digital service payments only.</p>
         </div>
         <div className="product-grid">
           {PRODUCTS.map((product) => {
@@ -28,11 +28,11 @@ export default function PayPage() {
               <article className="product-card" key={product.id}>
                 <h3>{product.name}</h3>
                 <p>{product.description}</p>
-                <strong>{formatUsd(product.priceUsd)} / {formatGhs(product.priceGhs)}</strong>
+                <strong>{formatGlobalPrice(product)}</strong>
                 {link ? (
-                  <a className="button primary full" href={link}>Pay with Paystack</a>
+                  <a className="button primary full" href={link}>Pay Now</a>
                 ) : (
-                  <span className="status-pill">Paystack link activating</span>
+                  <span className="status-pill">Available in Telegram checkout</span>
                 )}
               </article>
             );
@@ -43,7 +43,7 @@ export default function PayPage() {
       <section className="split-section">
         <div>
           <p className="eyebrow">Crypto Wallets</p>
-          <h2>Official crypto payment callout</h2>
+          <h2>Official crypto wallets</h2>
           <p>
             Crypto rails use USDT/USDC equivalent or quoted crypto amounts for service payments. Wrong-network payments may be unrecoverable.
           </p>
@@ -70,7 +70,7 @@ export default function PayPage() {
           <li>Checks and reviews are paid services.</li>
           <li>8thGuard never asks for private keys or seed phrases.</li>
           <li>No exchange, trading, custody, escrow, or user-to-user settlement.</li>
-          <li>Built for Telegram bot today and mini-app payment flows tomorrow.</li>
+          <li>Built for Telegram, web, and protected payment review flows.</li>
         </ul>
       </section>
     </main>

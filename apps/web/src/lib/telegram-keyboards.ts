@@ -47,16 +47,16 @@ export const paymentKeyboard: InlineKeyboardMarkup = {
   inline_keyboard: [
     [
       { text: "Pricing", callback_data: "pricing" },
-      { text: "Payment Session", callback_data: "payment_session" }
+      { text: "Choose Service", callback_data: "payment_session" }
     ],
-    [{ text: "Paystack", callback_data: "pay" }],
+    [{ text: "Card / Mobile Money", callback_data: "pay" }],
     [
       { text: "Crypto Pay", callback_data: "crypto_pay" },
-      { text: "Payment Warning", callback_data: "payment_warning" }
+      { text: "Payment Safety", callback_data: "payment_warning" }
     ],
     [
-      { text: "Submit Payment", callback_data: "submit_payment" },
-      { text: "Verify Paystack", callback_data: "verify_paystack_payment" }
+      { text: "Confirm Payment", callback_data: "submit_payment" },
+      { text: "Check Reference", callback_data: "verify_paystack_payment" }
     ]
   ]
 };
@@ -76,8 +76,8 @@ export const cryptoRailKeyboard: InlineKeyboardMarkup = {
       { text: "Solana", callback_data: "crypto:solana" }
     ],
     [
-      { text: "Submit Tx Hash", callback_data: "verify_crypto_payment" },
-      { text: "Payment Warning", callback_data: "payment_warning" }
+      { text: "Confirm Crypto Payment", callback_data: "verify_crypto_payment" },
+      { text: "Payment Safety", callback_data: "payment_warning" }
     ]
   ]
 };
@@ -85,7 +85,7 @@ export const cryptoRailKeyboard: InlineKeyboardMarkup = {
 export const walletCheckKeyboard: InlineKeyboardMarkup = {
   inline_keyboard: [
     [
-      { text: "Pay for Detailed Review", callback_data: "pay" },
+      { text: "Get Detailed Review", callback_data: "payment_session" },
       { text: "Report Scam", callback_data: "report_scam" }
     ],
     [
@@ -98,9 +98,9 @@ export const walletCheckKeyboard: InlineKeyboardMarkup = {
 export const scamReportKeyboard: InlineKeyboardMarkup = {
   inline_keyboard: [
     [
-      { text: "Submit Payment", callback_data: "submit_payment" },
+      { text: "Choose Service", callback_data: "payment_session" },
       { text: "Contact", callback_data: "contact" }
     ],
-    [{ text: "Payment Warning", callback_data: "payment_warning" }]
+    [{ text: "Payment Safety", callback_data: "payment_warning" }]
   ]
 };

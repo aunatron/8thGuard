@@ -26,6 +26,16 @@ export type PaymentProduct = {
   tier: ProductTier;
 };
 
+export type CurrencyCode = "USD" | "GBP" | "EUR" | "JPY" | "NGN" | "GHS";
+
+export const PRICING_RATES: Record<Exclude<CurrencyCode, "USD">, number> = {
+  GBP: 0.7378,
+  EUR: 0.8527,
+  JPY: 156.94,
+  NGN: 1360.34,
+  GHS: 12.5
+};
+
 export const PRODUCTS: PaymentProduct[] = [
   {
     id: "quick_wallet_check",
@@ -168,8 +178,8 @@ export const PRODUCT_BY_ID: Record<ProductId, PaymentProduct> = PRODUCTS.reduce(
 
 export const PRICING_NOTES = [
   "USD is the reference price.",
-  "GHS prices use the fixed reference rate 1 USD = GHS 12.50.",
-  "Paystack/MoMo/card/bank may convert to local currency at checkout.",
+  "Global guide prices are shown in USD, GBP, EUR, JPY, NGN, and GHS.",
+  "Local rails may settle in supported checkout currency.",
   "Crypto payments use USDT/USDC equivalent or quoted crypto amount."
 ];
 
@@ -189,6 +199,27 @@ export function formatGhs(priceGhs: number): string {
   return `GHS ${priceGhs.toLocaleString("en-US")}`;
 }
 
+export function formatCurrency(priceUsd: number, currency: CurrencyCode): string {
+  if (currency === "USD") return formatUsd(priceUsd);
+  const value = priceUsd * PRICING_RATES[currency];
+  if (currency === "GBP") return `GBP ${value.toFixed(2)}`;
+  if (currency === "EUR") return `EUR ${value.toFixed(2)}`;
+  if (currency === "JPY") return `JPY ${Math.round(value).toLocaleString("en-US")}`;
+  if (currency === "NGN") return `NGN ${Math.round(value).toLocaleString("en-US")}`;
+  return formatGhs(Math.round(value / 5) * 5);
+}
+
+export function formatGlobalPrice(product: PaymentProduct): string {
+  return [
+    formatCurrency(product.priceUsd, "USD"),
+    formatCurrency(product.priceUsd, "GBP"),
+    formatCurrency(product.priceUsd, "EUR"),
+    formatCurrency(product.priceUsd, "JPY"),
+    formatCurrency(product.priceUsd, "NGN"),
+    formatCurrency(product.priceUsd, "GHS")
+  ].join(" / ");
+}
+
 export function formatProductLine(product: PaymentProduct): string {
-  return `${product.name} - ${formatUsd(product.priceUsd)} / ${formatGhs(product.priceGhs)}`;
+  return `${product.name} - ${formatGlobalPrice(product)}`;
 }

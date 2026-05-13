@@ -16,7 +16,7 @@ export default async function PaystackCallbackPage({
         <p className="eyebrow">Payment Callback</p>
         <h1>Payment received for review.</h1>
         <p>
-          Paystack has redirected you back to 8thGuard. The backend webhook is the final confirmation signal.
+          Your payment details have been received. Return to Telegram to continue your 8thGuard review.
         </p>
       </section>
 

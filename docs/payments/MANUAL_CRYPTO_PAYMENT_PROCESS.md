@@ -1,6 +1,6 @@
 # Manual Crypto Payment Process
 
-Automated crypto payment verification is not fully live in this MVP.
+Crypto payment confirmation uses official wallet rails, public-chain transaction evidence, and payment desk review where needed.
 
 After payment, the user should prepare:
 - product selected
@@ -9,4 +9,4 @@ After payment, the user should prepare:
 - Telegram contact
 - short context
 
-Do not collect sensitive documents in Telegram. Use official contact or a future payment submission form.
+Do not collect sensitive documents in Telegram. Use official contact or approved payment-confirmation channels.
