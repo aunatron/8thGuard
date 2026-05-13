@@ -1,6 +1,8 @@
 # System Map
 
 - `apps/web/src/app/page.tsx`: premium global homepage with paid pricing, payment rails, safety boundaries, and mini-app readiness.
+- `apps/web/src/app/layout.tsx`: root layout with full SEO metadata, OpenGraph, Twitter cards, robots directives, and Inter font.
+- `apps/web/src/app/check/[address]/page.tsx`: public wallet check page — SEO-indexed per-wallet risk preview with paywall CTA for full reports.
 - `apps/web/src/app/pay/page.tsx`: paid service catalog with Paystack link readiness and official crypto wallet callouts.
 - `apps/web/src/app/pay/callback/page.tsx`: Paystack redirect callback page that routes users back to Telegram.
 - `apps/web/src/app/submit/page.tsx`: paid review intake page for session ID, service, payment reference, wallet/tx/agent/case context, and contact.
@@ -13,6 +15,7 @@
 - `apps/web/src/lib/telegram-keyboards.ts`: main, payment, risk-result, scam-report, and guarded-flow inline keyboards.
 - `apps/web/src/lib/risk.ts`: risk facade for wallet, transaction, and agent checks.
 - `apps/web/src/lib/reports.ts`: premium result report templates for Wallet Intelligence, Transaction Review, Agent Risk Review, and Priority Scam Report Review. Each includes risk level, risk indicators, network context, recommended action, limits/disclaimer, and 8thGuard branding.
+- `apps/web/src/lib/referrals.ts`: referral system with deterministic invite codes, Telegram deep links, and referral attribution tracking.
 - `apps/web/src/lib/wallet/*`: chain detection, explorer links, public data source lookups, and Real Wallet Check v0/v1 orchestration.
 - `apps/web/src/lib/payments/products.ts`: paid-first product catalog with USD/GHS pricing and Paystack subunit values.
 - `apps/web/src/lib/payments/config.ts`: Paystack link env mapping, public crypto wallet env mapping, contact envs, and server-only payment/data-source config.

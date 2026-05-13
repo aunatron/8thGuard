@@ -1,6 +1,7 @@
 import { MAX_INPUT_LENGTH, getEnv } from "./config";
 import { getPaymentContact, getPaystackPaymentLinks, getPublicCryptoWallets } from "./payments/config";
 import { detectWalletAddress } from "./wallet/detect";
+import { buildReferralLink, extractReferralCode } from "./referrals";
 import { formatCryptoPaymentVerification, verifyCryptoPayment } from "./payments/cryptoVerification";
 import { formatPaystackVerification, initializePaystackTransaction, paymentEmailForTelegram, verifyPaystackReference } from "./payments/paystackVerification";
 import {
@@ -77,6 +78,7 @@ export function buildCommandHelp(appName: string): string {
     "",
     "More:",
     "/guarded_send — Pre-send safety review",
+    "/referral — Get your invite link",
     "/contact — Reach us",
     "/help — This menu",
     "",
@@ -444,7 +446,14 @@ function formatReferenceLinks(score: number, links: { label: string; url: string
 export async function buildBotReply(text: string, appName: string, context: TelegramReplyContext = {}): Promise<TelegramBotReply> {
   const { command, arg } = parseCommand(text);
   if (command === "/start") {
-    return { command, message: buildStartMessage(), reply_markup: buildStartServicesKeyboard() };
+    const referralCode = arg ? extractReferralCode(arg) : undefined;
+    const message = buildStartMessage();
+    const reply: TelegramBotReply = {
+      command: referralCode ? `start:ref:${referralCode}` : command,
+      message,
+      reply_markup: buildStartServicesKeyboard()
+    };
+    return reply;
   }
 
   if (command === "/help") {
@@ -680,6 +689,35 @@ export async function buildBotReply(text: string, appName: string, context: Tele
   }
   if (command === "/fee_quote") return { command, message: buildFeeQuoteMessage(), reply_markup: guardedFlowKeyboard };
   if (command === "/protected_flow") return { command, message: buildProtectedFlowMessage(), reply_markup: guardedFlowKeyboard };
+
+  if (command === "/referral") {
+    const userId = context.user?.id;
+    if (!userId) {
+      return {
+        command,
+        message: "Could not generate your referral link. Try again from your Telegram account.",
+        reply_markup: mainMenuKeyboard
+      };
+    }
+    const botUsername = getEnv().appName === "8thGuard" ? "8thGuardBot" : getEnv().appName;
+    const ref = buildReferralLink(botUsername, userId);
+    return {
+      command,
+      message: [
+        "🎁 Your Referral Link",
+        "",
+        "Share this link with friends. When they start the bot through your link, we track the referral.",
+        "",
+        `🔗 ${ref.link}`,
+        "",
+        `Your code: ${ref.code}`,
+        "",
+        "More referrals = more impact.",
+        "🛡 Check before you send."
+      ].join("\n"),
+      reply_markup: mainMenuKeyboard
+    };
+  }
 
   return {
     command: "unknown",
