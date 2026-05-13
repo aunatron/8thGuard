@@ -18,21 +18,48 @@ export function parseCommand(text: string): { command: string; arg: string } {
 
 export function buildCommandHelp(appName: string): string {
   return [
-    `Welcome to ${appName} command center.`,
-    "Available commands:",
-    "/start",
-    "/help",
-    "/check_wallet <address>",
-    "/check_tx <transaction_hash>",
-    "/check_agent <name_or_username>",
-    "/report_scam",
-    "/pricing",
-    "/pay",
-    "/crypto_pay",
-    "/payment_warning",
-    "/submit_payment",
-    "/tonight_offer",
-    "/contact"
+    `${appName} commands:`,
+    "",
+    "/start — Start 8thGuard",
+    "/help — See available commands",
+    "/check_wallet <address> — Check a crypto wallet address",
+    "/check_tx <transaction_hash> — Review a transaction hash",
+    "/check_agent <name_or_username> — Check a P2P agent or username",
+    "/report_scam — Learn what evidence to prepare",
+    "/pricing — See MVP service pricing",
+    "/pay — Pay with Paystack/local rails",
+    "/crypto_pay — View official crypto payment rails",
+    "/payment_warning — Read payment safety warnings",
+    "/submit_payment — Learn how to submit payment proof",
+    "/tonight_offer — See current MVP offer stack",
+    "/contact — Official contact options",
+    "",
+    "8thGuard is in MVP. Results are early risk indicators, not final fraud proof. Check before you send."
+  ].join("\n");
+}
+
+function buildStartMessage(): string {
+  return [
+    "Welcome to 8thGuard.",
+    "",
+    "Check before you send.",
+    "",
+    "I help you review crypto wallets, transaction hashes, and P2P agents for early risk signals before you move funds.",
+    "",
+    "Crypto scams move fast. 8thGuard helps you pause, check, and make a safer decision before money leaves your wallet.",
+    "",
+    "What you can do now:",
+    "• /check_wallet <address> — Check a crypto wallet address",
+    "• /check_tx <transaction_hash> — Review a transaction hash",
+    "• /check_agent <name_or_username> — Check a P2P agent or username",
+    "• /pricing — See MVP service pricing",
+    "• /pay — Pay with Paystack/local rails",
+    "• /crypto_pay — View official crypto payment rails",
+    "• /report_scam — Learn what evidence to prepare",
+    "",
+    "MVP results are early risk indicators, not final fraud proof.",
+    "",
+    "Use /help to see all commands."
   ].join("\n");
 }
 
@@ -163,8 +190,7 @@ export async function buildBotReply(text: string, appName: string): Promise<{ co
   if (command === "/start") {
     return {
       command,
-      message:
-        "Welcome to 8thGuard. I help you check crypto wallets, transactions, and P2P agents before you send money."
+      message: buildStartMessage()
     };
   }
 
@@ -239,7 +265,7 @@ export async function buildBotReply(text: string, appName: string): Promise<{ co
 
   return {
     command: "unknown",
-    message: `I did not understand that.\n\n${buildCommandHelp(appName)}`
+    message: "I didn’t recognize that command. Use /help to see what I can do."
   };
 }
 
