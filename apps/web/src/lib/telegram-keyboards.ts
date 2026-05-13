@@ -96,6 +96,19 @@ export const walletCheckKeyboard: InlineKeyboardMarkup = {
   ]
 };
 
+export const quickCheckKeyboard: InlineKeyboardMarkup = {
+  inline_keyboard: [
+    [
+      { text: "Full Report", callback_data: "pricing" },
+      { text: "Pricing", callback_data: "pricing" }
+    ],
+    [
+      { text: "Pay", callback_data: "pay" },
+      { text: "Report Scam", callback_data: "report_scam" }
+    ]
+  ]
+};
+
 export const scamReportKeyboard: InlineKeyboardMarkup = {
   inline_keyboard: [
     [

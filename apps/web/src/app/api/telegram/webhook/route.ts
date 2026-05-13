@@ -36,7 +36,8 @@ export async function POST(req: Request) {
 
       const reply = await buildCallbackReply(callbackData, env.appName, {
         chatId: callbackChatId,
-        user: callbackUser
+        user: callbackUser,
+        chatType: callbackQuery?.message?.chat?.type
       });
 
       await logAuditEvent({
@@ -67,7 +68,8 @@ export async function POST(req: Request) {
 
     const reply = await buildBotReply(text, env.appName, {
       chatId,
-      user
+      user,
+      chatType: message?.chat?.type
     });
 
     await logAuditEvent({

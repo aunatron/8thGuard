@@ -27,6 +27,7 @@ import {
   guardedFlowKeyboard,
   mainMenuKeyboard,
   paymentKeyboard,
+  quickCheckKeyboard,
   scamReportKeyboard,
   walletCheckKeyboard,
   type InlineKeyboardMarkup
@@ -43,6 +44,7 @@ export type TelegramBotReply = {
 export type TelegramReplyContext = {
   chatId?: number;
   user?: TelegramUser;
+  chatType?: string;
 };
 
 function sanitizeInput(input: string | undefined): string {
@@ -338,9 +340,19 @@ function buildProtectedFlowMessage(): string {
   ].join("\n");
 }
 
+function isGroupChat(context: TelegramReplyContext): boolean {
+  return context.chatType === "group" || context.chatType === "supergroup";
+}
+
 function walletLiveDataLabel(liveDataUsed: boolean, sources: string[]): "Enhanced" | "Standard" {
   if (liveDataUsed || sources.length > 0) return "Enhanced";
   return "Standard";
+}
+
+function liveDataShortLabel(liveDataUsed: boolean, sources: string[]): string {
+  if (liveDataUsed) return "Yes";
+  if (sources.length > 0) return "Partial";
+  return "No";
 }
 
 function confidenceLabel(score: number): string {
@@ -355,6 +367,21 @@ function actionSummary(score: number): string {
   if (score >= 50) return "Proceed carefully. Verify counterparty, network, token, and payment context.";
   if (score >= 35) return "No severe automated signal surfaced, but verify details before sending.";
   return "Lower immediate risk surfaced in this check. Keep standard transaction hygiene.";
+}
+
+function quickSignals(reasons: string[]): string[] {
+  return reasons.slice(0, 3).map((reason) => `• ${polishSignal(reason)}`);
+}
+
+function compactExplorerLine(links: { label: string; url: string }[]): string | undefined {
+  if (links.length === 0) return undefined;
+  const first = links[0];
+  return `Explorer: ${first.label}`;
+}
+
+function txStatusLabel(liveDataUsed: boolean): string {
+  if (liveDataUsed) return "Live lookup available";
+  return "Explorer-only";
 }
 
 function formatSignals(reasons: string[]): string[] {
@@ -430,77 +457,121 @@ export async function buildBotReply(text: string, appName: string, context: Tele
   if (command === "/check_wallet") {
     if (!arg) return { command, message: "Send a wallet address with the command.\n\nExample: /check_wallet 0x1234...", reply_markup: mainMenuKeyboard };
     const risk = await checkWalletRisk(arg);
+
+    if (isGroupChat(context)) {
+      return {
+        command,
+        message: [
+          `⚠️ 8thGuard Preview`,
+          `Network: ${userFacingNetwork(risk.detectedChain, risk.possibleNetworks)}`,
+          `Risk: ${risk.level} — ${risk.score}/100`,
+          "",
+          "Full paid report: DM the bot.",
+          "Check before you send."
+        ].join("\n"),
+        reply_markup: quickCheckKeyboard
+      };
+    }
+
+    const explorer = compactExplorerLine(risk.explorerLinks);
     return {
       command,
       message: [
-        "Wallet Intelligence Preview",
+        "8thGuard Quick Check",
         "",
         `Network: ${userFacingNetwork(risk.detectedChain, risk.possibleNetworks)}`,
-        `Risk score: ${risk.score}/100`,
-        `Assessment: ${confidenceLabel(risk.score)}`,
-        `Coverage: ${walletLiveDataLabel(risk.liveDataUsed, risk.sources)}`,
+        `Risk: ${risk.level} — ${risk.score}/100`,
+        `Live data: ${liveDataShortLabel(risk.liveDataUsed, risk.sources)}`,
         "",
-        "Risk indicators:",
-        ...formatSignals(risk.reasons),
+        "Signals:",
+        ...quickSignals(risk.reasons),
+        ...(explorer ? ["", explorer] : []),
         "",
-        actionSummary(risk.score),
+        "Next:",
+        "For full report, use /pricing.",
         "",
-        explorerSummary(risk.explorerLinks.length),
-        ...formatReferenceLinks(risk.score, risk.explorerLinks),
-        "",
-        userFriendlyDisclaimer(),
-        userFriendlyPaidCta()
+        "\u{1F6E1} MVP result. Early risk signals only, not final fraud proof."
       ].join("\n"),
-      reply_markup: walletCheckKeyboard
+      reply_markup: quickCheckKeyboard
     };
   }
 
   if (command === "/check_tx") {
     if (!arg) return { command, message: "Send a transaction hash with the command.\n\nExample: /check_tx <transaction_hash>", reply_markup: mainMenuKeyboard };
     const risk = checkTransactionRisk(arg);
+
+    if (isGroupChat(context)) {
+      return {
+        command,
+        message: [
+          `⚠️ 8thGuard Tx Preview`,
+          `Network: ${risk.likelyNetworks.join(", ")}`,
+          `Risk: ${risk.level} — ${risk.score}/100`,
+          "",
+          "Full paid report: DM the bot.",
+          "Check before you send."
+        ].join("\n"),
+        reply_markup: quickCheckKeyboard
+      };
+    }
+
     return {
       command,
       message: [
-        "8thGuard Transaction Review",
+        "8thGuard Tx Preview",
         "",
-        `Network family: ${risk.likelyNetworks.join(", ")}`,
-        `Risk score: ${risk.score}/100`,
-        `Assessment: ${confidenceLabel(risk.score)}`,
+        `Likely network: ${risk.likelyNetworks.join(", ")}`,
+        `Risk: ${risk.level} — ${risk.score}/100`,
+        `Status: ${txStatusLabel(risk.liveDataUsed)}`,
         "",
-        "Risk indicators:",
-        ...formatSignals(risk.reasons),
+        "Next:",
+        "For transaction review, use /pricing.",
         "",
-        actionSummary(risk.score),
-        "",
-        explorerSummary(risk.explorerLinks.length),
-        ...formatReferenceLinks(risk.score, risk.explorerLinks),
-        "",
-        userFriendlyDisclaimer(),
-        userFriendlyPaidCta()
+        "\u{1F6E1} MVP result. Early risk signals only."
       ].join("\n"),
-      reply_markup: walletCheckKeyboard
+      reply_markup: quickCheckKeyboard
     };
   }
 
   if (command === "/check_agent") {
     if (!arg) return { command, message: "Send an agent name or username with the command.\n\nExample: /check_agent @username", reply_markup: mainMenuKeyboard };
     const risk = checkAgentRisk(arg);
+
+    if (isGroupChat(context)) {
+      return {
+        command,
+        message: [
+          `⚠️ 8thGuard Agent Preview`,
+          `Agent: ${arg}`,
+          `Risk: ${risk.level} — ${risk.score}/100`,
+          "",
+          "Full paid report: DM the bot.",
+          "Check before you send."
+        ].join("\n"),
+        reply_markup: quickCheckKeyboard
+      };
+    }
+
     return {
       command,
       message: [
-        "8thGuard Agent Risk Review",
+        "8thGuard Agent Preview",
         "",
-        `Risk score: ${risk.score}/100`,
-        `Assessment: ${confidenceLabel(risk.score)}`,
-        "Risk indicators:",
-        ...formatSignals(risk.reasons),
+        `Agent: ${arg}`,
+        `Risk: ${risk.level} — ${risk.score}/100`,
+        "Status: Registry check not fully live yet",
         "",
-        actionSummary(risk.score),
+        "Signals:",
+        "• Username format captured",
+        "• Public registry coming soon",
+        "• Use caution before sending funds",
         "",
-        userFriendlyDisclaimer(),
-        userFriendlyPaidCta()
+        "Next:",
+        "For Agent Risk Review, use /pricing.",
+        "",
+        "\u{1F6E1} MVP result. Early risk signals only."
       ].join("\n"),
-      reply_markup: walletCheckKeyboard
+      reply_markup: quickCheckKeyboard
     };
   }
 
