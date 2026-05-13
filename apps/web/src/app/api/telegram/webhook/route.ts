@@ -5,6 +5,8 @@ import {
   answerTelegramCallbackQuery,
   buildBotReply,
   buildCallbackReply,
+  buildGroupAutoReply,
+  extractWalletFromText,
   getActorMeta,
   sendTelegramMessage
 } from "@/lib/telegram";
@@ -66,10 +68,40 @@ export async function POST(req: Request) {
       return NextResponse.json({ ok: true, skipped: true });
     }
 
+    const chatType: string | undefined = message?.chat?.type;
+    const isGroup = chatType === "group" || chatType === "supergroup";
+
+    // Passive group auto-detection: scan non-command messages for wallet addresses
+    if (isGroup && !text.startsWith("/")) {
+      const detectedAddress = extractWalletFromText(text);
+      if (detectedAddress) {
+        const autoReply = await buildGroupAutoReply(detectedAddress);
+
+        await logAuditEvent({
+          event_type: "telegram_group_auto_detect",
+          actor_type: "system",
+          telegram_user_id: user?.id,
+          command: autoReply.command,
+          timestamp: new Date().toISOString(),
+          metadata: {
+            chat_id: chatId,
+            chat_type: chatType,
+            detected_address: detectedAddress,
+            ...getActorMeta(user)
+          }
+        });
+
+        await sendTelegramMessage(chatId, autoReply.message, autoReply.reply_markup);
+        return NextResponse.json({ ok: true });
+      }
+      // No wallet detected in group non-command message — skip silently
+      return NextResponse.json({ ok: true, skipped: true });
+    }
+
     const reply = await buildBotReply(text, env.appName, {
       chatId,
       user,
-      chatType: message?.chat?.type
+      chatType
     });
 
     await logAuditEvent({

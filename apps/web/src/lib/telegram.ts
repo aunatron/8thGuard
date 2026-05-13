@@ -1,5 +1,6 @@
 import { MAX_INPUT_LENGTH, getEnv } from "./config";
 import { getPaymentContact, getPaystackPaymentLinks, getPublicCryptoWallets } from "./payments/config";
+import { detectWalletAddress } from "./wallet/detect";
 import { formatCryptoPaymentVerification, verifyCryptoPayment } from "./payments/cryptoVerification";
 import { formatPaystackVerification, initializePaystackTransaction, paymentEmailForTelegram, verifyPaystackReference } from "./payments/paystackVerification";
 import {
@@ -60,52 +61,42 @@ export function parseCommand(text: string): { command: string; arg: string } {
 
 export function buildCommandHelp(appName: string): string {
   return [
-    `${appName} Safety Desk`,
+    `🛡 ${appName}`,
     "",
-    "Core:",
-    "/start - Open the premium 8thGuard menu",
-    "/help - List all commands",
-    "/check_wallet <address> - Wallet Intelligence Preview",
-    "/check_tx <transaction_hash> - Transaction risk preview",
-    "/check_agent <name_or_username> - P2P agent risk preview",
-    "/report_scam - Scam report evidence checklist",
+    "Quick Checks:",
+    "/check_wallet <address> — Wallet risk preview",
+    "/check_tx <hash> — Transaction risk preview",
+    "/check_agent <name> — Agent risk preview",
+    "/report_scam — Report a scam",
     "",
-    "Payments:",
-    "/pricing - Paid service catalog",
-    "/pay - Card and mobile money checkout",
-    "/crypto_pay - Official crypto wallet service-payment rails",
-    "/payment_warning - Payment safety guidance",
-    "/submit_payment - Confirm payment",
-    "/verify_paystack_payment <reference> [session_id] - Check payment reference",
-    "/verify_crypto_payment <rail> <tx_hash> [session_id] - Confirm crypto payment",
-    "/tonight_offer - Priority premium review paths",
-    "/contact - Official contact options",
+    "Services:",
+    "/pricing — Full service catalog",
+    "/pay — Pay with card or mobile money",
+    "/crypto_pay — Pay with crypto",
+    "/payment_session — Start a paid review",
     "",
-    "Protected flow:",
-    "/guarded_send - Guarded Send",
-    "/payment_session - Choose service",
-    "/fee_quote - Service and protection fee guidance",
-    "/protected_flow - Protected flow",
+    "More:",
+    "/guarded_send — Pre-send safety review",
+    "/contact — Reach us",
+    "/help — This menu",
     "",
-    "Free education. Paid utility. Early risk signals, not final fraud proof."
+    "🛡 Early risk signals, not final fraud proof."
   ].join("\n");
 }
 
 function buildStartMessage(): string {
   return [
-    "Welcome to 8thGuard.",
+    "🛡 8thGuard",
     "",
-    "Check before you send.",
+    "Crypto moves fast. Scammers move faster.",
+    "8thGuard checks wallets, transactions, and agents before your money moves.",
     "",
-    "8thGuard helps you review crypto wallets, transaction hashes, P2P agents, and protected payment flows for early risk signals before funds move.",
+    "⚡ Instant risk previews",
+    "🔍 Multi-chain wallet intelligence",
+    "🚨 Scam pattern detection",
+    "📊 Premium paid reports with full analysis",
     "",
-    "This is a paid crypto safety and fraud-intelligence service. Public scam education may be free, but checks, reviews, payment sessions, and protected flows are paid products.",
-    "",
-    "Paid services are available now: quick checks, detailed reviews, priority scam report review, agent verification review, group/community safety review, and founding partner access.",
-    "",
-    "Crypto has speed. Now it needs a guard.",
-    "",
-    "Choose a service below to start, or use /pricing to view the full catalog."
+    "Choose a service below to get started."
   ].join("\n");
 }
 
@@ -115,16 +106,23 @@ function productLine(productId: ProductId): string {
 
 function buildPricingMessage(): string {
   return [
-    "8thGuard Paid Service Catalog",
+    "🛡 8thGuard Services",
     "",
-    "Free education. Paid utility. Checks and reviews are paid services.",
+    "Quick Checks — fast risk previews:",
+    ...PRODUCTS.filter((p) => p.tier === "quick").map((p) => `  ${p.name} — ${formatGlobalPrice(p)}`),
     "",
-    ...PRODUCTS.map((product) => formatProductLine(product)),
+    "Premium Reviews — deeper intelligence:",
+    ...PRODUCTS.filter((p) => p.tier === "premium").map((p) => `  ${p.name} — ${formatGlobalPrice(p)}`),
     "",
-    ...PRICING_NOTES,
-    "Card and mobile money checkout is for 8thGuard digital service payments only.",
-    "Crypto wallets are for 8thGuard digital service payments only.",
-    "Early risk signals, not final fraud proof."
+    "Enterprise & Partner:",
+    ...PRODUCTS.filter((p) => p.tier === "enterprise" || p.tier === "supporter").map((p) => `  ${p.name} — ${formatGlobalPrice(p)}`),
+    "",
+    "💳 Card, mobile money, and crypto accepted.",
+    "",
+    "Quick checks give you a preview.",
+    "Premium reports give you the full picture.",
+    "",
+    "🛡 Early risk signals, not final fraud proof."
   ].join("\n");
 }
 
@@ -261,15 +259,16 @@ function buildSubmitPaymentMessage(): string {
 
 function buildTonightOfferMessage(): string {
   return [
-    "Priority Premium Review Paths",
+    "🔥 Priority Reviews",
     "",
-    productLine("priority_scam_report_review"),
-    productLine("agent_verification_review"),
-    productLine("group_community_safety_review"),
-    productLine("founding_partner_package"),
+    "Need answers now? These are the fast-track options:",
     "",
-    "Choose the level of review that matches the risk and urgency of the situation.",
-    "Early risk signals, not final fraud proof."
+    `🚨 ${productLine("priority_scam_report_review")}`,
+    `🔍 ${productLine("agent_verification_review")}`,
+    `👥 ${productLine("group_community_safety_review")}`,
+    `⭐ ${productLine("founding_partner_package")}`,
+    "",
+    "Tap below to start. Reviews begin after payment."
   ].join("\n");
 }
 
@@ -286,13 +285,11 @@ function buildGuardedSendMessage(): string {
 
 function buildPaymentSessionMessage(): string {
   return [
-    "8thGuard Paid Services",
+    "🛡 Choose Your Review",
     "",
-    "Choose the service that matches the risk and urgency. Your session and official payment options will be prepared instantly.",
+    ...PRODUCTS.map((product) => `${product.name} — ${formatGlobalPrice(product)}`),
     "",
-    ...PRODUCTS.map((product) => formatProductLine(product)),
-    "",
-    "Tap a service below to continue."
+    "Tap a service below. Payment options appear instantly."
   ].join("\n");
 }
 
@@ -804,5 +801,41 @@ export function getActorMeta(user?: TelegramUser): Record<string, unknown> {
   return {
     username: user?.username,
     first_name: user?.first_name
+  };
+}
+
+/**
+ * Extracts a wallet address from freeform text.
+ * Returns the first token that the wallet detector recognizes as a valid format.
+ * Used for passive group auto-detection (no command required).
+ */
+export function extractWalletFromText(text: string): string | undefined {
+  const tokens = text.trim().split(/\s+/);
+  for (const token of tokens) {
+    const cleaned = token.replace(/[,.:;!?()[\]{}]/g, "");
+    if (cleaned.length < 20) continue;
+    const detection = detectWalletAddress(cleaned);
+    if (detection.isValidFormat) return cleaned;
+  }
+  return undefined;
+}
+
+/**
+ * Builds a short auto-reply for when a wallet address is detected in a group
+ * chat without a command. Runs the quick check and returns a branded teaser.
+ */
+export async function buildGroupAutoReply(address: string): Promise<TelegramBotReply> {
+  const risk = await checkWalletRisk(address);
+  return {
+    command: "auto_check",
+    message: [
+      `⚠️ 8thGuard Preview`,
+      `Network: ${userFacingNetwork(risk.detectedChain, risk.possibleNetworks)}`,
+      `Risk: ${risk.level} — ${risk.score}/100`,
+      "",
+      "Full paid report: DM @8thGuardBot",
+      "🛡 Check before you send."
+    ].join("\n"),
+    reply_markup: quickCheckKeyboard
   };
 }
