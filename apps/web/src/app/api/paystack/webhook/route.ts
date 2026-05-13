@@ -1,5 +1,7 @@
 import crypto from "crypto";
 import { NextResponse } from "next/server";
+import { PRODUCT_BY_ID, type ProductId } from "@/lib/payments/products";
+import { recordPaystackPaymentConfirmed } from "@/lib/payments/records";
 import { verifyPaystackReference } from "@/lib/payments/paystackVerification";
 import { sendTelegramMessage } from "@/lib/telegram";
 
@@ -35,6 +37,25 @@ function parseMetadata(metadata: string | Record<string, unknown> | undefined): 
   }
 }
 
+function productIdFromMetadata(value: unknown): ProductId | undefined {
+  if (typeof value !== "string") return undefined;
+  return PRODUCT_BY_ID[value as ProductId] ? (value as ProductId) : undefined;
+}
+
+function siteUrl(): string | undefined {
+  return process.env.NEXT_PUBLIC_SITE_URL?.trim().replace(/\/+$/, "") || undefined;
+}
+
+function submitUrl(input: { sessionId?: string; productId?: ProductId; reference?: string }): string | undefined {
+  const baseUrl = siteUrl();
+  if (!baseUrl) return undefined;
+  const url = new URL("/submit", baseUrl);
+  if (input.sessionId) url.searchParams.set("session_id", input.sessionId);
+  if (input.productId) url.searchParams.set("product_id", input.productId);
+  if (input.reference) url.searchParams.set("payment_reference", input.reference);
+  return url.toString();
+}
+
 export async function POST(req: Request) {
   const rawBody = await req.text();
   const signature = req.headers.get("x-paystack-signature");
@@ -58,7 +79,19 @@ export async function POST(req: Request) {
   const metadata = parseMetadata(body.data.metadata);
   const telegramChatId = typeof metadata.telegram_chat_id === "number" ? metadata.telegram_chat_id : undefined;
   const sessionId = typeof metadata.session_id === "string" ? metadata.session_id : undefined;
+  const productId = productIdFromMetadata(metadata.product_id);
   const productName = typeof metadata.product_name === "string" ? metadata.product_name : "8thGuard service";
+  const reviewSubmitUrl = submitUrl({ sessionId, productId, reference: verification.reference });
+
+  await recordPaystackPaymentConfirmed({
+    sessionId,
+    productId,
+    reference: verification.reference,
+    status: verification.status,
+    amount: verification.amount,
+    currency: verification.currency,
+    channel: verification.channel
+  });
 
   console.log(JSON.stringify({
     audit: {
@@ -87,12 +120,21 @@ export async function POST(req: Request) {
         `Product: ${productName}`,
         `Paystack reference: ${verification.reference}`,
         "",
-        "Your paid service is ready for review intake. Send the wallet, transaction hash, agent, or context connected to this session.",
+        "Your paid service is ready for review intake.",
+        reviewSubmitUrl ? "Tap Submit Review Details below, or send the wallet, transaction hash, agent, or context connected to this session." : "Send the wallet, transaction hash, agent, or context connected to this session.",
         "",
         "Early risk signals, not final fraud proof."
       ]
         .filter((line): line is string => Boolean(line))
-        .join("\n")
+        .join("\n"),
+      reviewSubmitUrl
+        ? {
+            inline_keyboard: [
+              [{ text: "Submit Review Details", url: reviewSubmitUrl }],
+              [{ text: "Paid Services", callback_data: "payment_session" }]
+            ]
+          }
+        : undefined
     );
   }
 

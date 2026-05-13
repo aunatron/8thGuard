@@ -51,8 +51,14 @@ Button-first checkout:
 /payment_session
 ```
 
+## Revenue loop
+- Paystack checkout can message the Telegram user after a successful payment.
+- `/submit` collects paid review details: session ID, service, wallet/transaction/agent/case context, payment reference, and contact.
+- `/admin/reviews?token=ADMIN_REVIEW_TOKEN` shows the paid review queue when Supabase is configured.
+- Supabase persistence is optional at runtime, but recommended for production payment sessions, payments, ledger entries, review requests, and audit logs.
+
 ## Vercel envs
-Add checkout backup links as `NEXT_PUBLIC_PAYSTACK_LINK_*` values. Add approved public wallet addresses as `NEXT_PUBLIC_CRYPTO_*` values only after they are ready for publication. Keep `PAYSTACK_SECRET_KEY`, blockchain API keys, and webhook secrets server-only.
+Add checkout backup links as `NEXT_PUBLIC_PAYSTACK_LINK_*` values. Add approved public wallet addresses as `NEXT_PUBLIC_CRYPTO_*` values only after they are ready for publication. Keep `PAYSTACK_SECRET_KEY`, `SUPABASE_SERVICE_ROLE_KEY`, blockchain API keys, admin tokens, and webhook secrets server-only.
 
 Optional wallet data source envs:
 - `ETHERSCAN_API_KEY`

@@ -9,6 +9,11 @@ export default async function PaystackCallbackPage({
   const reference = params.reference || params.trxref;
   const sessionId = params.session_id;
   const telegramUrl = process.env.NEXT_PUBLIC_OFFICIAL_TELEGRAM || "https://t.me/";
+  const submitParams = new URLSearchParams({
+    ...(sessionId ? { session_id: sessionId } : {}),
+    ...(reference ? { payment_reference: reference } : {})
+  });
+  const submitHref = submitParams.toString() ? `/submit?${submitParams.toString()}` : "/submit";
 
   return (
     <main>
@@ -25,8 +30,9 @@ export default async function PaystackCallbackPage({
           <p className="eyebrow">Next Step</p>
           <h2>Return to Telegram.</h2>
           <p>
-            Send your session details and review context in the official 8thGuard bot so the paid service can be fulfilled.
+            Submit the wallet, transaction, agent, or case context connected to this payment so the paid service can continue.
           </p>
+          <Link className="button primary" href={submitHref}>Submit Review Details</Link>
         </div>
         <div className="pricing-list">
           {sessionId && (

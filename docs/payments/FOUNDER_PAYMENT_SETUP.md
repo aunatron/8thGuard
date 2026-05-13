@@ -14,8 +14,9 @@ User flow:
 3. Bot creates a session ID and shows the global guide price.
 4. Bot returns a `Pay Now` checkout button plus official crypto rail buttons.
 5. User pays through checkout or from their own crypto wallet.
-6. User returns to Telegram to continue the review session.
-7. If support confirmation is needed, the user sends the payment reference or public-chain transaction hash with the session ID.
+6. Successful Paystack payment can trigger a Telegram confirmation message.
+7. User taps `Submit Review Details` or opens `/submit` to send wallet, transaction, agent, or case context.
+8. If support confirmation is needed, the user sends the payment reference or public-chain transaction hash with the session ID.
 
 Static Paystack pages are still useful as backup links in `/pay`.
 
@@ -45,7 +46,7 @@ Recommended Paystack page settings:
 - Currency: GHS.
 - Collect phone number: enabled if useful.
 - Description: "8thGuard digital service payment. Checks and reviews are paid services. Early risk signals, not final fraud proof."
-- Success message: "Payment received. Return to Telegram and send your 8thGuard session ID plus Paystack reference with /submit_payment."
+- Success message: "Payment received. Return to 8thGuard and submit your review details with your session ID."
 
 Do not create pages that describe trading, exchange, custody, escrow, recovery guarantees, investment, deposits, or user-to-user settlement.
 
@@ -85,6 +86,12 @@ Paystack server keys:
 - `PAYSTACK_SECRET_KEY`
 - `PAYSTACK_CALLBACK_URL`
 - `PAYSTACK_WEBHOOK_SECRET`
+
+Revenue operations:
+- `SUPABASE_URL`
+- `SUPABASE_ANON_KEY`
+- `SUPABASE_SERVICE_ROLE_KEY`
+- `ADMIN_REVIEW_TOKEN`
 
 Recommended values:
 - `PAYSTACK_CALLBACK_URL=https://YOUR_DOMAIN/pay/callback`
@@ -127,17 +134,22 @@ User flow:
 4. Bot shows global guide price, `Pay Now`, and crypto rail buttons.
 5. User pays through checkout or from their own crypto wallet.
 6. User returns to Telegram and continues the review session.
-7. User submits payment confirmation only when needed:
+7. User opens `/submit` to provide the review context.
+8. User submits payment confirmation only when needed:
    - Paystack: `/submit_payment 8G-260513-X7K2 <paystack_reference>`
    - Paystack verification: `/verify_paystack_payment <paystack_reference> 8G-260513-X7K2`
    - Crypto: `/verify_crypto_payment xrp <tx_hash> 8G-260513-X7K2`
-8. Bot checks payment/public-chain evidence where supported and routes the paid service.
+9. Bot checks payment/public-chain evidence where supported and routes the paid service.
 
 Test commands:
 - `/payment_session`
 - `/payment_session quick_wallet_check`
 - `/verify_paystack_payment <reference> <session_id>`
 - `/verify_crypto_payment xrp <tx_hash> <session_id>`
+
+Web routes:
+- `/submit`
+- `/admin/reviews?token=ADMIN_REVIEW_TOKEN`
 
 Paystack verifier:
 - Uses `PAYSTACK_SECRET_KEY` server-side.

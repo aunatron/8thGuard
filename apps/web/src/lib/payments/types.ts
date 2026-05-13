@@ -7,14 +7,21 @@ export type PaymentStatus =
   | "pending"
   | "submitted"
   | "reviewing"
+  | "confirmed"
   | "paid"
   | "failed"
   | "expired"
   | "refunded";
 
+export type ReviewSubjectType = "wallet" | "transaction" | "agent" | "scam_report" | "group" | "payment_session" | "other";
+
+export type ReviewStatus = "new" | "paid" | "reviewing" | "completed" | "needs_more_info";
+
 export type PaymentSession = {
   id: string;
   telegramUserId?: number;
+  telegramChatId?: number;
+  telegramUsername?: string;
   selectedProductId: PaymentProduct["id"];
   chain?: string;
   token?: string;
@@ -42,6 +49,8 @@ export type Invoice = {
 export type Payment = {
   id: string;
   invoiceId: string;
+  sessionId?: string;
+  productId?: PaymentProduct["id"];
   provider: PaymentProvider;
   status: PaymentStatus;
   reference?: string;
@@ -49,6 +58,23 @@ export type Payment = {
   network?: string;
   amountReceived?: string;
   createdAt: string;
+};
+
+export type ReviewRequest = {
+  id: string;
+  sessionId: string;
+  productId: PaymentProduct["id"];
+  status: ReviewStatus;
+  subjectType: ReviewSubjectType;
+  subjectValue: string;
+  network?: string;
+  paymentReference?: string;
+  cryptoTxHash?: string;
+  telegramHandle?: string;
+  contactEmail?: string;
+  context?: string;
+  createdAt: string;
+  updatedAt: string;
 };
 
 export type Entitlement = {

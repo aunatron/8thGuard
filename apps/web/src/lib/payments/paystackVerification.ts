@@ -1,5 +1,6 @@
 import { formatGhs } from "./products";
 import { PRODUCT_BY_ID, type ProductId } from "./products";
+import { recordPaystackCheckoutInitialized } from "./records";
 
 export type PaystackVerificationResult = {
   configured: boolean;
@@ -214,14 +215,25 @@ export async function initializePaystackTransaction(input: {
       };
     }
 
-    return {
+    const initialized = {
       ok: true,
       authorizationUrl: json.data.authorization_url,
       accessCode: json.data.access_code,
       reference: json.data.reference,
       sessionId: input.sessionId,
       productId: input.productId
-    };
+    } as const;
+
+    await recordPaystackCheckoutInitialized({
+      sessionId: input.sessionId,
+      productId: input.productId,
+      reference: json.data.reference,
+      telegramChatId: input.telegramChatId,
+      telegramUserId: input.telegramUserId,
+      telegramUsername: input.telegramUsername
+    });
+
+    return initialized;
   } catch {
     return {
       ok: false,
