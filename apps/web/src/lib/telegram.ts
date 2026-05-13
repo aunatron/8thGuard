@@ -15,6 +15,7 @@ import {
   buildInitializedSessionPaymentKeyboard,
   buildPaystackInitializedMessage,
   buildProductSessionKeyboard,
+  buildStartServicesKeyboard,
   createPaymentSessionDraft,
   parseCryptoRailId,
   productIdFromCallback,
@@ -102,7 +103,7 @@ function buildStartMessage(): string {
     "",
     "Crypto has speed. Now it needs a guard.",
     "",
-    "Choose Paid Services below to start, or use /pricing to view the full catalog."
+    "Choose a service below to start, or use /pricing to view the full catalog."
   ].join("\n");
 }
 
@@ -419,7 +420,7 @@ function formatReferenceLinks(score: number, links: { label: string; url: string
 export async function buildBotReply(text: string, appName: string, context: TelegramReplyContext = {}): Promise<TelegramBotReply> {
   const { command, arg } = parseCommand(text);
   if (command === "/start") {
-    return { command, message: buildStartMessage(), reply_markup: mainMenuKeyboard };
+    return { command, message: buildStartMessage(), reply_markup: buildStartServicesKeyboard() };
   }
 
   if (command === "/help") {

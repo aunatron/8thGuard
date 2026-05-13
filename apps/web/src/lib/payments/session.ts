@@ -57,6 +57,35 @@ export function buildProductSessionKeyboard(): InlineKeyboardMarkup {
   };
 }
 
+export function buildStartServicesKeyboard(): InlineKeyboardMarkup {
+  return {
+    inline_keyboard: [
+      ...PRODUCTS.map((product) => [
+        {
+          text: product.name,
+          callback_data: productCallbackData(product.id)
+        }
+      ]),
+      [
+        { text: "Pricing", callback_data: "pricing" },
+        { text: "Payment Safety", callback_data: "payment_warning" }
+      ],
+      [
+        { text: "Check Wallet", callback_data: "check_wallet" },
+        { text: "Check Transaction", callback_data: "check_tx" }
+      ],
+      [
+        { text: "Check Agent", callback_data: "check_agent" },
+        { text: "Report Scam", callback_data: "report_scam" }
+      ],
+      [
+        { text: "Crypto Pay", callback_data: "crypto_pay" },
+        { text: "Contact", callback_data: "contact" }
+      ]
+    ]
+  };
+}
+
 export function buildSessionPaymentKeyboard(productId: ProductId): InlineKeyboardMarkup {
   const paystackLinks = getPaystackPaymentLinks();
   const paystackLink = paystackLinks[productId];
