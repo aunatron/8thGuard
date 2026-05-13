@@ -98,9 +98,11 @@ function buildStartMessage(): string {
     "",
     "This is a paid crypto safety and fraud-intelligence service. Public scam education may be free, but checks, reviews, payment sessions, and protected flows are paid products.",
     "",
+    "Paid services are available now: quick checks, detailed reviews, priority scam report review, agent verification review, group/community safety review, and founding partner access.",
+    "",
     "Crypto has speed. Now it needs a guard.",
     "",
-    "Use /pricing to view services or choose an option below."
+    "Choose Paid Services below to start, or use /pricing to view the full catalog."
   ].join("\n");
 }
 
@@ -281,9 +283,13 @@ function buildGuardedSendMessage(): string {
 
 function buildPaymentSessionMessage(): string {
   return [
-    "Choose Your 8thGuard Service",
+    "8thGuard Paid Services",
     "",
-    "Select a service below. Your session and official payment options will be prepared instantly."
+    "Choose the service that matches the risk and urgency. Your session and official payment options will be prepared instantly.",
+    "",
+    ...PRODUCTS.map((product) => formatProductLine(product)),
+    "",
+    "Tap a service below to continue."
   ].join("\n");
 }
 
@@ -390,7 +396,7 @@ function userFriendlyDisclaimer(): string {
 }
 
 function userFriendlyPaidCta(): string {
-  return "For deeper review, choose Get Detailed Review below.";
+  return "For paid review options, choose Paid Services below.";
 }
 
 function paymentSessionEmail(context: TelegramReplyContext): string {

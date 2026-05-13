@@ -11,6 +11,10 @@ export type InlineKeyboardMarkup = {
 export const mainMenuKeyboard: InlineKeyboardMarkup = {
   inline_keyboard: [
     [
+      { text: "Paid Services", callback_data: "payment_session" },
+      { text: "Pricing", callback_data: "pricing" }
+    ],
+    [
       { text: "Check Wallet", callback_data: "check_wallet" },
       { text: "Check Transaction", callback_data: "check_tx" }
     ],
@@ -18,10 +22,7 @@ export const mainMenuKeyboard: InlineKeyboardMarkup = {
       { text: "Check Agent", callback_data: "check_agent" },
       { text: "Report Scam", callback_data: "report_scam" }
     ],
-    [
-      { text: "Pricing", callback_data: "pricing" },
-      { text: "Pay", callback_data: "pay" }
-    ],
+    [{ text: "Card / Mobile Money", callback_data: "pay" }],
     [
       { text: "Crypto Pay", callback_data: "crypto_pay" },
       { text: "Guarded Send", callback_data: "guarded_send" }
@@ -85,7 +86,7 @@ export const cryptoRailKeyboard: InlineKeyboardMarkup = {
 export const walletCheckKeyboard: InlineKeyboardMarkup = {
   inline_keyboard: [
     [
-      { text: "Get Detailed Review", callback_data: "payment_session" },
+      { text: "Paid Services", callback_data: "payment_session" },
       { text: "Report Scam", callback_data: "report_scam" }
     ],
     [
