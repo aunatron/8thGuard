@@ -1,131 +1,194 @@
 export type ProductId =
+  | "quick_wallet_check"
+  | "quick_transaction_check"
+  | "quick_agent_check"
   | "detailed_wallet_review"
   | "detailed_transaction_review"
-  | "agent_risk_review"
+  | "detailed_agent_review"
+  | "weekly_premium_access"
   | "priority_scam_report_review"
-  | "weekly_early_access_supporter"
   | "agent_verification_review"
   | "group_community_safety_review"
-  | "founding_supporter_package"
-  | "rapid_wallet_risk_review"
-  | "priority_scam_case_triage"
-  | "agent_group_safety_review"
-  | "business_community_safety_review"
-  | "founder_protection_package"
-  | "same_day_response_desk";
+  | "founding_partner_package";
 
-export type Product = {
+export type ProductTier = "quick" | "premium" | "enterprise" | "supporter";
+
+export type PaymentProduct = {
   id: ProductId;
   name: string;
   priceUsd: number;
+  priceGhs: number;
+  paystackSubunit: number;
   description: string;
+  serviceType: string;
+  requiresInput: boolean;
+  inputLabel: string;
+  tier: ProductTier;
 };
 
-export const FREE_BASIC_OFFER = {
-  name: "Basic checks",
-  priceUsd: 0,
-  description: "Free automated first-pass checks"
-} as const;
-
-export const PRODUCTS: Product[] = [
+export const PRODUCTS: PaymentProduct[] = [
+  {
+    id: "quick_wallet_check",
+    name: "Quick Wallet Check",
+    priceUsd: 4.99,
+    priceGhs: 65,
+    paystackSubunit: 6500,
+    description: "Fast wallet intelligence preview for one crypto address.",
+    serviceType: "wallet_check",
+    requiresInput: true,
+    inputLabel: "Wallet address",
+    tier: "quick"
+  },
+  {
+    id: "quick_transaction_check",
+    name: "Quick Transaction Check",
+    priceUsd: 4.99,
+    priceGhs: 65,
+    paystackSubunit: 6500,
+    description: "Fast transaction hash review with likely network and explorer guidance.",
+    serviceType: "transaction_check",
+    requiresInput: true,
+    inputLabel: "Transaction hash",
+    tier: "quick"
+  },
+  {
+    id: "quick_agent_check",
+    name: "Quick Agent Check",
+    priceUsd: 4.99,
+    priceGhs: 65,
+    paystackSubunit: 6500,
+    description: "Fast P2P agent or username risk indicator review.",
+    serviceType: "agent_check",
+    requiresInput: true,
+    inputLabel: "Agent name or username",
+    tier: "quick"
+  },
   {
     id: "detailed_wallet_review",
     name: "Detailed Wallet Review",
-    priceUsd: 4.99,
-    description: "Manual review of wallet risk indicators."
+    priceUsd: 9.99,
+    priceGhs: 125,
+    paystackSubunit: 12500,
+    description: "Manual wallet review with context, explorer links, and risk notes.",
+    serviceType: "wallet_review",
+    requiresInput: true,
+    inputLabel: "Wallet address and context",
+    tier: "premium"
   },
   {
     id: "detailed_transaction_review",
     name: "Detailed Transaction Review",
-    priceUsd: 4.99,
-    description: "Manual review of a transaction hash."
+    priceUsd: 9.99,
+    priceGhs: 125,
+    paystackSubunit: 12500,
+    description: "Manual transaction review for hash, token, recipient, amount, and timing.",
+    serviceType: "transaction_review",
+    requiresInput: true,
+    inputLabel: "Transaction hash and context",
+    tier: "premium"
   },
   {
-    id: "agent_risk_review",
-    name: "Agent Risk Review",
-    priceUsd: 4.99,
-    description: "Manual review of P2P agent risk indicators."
+    id: "detailed_agent_review",
+    name: "Detailed Agent Review",
+    priceUsd: 9.99,
+    priceGhs: 125,
+    paystackSubunit: 12500,
+    description: "Manual review of P2P agent signals, identity consistency, and payment context.",
+    serviceType: "agent_review",
+    requiresInput: true,
+    inputLabel: "Agent username and context",
+    tier: "premium"
+  },
+  {
+    id: "weekly_premium_access",
+    name: "Weekly Premium Access",
+    priceUsd: 14.99,
+    priceGhs: 190,
+    paystackSubunit: 19000,
+    description: "Weekly access for multiple safety checks, priority feedback, and safety guidance.",
+    serviceType: "premium_access",
+    requiresInput: false,
+    inputLabel: "Telegram contact",
+    tier: "supporter"
   },
   {
     id: "priority_scam_report_review",
     name: "Priority Scam Report Review",
-    priceUsd: 9.99,
-    description: "Priority guidance for scam-report evidence."
-  },
-  {
-    id: "weekly_early_access_supporter",
-    name: "Weekly Early-Access Supporter",
-    priceUsd: 14.99,
-    description: "Supporter access, priority feedback, and updates."
+    priceUsd: 24.99,
+    priceGhs: 315,
+    paystackSubunit: 31500,
+    description: "Priority evidence review for a scam report, wallet, transaction, agent, and timeline.",
+    serviceType: "scam_report_review",
+    requiresInput: true,
+    inputLabel: "Evidence summary",
+    tier: "premium"
   },
   {
     id: "agent_verification_review",
     name: "Agent Verification Review",
-    priceUsd: 29.99,
-    description: "Agent review for future verification registry readiness. Do not call it final verification."
+    priceUsd: 49.99,
+    priceGhs: 625,
+    paystackSubunit: 62500,
+    description: "P2P agent review for registry readiness. Not final verification or endorsement.",
+    serviceType: "agent_verification_review",
+    requiresInput: true,
+    inputLabel: "Agent profile and payment context",
+    tier: "premium"
   },
   {
     id: "group_community_safety_review",
     name: "Group/Community Safety Review",
-    priceUsd: 49.99,
-    description: "Safety review for Telegram/WhatsApp crypto groups and communities."
-  },
-  {
-    id: "founding_supporter_package",
-    name: "Founding Supporter Package",
     priceUsd: 99.99,
-    description: "Founding supporter package with priority access and multiple manual reviews."
+    priceGhs: 1250,
+    paystackSubunit: 125000,
+    description: "Safety review for Telegram/WhatsApp crypto groups, admins, rails, and visible risk patterns.",
+    serviceType: "community_safety_review",
+    requiresInput: true,
+    inputLabel: "Group/community details",
+    tier: "enterprise"
   },
   {
-    id: "rapid_wallet_risk_review",
-    name: "Rapid Wallet Risk Review",
-    priceUsd: 49,
-    description: "Same-day wallet review summary for a single address, where capacity allows."
-  },
-  {
-    id: "priority_scam_case_triage",
-    name: "Priority Scam Case Triage",
-    priceUsd: 99,
-    description: "Priority review of wallet, transaction, agent, and evidence context for one urgent case."
-  },
-  {
-    id: "agent_group_safety_review",
-    name: "Agent/Group Safety Review",
-    priceUsd: 149,
-    description: "Review of a P2P agent, Telegram/WhatsApp group, payment flow, and visible risk signals."
-  },
-  {
-    id: "business_community_safety_review",
-    name: "Business/Community Safety Review",
-    priceUsd: 299,
-    description: "Safety review for a team, trader community, group admins, or high-activity P2P desk."
-  },
-  {
-    id: "founder_protection_package",
-    name: "Founder Protection Package",
-    priceUsd: 499,
-    description: "Priority protection package with multiple manual reviews and safety recommendations."
-  },
-  {
-    id: "same_day_response_desk",
-    name: "Same-Day Response Desk",
-    priceUsd: 999,
-    description: "High-priority response desk for several related wallets, transactions, agents, or groups."
+    id: "founding_partner_package",
+    name: "Founding Partner Package",
+    priceUsd: 199.99,
+    priceGhs: 2500,
+    paystackSubunit: 250000,
+    description: "Premium founding partner package with priority review access and multiple safety reviews.",
+    serviceType: "founding_partner",
+    requiresInput: false,
+    inputLabel: "Telegram contact",
+    tier: "enterprise"
   }
 ];
 
-export const PRODUCT_BY_ID: Record<ProductId, Product> = PRODUCTS.reduce(
+export const PRODUCT_BY_ID: Record<ProductId, PaymentProduct> = PRODUCTS.reduce(
   (acc, product) => ({ ...acc, [product.id]: product }),
-  {} as Record<ProductId, Product>
+  {} as Record<ProductId, PaymentProduct>
 );
 
 export const PRICING_NOTES = [
-  "Prices may change as the service evolves.",
   "USD is the reference price.",
+  "GHS prices use the fixed reference rate 1 USD = GHS 12.50.",
   "Paystack/MoMo/card/bank may convert to local currency at checkout.",
   "Crypto payments use USDT/USDC equivalent or quoted crypto amount."
 ];
 
+export function getProducts(): PaymentProduct[] {
+  return PRODUCTS;
+}
+
+export function getProductById(id: ProductId): PaymentProduct {
+  return PRODUCT_BY_ID[id];
+}
+
 export function formatUsd(priceUsd: number): string {
-  return priceUsd === 0 ? "Free" : `$${priceUsd.toFixed(2)}`;
+  return `$${priceUsd.toFixed(2)}`;
+}
+
+export function formatGhs(priceGhs: number): string {
+  return `GHS ${priceGhs.toLocaleString("en-US")}`;
+}
+
+export function formatProductLine(product: PaymentProduct): string {
+  return `${product.name} - ${formatUsd(product.priceUsd)} / ${formatGhs(product.priceGhs)}`;
 }

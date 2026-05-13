@@ -6,20 +6,17 @@ type PaystackLinkEnv = {
 };
 
 const PAYSTACK_LINK_ENVS: PaystackLinkEnv[] = [
+  { productId: "quick_wallet_check", envName: "NEXT_PUBLIC_PAYSTACK_LINK_QUICK_WALLET_CHECK" },
+  { productId: "quick_transaction_check", envName: "NEXT_PUBLIC_PAYSTACK_LINK_QUICK_TRANSACTION_CHECK" },
+  { productId: "quick_agent_check", envName: "NEXT_PUBLIC_PAYSTACK_LINK_QUICK_AGENT_CHECK" },
   { productId: "detailed_wallet_review", envName: "NEXT_PUBLIC_PAYSTACK_LINK_DETAILED_WALLET_REVIEW" },
   { productId: "detailed_transaction_review", envName: "NEXT_PUBLIC_PAYSTACK_LINK_DETAILED_TRANSACTION_REVIEW" },
-  { productId: "agent_risk_review", envName: "NEXT_PUBLIC_PAYSTACK_LINK_AGENT_RISK_REVIEW" },
+  { productId: "detailed_agent_review", envName: "NEXT_PUBLIC_PAYSTACK_LINK_DETAILED_AGENT_REVIEW" },
+  { productId: "weekly_premium_access", envName: "NEXT_PUBLIC_PAYSTACK_LINK_WEEKLY_PREMIUM" },
   { productId: "priority_scam_report_review", envName: "NEXT_PUBLIC_PAYSTACK_LINK_PRIORITY_SCAM_REPORT" },
-  { productId: "weekly_early_access_supporter", envName: "NEXT_PUBLIC_PAYSTACK_LINK_WEEKLY_SUPPORTER" },
   { productId: "agent_verification_review", envName: "NEXT_PUBLIC_PAYSTACK_LINK_AGENT_VERIFICATION" },
   { productId: "group_community_safety_review", envName: "NEXT_PUBLIC_PAYSTACK_LINK_GROUP_SAFETY_REVIEW" },
-  { productId: "founding_supporter_package", envName: "NEXT_PUBLIC_PAYSTACK_LINK_FOUNDING_SUPPORTER" },
-  { productId: "rapid_wallet_risk_review", envName: "NEXT_PUBLIC_PAYSTACK_LINK_RAPID_WALLET_REVIEW" },
-  { productId: "priority_scam_case_triage", envName: "NEXT_PUBLIC_PAYSTACK_LINK_PRIORITY_CASE_TRIAGE" },
-  { productId: "agent_group_safety_review", envName: "NEXT_PUBLIC_PAYSTACK_LINK_AGENT_GROUP_SAFETY" },
-  { productId: "business_community_safety_review", envName: "NEXT_PUBLIC_PAYSTACK_LINK_BUSINESS_COMMUNITY_SAFETY" },
-  { productId: "founder_protection_package", envName: "NEXT_PUBLIC_PAYSTACK_LINK_FOUNDER_PROTECTION" },
-  { productId: "same_day_response_desk", envName: "NEXT_PUBLIC_PAYSTACK_LINK_SAME_DAY_RESPONSE" }
+  { productId: "founding_partner_package", envName: "NEXT_PUBLIC_PAYSTACK_LINK_FOUNDING_PARTNER" }
 ];
 
 export type CryptoWalletRail = {
@@ -27,7 +24,6 @@ export type CryptoWalletRail = {
   envName: string;
   address?: string;
   destinationTag?: string;
-  note?: string;
 };
 
 function readEnv(name: string): string | undefined {
@@ -53,29 +49,12 @@ export function getPaymentContact() {
 
 export function getPublicCryptoWallets(): CryptoWalletRail[] {
   return [
+    { label: "XRP", envName: "NEXT_PUBLIC_CRYPTO_XRP_ADDRESS", address: readEnv("NEXT_PUBLIC_CRYPTO_XRP_ADDRESS"), destinationTag: readEnv("NEXT_PUBLIC_CRYPTO_XRP_DESTINATION_TAG") },
     { label: "BTC", envName: "NEXT_PUBLIC_CRYPTO_BTC_ADDRESS", address: readEnv("NEXT_PUBLIC_CRYPTO_BTC_ADDRESS") },
-    {
-      label: "ETH / EVM rails",
-      envName: "NEXT_PUBLIC_CRYPTO_ETH_EVM_ADDRESS",
-      address: readEnv("NEXT_PUBLIC_CRYPTO_ETH_EVM_ADDRESS")
-    },
-    {
-      label: "USDT TRC20",
-      envName: "NEXT_PUBLIC_CRYPTO_USDT_TRC20_ADDRESS",
-      address: readEnv("NEXT_PUBLIC_CRYPTO_USDT_TRC20_ADDRESS")
-    },
-    {
-      label: "USDT BEP20",
-      envName: "NEXT_PUBLIC_CRYPTO_USDT_BEP20_ADDRESS",
-      address: readEnv("NEXT_PUBLIC_CRYPTO_USDT_BEP20_ADDRESS")
-    },
+    { label: "USDT TRC20", envName: "NEXT_PUBLIC_CRYPTO_USDT_TRC20_ADDRESS", address: readEnv("NEXT_PUBLIC_CRYPTO_USDT_TRC20_ADDRESS") },
+    { label: "USDT BEP20 / EVM", envName: "NEXT_PUBLIC_CRYPTO_USDT_BEP20_ADDRESS", address: readEnv("NEXT_PUBLIC_CRYPTO_USDT_BEP20_ADDRESS") },
+    { label: "ETH / EVM rails", envName: "NEXT_PUBLIC_CRYPTO_ETH_EVM_ADDRESS", address: readEnv("NEXT_PUBLIC_CRYPTO_ETH_EVM_ADDRESS") },
     { label: "TON / USDT on TON", envName: "NEXT_PUBLIC_CRYPTO_TON_ADDRESS", address: readEnv("NEXT_PUBLIC_CRYPTO_TON_ADDRESS") },
-    {
-      label: "XRP",
-      envName: "NEXT_PUBLIC_CRYPTO_XRP_ADDRESS",
-      address: readEnv("NEXT_PUBLIC_CRYPTO_XRP_ADDRESS"),
-      destinationTag: readEnv("NEXT_PUBLIC_CRYPTO_XRP_DESTINATION_TAG")
-    },
     { label: "Solana", envName: "NEXT_PUBLIC_CRYPTO_SOLANA_ADDRESS", address: readEnv("NEXT_PUBLIC_CRYPTO_SOLANA_ADDRESS") }
   ];
 }

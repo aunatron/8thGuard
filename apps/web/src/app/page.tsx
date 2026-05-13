@@ -1,84 +1,135 @@
-import { PRODUCTS, formatUsd } from "@/lib/payments/products";
+import Image from "next/image";
+import { PRODUCTS, formatGhs, formatUsd } from "@/lib/payments/products";
+
+const productCards = [
+  "Wallet Intelligence",
+  "Transaction Review",
+  "Agent Risk Review",
+  "Guarded Send",
+  "Payment Sessions",
+  "Group Safety",
+  "Future Protected Transactions"
+];
+
+const paymentRails = ["Paystack", "Crypto wallets", "BTC", "XRP", "USDT TRC20", "USDT BEP20/EVM", "TON", "Solana"];
 
 export default function HomePage() {
-  const launchOffers = PRODUCTS.filter((product) =>
-    [
-      "rapid_wallet_risk_review",
-      "priority_scam_case_triage",
-      "agent_group_safety_review",
-      "business_community_safety_review",
-      "founder_protection_package",
-      "same_day_response_desk"
-    ].includes(product.id)
-  );
-
   return (
     <main>
-      <h1>8thGuard</h1>
-      <p>
-        Global crypto fraud intelligence and transaction safety for reviewing wallets,
-        transaction hashes, and P2P agents before funds move. Built for global crypto safety
-        with practical attention to the payment habits and P2P risks users face across Ghana,
-        Africa, and other fast-moving markets.
-      </p>
+      <section className="hero-section">
+        <div className="hero-copy">
+          <Image className="brand-mark" src="/assets/logo_dark-removebg-preview.png" alt="8thGuard" width={172} height={64} priority />
+          <h1>Check before you send.</h1>
+          <p className="hero-subhead">
+            8thGuard helps users review wallets, transactions, agents, and future guarded transactions for early risk signals before funds move.
+          </p>
+          <p className="trust-line">Paid crypto safety. No private keys. No exchange. No custody in MVP.</p>
+          <div className="hero-actions">
+            <a className="button primary" href="/pay">View Paid Services</a>
+            <a className="button secondary" href="/services">Explore Reviews</a>
+          </div>
+        </div>
+        <div className="signal-panel" aria-label="8thGuard risk signal preview">
+          <p className="panel-kicker">Wallet Intelligence Preview</p>
+          <div className="score-row">
+            <span>Risk Score</span>
+            <strong>42/100</strong>
+          </div>
+          <div className="signal-bar"><span /></div>
+          <ul>
+            <li>Detected network: EVM</li>
+            <li>Live data: Partial</li>
+            <li>Sources: explorer routing, public-chain signals</li>
+            <li>MVP result: early risk signals only</li>
+          </ul>
+        </div>
+      </section>
 
-      <h2>Wallet Intelligence</h2>
-      <p>
-        8thGuard reviews wallet formats, explorer links, public-chain signals where available,
-        transaction activity, and user-submitted context to help you spot risk before sending funds.
-      </p>
-      <ul>
-        <li>Wallet checks with early risk signals and source notes.</li>
-        <li>Transaction hash previews with likely network and explorer links.</li>
-        <li>P2P agent review workflow foundation and scam report preparation guidance.</li>
-      </ul>
+      <section className="section-band">
+        <div className="section-heading">
+          <p className="eyebrow">Premium Safety Products</p>
+          <h2>Built for the moment before funds move.</h2>
+        </div>
+        <div className="product-grid">
+          {productCards.map((name) => (
+            <article className="product-card" key={name}>
+              <h3>{name}</h3>
+              <p>
+                Chain-aware review surfaces for crypto decisions where speed, pressure, and bad information create real risk.
+              </p>
+            </article>
+          ))}
+        </div>
+      </section>
 
-      <h2>Payment Rails</h2>
-      <p>
-        8thGuard uses USD reference pricing for global clarity. Paystack service payments
-        may support local rails such as MoMo, card, bank transfer, and local-currency
-        conversion at checkout. Official crypto wallet payments use USDT/USDC equivalent
-        or quoted crypto amounts for 8thGuard digital services only.
-      </p>
-      <ul>
-        <li>No escrow.</li>
-        <li>No custody of customer funds.</li>
-        <li>No exchange, trading, or user-to-user settlement.</li>
-      </ul>
+      <section className="split-section">
+        <div>
+          <p className="eyebrow">Pricing</p>
+          <h2>Free education. Paid utility.</h2>
+          <p>
+            Checks and reviews are paid services. Public pricing uses USD reference pricing, with fixed GHS reference values for local rails.
+          </p>
+        </div>
+        <div className="pricing-list">
+          {PRODUCTS.map((product) => (
+            <div className="price-row" key={product.id}>
+              <span>{product.name}</span>
+              <strong>{formatUsd(product.priceUsd)} / {formatGhs(product.priceGhs)}</strong>
+            </div>
+          ))}
+        </div>
+      </section>
 
-      <h2>Priority Review Services</h2>
-      <p>
-        When the situation is urgent or the amount at risk is meaningful, choose a higher-touch
-        review path with clearer next steps and focused safety guidance.
-      </p>
-      <ul>
-        {launchOffers.map((product) => (
-          <li key={product.id}>
-            {product.name.replace("Detailed Wallet Review", "Detailed Review")} - {formatUsd(product.priceUsd)}
-          </li>
-        ))}
-      </ul>
-      <p><a href="/services">View priority review services</a></p>
+      <section className="section-band muted">
+        <div className="section-heading">
+          <p className="eyebrow">Official Rails</p>
+          <h2>Pay through service rails only.</h2>
+          <p>
+            Paystack and published crypto wallets are for 8thGuard digital service payments only. They are not trading, exchange, custody, or user-to-user settlement rails.
+          </p>
+        </div>
+        <div className="rail-grid">
+          {paymentRails.map((rail) => (
+            <span key={rail}>{rail}</span>
+          ))}
+        </div>
+      </section>
 
-      <h2>Safety boundaries</h2>
-      <ul>
-        <li>No custody of customer funds.</li>
-        <li>No escrow execution.</li>
-        <li>No private-key storage.</li>
-        <li>Results are early risk signals, not final fraud proof.</li>
-      </ul>
-      <h2>Trust Center</h2>
-      <p>
-        Clear rules protect users and the platform. 8thGuard does not provide escrow, custody,
-        exchange, trading, or guaranteed fraud-proof claims.
-      </p>
-      <ul>
-        <li><a href="/legal/terms">Terms of Service</a></li>
-        <li><a href="/legal/privacy">Privacy Policy</a></li>
-        <li><a href="/legal/risk-disclaimer">Risk Disclaimer</a></li>
-        <li><a href="/legal/payment-policy">Payment Policy</a></li>
-        <li><a href="/legal/refund-policy">Refund Policy</a></li>
-      </ul>
+      <section className="split-section">
+        <div>
+          <p className="eyebrow">How It Works</p>
+          <h2>Choose, pay, submit, review.</h2>
+        </div>
+        <ol className="steps">
+          <li>Choose service</li>
+          <li>Pay through official rail</li>
+          <li>Submit wallet, transaction, agent, or session context</li>
+          <li>Receive risk signals or manual review</li>
+          <li>Future: automated unlock and guarded transaction flow</li>
+        </ol>
+      </section>
+
+      <section className="trust-section">
+        <div>
+          <p className="eyebrow">Safety Boundaries</p>
+          <h2>Urgent, but qualified.</h2>
+        </div>
+        <ul>
+          <li>No seed phrase requests.</li>
+          <li>No private keys.</li>
+          <li>No exchange.</li>
+          <li>No final fraud proof claims.</li>
+          <li>Early risk signals only.</li>
+        </ul>
+      </section>
+
+      <section className="miniapp-section">
+        <p className="eyebrow">Mini App Readiness</p>
+        <h2>Built for Telegram bot today. Designed for mini app, web app, and future protected transaction flows.</h2>
+        <p>
+          The current MVP keeps payments, wallet intelligence, audit logging, and future guarded transaction architecture separated so the product can grow without breaking trust boundaries.
+        </p>
+      </section>
     </main>
   );
 }

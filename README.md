@@ -1,13 +1,25 @@
 # 8thGuard
 
-8thGuard is a global crypto fraud intelligence and transaction safety platform for reviewing wallets, transaction hashes, and P2P agents before sending funds.
+8thGuard is a premium global crypto safety system for wallet intelligence, transaction review, P2P agent risk checks, payment protection readiness, and future guarded transaction flows.
+
+Core line: **Check before you send.**
 
 ## MVP in this repository
 - Next.js app for Vercel deployment.
-- Telegram webhook bot endpoint.
-- Real Wallet Check v0 with address detection, explorer links, and limited live public lookups.
-- Paystack service-payment readiness and official crypto wallet payment instructions.
-- Structured audit logging to console (Supabase-ready extension point).
+- Premium paid-first website and `/pay` service-payment page.
+- Telegram webhook bot with inline menus, paid service catalog, Paystack readiness, crypto payment instructions, and guarded-flow placeholders.
+- Real Wallet Check v0/v1 with chain detection, explorer links, optional public data lookups, and graceful API fallbacks.
+- Payment catalog with USD reference pricing and fixed GHS references.
+- Supabase-ready payment sessions, invoices, entitlements, ledger entries, audit logs, and risk check planning.
+
+## Product boundaries
+- Free education. Paid utility.
+- Checks and reviews are paid services.
+- Paystack is for 8thGuard digital service payments only.
+- Crypto wallets are for 8thGuard digital service payments only.
+- No private keys or seed phrases.
+- No exchange, trading, custody, escrow, or user-to-user settlement in the MVP.
+- Wallet and transaction outputs are early risk signals, not final fraud proof.
 
 ## Run locally
 ```bash
@@ -15,10 +27,11 @@ npm install
 npm run dev
 ```
 
-## Validate build
+## Validate
 ```bash
 npm run build
 npm run lint
+npx tsc --noEmit -p apps/web/tsconfig.json
 ```
 
 ## Bot commands
@@ -29,27 +42,23 @@ npm run lint
 - `/report_scam`
 - `/pricing`, `/pay`, `/crypto_pay`
 - `/payment_warning`, `/submit_payment`, `/tonight_offer`, `/contact`
+- `/verify_paystack_payment <reference> [session_id]`
+- `/verify_crypto_payment <rail> <tx_hash> [session_id]`
+- `/guarded_send`, `/payment_session`, `/fee_quote`, `/protected_flow`
 
-## Payment envs for Vercel
-Add Paystack links as `NEXT_PUBLIC_PAYSTACK_LINK_*` values when payment pages are ready. Add official public wallet addresses as `NEXT_PUBLIC_CRYPTO_*` values only after they are approved for publication. Keep `PAYSTACK_SECRET_KEY`, API keys, and webhook secrets server-only.
+## Vercel envs
+Add Paystack product links as `NEXT_PUBLIC_PAYSTACK_LINK_*` values after the founder creates the pages. Add approved public wallet addresses as `NEXT_PUBLIC_CRYPTO_*` values only after they are ready for publication. Keep `PAYSTACK_SECRET_KEY`, blockchain API keys, and webhook secrets server-only.
 
-## Wallet data source envs for Vercel
-Optional live sources:
+Optional wallet data source envs:
 - `ETHERSCAN_API_KEY`
 - `TRONGRID_API_KEY`
-- `TONCENTER_API_KEY` or `TONAPI_KEY`
+- `TONCENTER_API_KEY`
+- `TONAPI_KEY`
 - `SOLANA_RPC_URL`
 - `XRPL_RPC_URL`
 - `BTC_MEMPOOL_API_BASE`
 
-## Local webhook testing
-Use a tunnel (for example ngrok) to expose your local server and call Telegram setWebhook with your tunnel URL.
-
-## Deploy to Vercel
+## Deploy
 Follow `docs/deployment/TELEGRAM_BOT_DEPLOYMENT.md`.
 
-## Next actions
-1. Wire Supabase audit persistence and risk check storage.
-2. Add payment submission intake and manual review workflow.
-3. Add verified-agent registry workflow.
-4. Expand wallet and transaction data providers without claiming final fraud proof.
+Founder payment setup lives in `docs/payments/FOUNDER_PAYMENT_SETUP.md`.

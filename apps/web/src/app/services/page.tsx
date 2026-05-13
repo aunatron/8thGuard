@@ -1,12 +1,13 @@
-import { PRODUCTS, formatUsd } from "@/lib/payments/products";
+import { PRODUCTS, formatGhs, formatUsd } from "@/lib/payments/products";
 
 const featuredIds = [
-  "rapid_wallet_risk_review",
-  "priority_scam_case_triage",
-  "agent_group_safety_review",
-  "business_community_safety_review",
-  "founder_protection_package",
-  "same_day_response_desk"
+  "quick_wallet_check",
+  "quick_transaction_check",
+  "quick_agent_check",
+  "priority_scam_report_review",
+  "agent_verification_review",
+  "group_community_safety_review",
+  "founding_partner_package"
 ];
 
 const featuredProducts = PRODUCTS.filter((product) => featuredIds.includes(product.id));
@@ -18,14 +19,14 @@ export default function ServicesPage() {
       <p>
         For high-pressure crypto decisions, 8thGuard provides focused review support for wallets,
         transactions, P2P agents, groups, and scam-report evidence. The service is global, with practical
-        attention to local payment rails, Telegram/WhatsApp groups, and P2P risks common across Ghana and Africa.
+        attention to local payment rails, Telegram groups, and P2P risks in fast-moving markets.
       </p>
 
       <h2>Priority Services</h2>
       <ul>
         {featuredProducts.map((product) => (
           <li key={product.id}>
-            <strong>{product.name}</strong> - {formatUsd(product.priceUsd)}
+            <strong>{product.name}</strong> - {formatUsd(product.priceUsd)} / {formatGhs(product.priceGhs)}
             <br />
             {product.description}
           </li>
@@ -35,7 +36,7 @@ export default function ServicesPage() {
       <h2>How To Start</h2>
       <ol>
         <li>Open the 8thGuard Telegram bot.</li>
-        <li>Run a first-pass check with `/check_wallet`, `/check_tx`, or `/check_agent`.</li>
+        <li>Choose the paid check or review that matches the risk.</li>
         <li>Choose the review service that matches the risk and urgency.</li>
         <li>Use `/pay` or `/crypto_pay` for official payment instructions.</li>
         <li>Use `/submit_payment` and official contact to send payment proof and review context.</li>

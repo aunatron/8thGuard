@@ -1,24 +1,19 @@
 # Pricing Model
 
-## Free
-- Basic checks: Free during MVP
+Public pricing uses USD reference pricing. Fixed GHS reference pricing uses 1 USD = GHS 12.50.
 
-## Paid MVP products
-- Detailed Wallet Review: $4.99
-- Detailed Transaction Review: $4.99
-- Agent Risk Review: $4.99
-- Priority Scam Report Review: $9.99
-- Weekly Early-Access Supporter: $14.99
-- Agent Verification Review: $29.99
-- Group/Community Safety Review: $49.99
-- Founding Supporter Package: $99.99
+| Product | USD | GHS |
+| --- | ---: | ---: |
+| Quick Wallet Check | $4.99 | GHS 65 |
+| Quick Transaction Check | $4.99 | GHS 65 |
+| Quick Agent Check | $4.99 | GHS 65 |
+| Detailed Wallet Review | $9.99 | GHS 125 |
+| Detailed Transaction Review | $9.99 | GHS 125 |
+| Detailed Agent Review | $9.99 | GHS 125 |
+| Weekly Premium Access | $14.99 | GHS 190 |
+| Priority Scam Report Review | $24.99 | GHS 315 |
+| Agent Verification Review | $49.99 | GHS 625 |
+| Group/Community Safety Review | $99.99 | GHS 1,250 |
+| Founding Partner Package | $199.99 | GHS 2,500 |
 
-All prices are USD reference prices. Results are early risk indicators, not final fraud proof.
-
-## Priority review ladder
-- Rapid Wallet Risk Review: $49
-- Priority Scam Case Triage: $99
-- Agent/Group Safety Review: $149
-- Business/Community Safety Review: $299
-- Founder Protection Package: $499
-- Same-Day Response Desk: $999
+Paystack/local rails may convert to local currency at checkout. Crypto payments use USDT/USDC equivalent or quoted crypto amount.
