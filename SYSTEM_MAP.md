@@ -12,6 +12,7 @@
 - `apps/web/src/lib/telegram.ts`: command parser, premium bot responses, inline callback routing, payment UX, and guarded-flow placeholders.
 - `apps/web/src/lib/telegram-keyboards.ts`: main, payment, risk-result, scam-report, and guarded-flow inline keyboards.
 - `apps/web/src/lib/risk.ts`: risk facade for wallet, transaction, and agent checks.
+- `apps/web/src/lib/reports.ts`: premium result report templates for Wallet Intelligence, Transaction Review, Agent Risk Review, and Priority Scam Report Review. Each includes risk level, risk indicators, network context, recommended action, limits/disclaimer, and 8thGuard branding.
 - `apps/web/src/lib/wallet/*`: chain detection, explorer links, public data source lookups, and Real Wallet Check v0/v1 orchestration.
 - `apps/web/src/lib/payments/products.ts`: paid-first product catalog with USD/GHS pricing and Paystack subunit values.
 - `apps/web/src/lib/payments/config.ts`: Paystack link env mapping, public crypto wallet env mapping, contact envs, and server-only payment/data-source config.
