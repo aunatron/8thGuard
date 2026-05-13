@@ -76,3 +76,12 @@ External API failures should return partial results and explorer links where pos
 - Do not stage or commit `env.txt`.
 - Do not stage or commit `.env`, `.env.local`, `.env.production`, `*.pem`, or `*.key`.
 - Never expose `PAYSTACK_SECRET_KEY`, Telegram bot tokens, private keys, seed phrases, Supabase service role keys, or blockchain API keys in frontend code or docs.
+
+## Legal and trust pages
+- Confirm `/legal` opens.
+- Confirm `/legal/terms` opens.
+- Confirm `/legal/privacy` opens.
+- Confirm `/legal/risk-disclaimer` opens.
+- Confirm `/legal/payment-policy` opens.
+- Confirm `/legal/refund-policy` opens.
+- Confirm legal pages do not describe 8thGuard as escrow, custody, exchange, trading, brokerage, or guaranteed recovery.

@@ -3,11 +3,12 @@ import { PRODUCTS, formatUsd } from "@/lib/payments/products";
 export default function HomePage() {
   const launchOffers = PRODUCTS.filter((product) =>
     [
-      "detailed_wallet_review",
-      "priority_scam_report_review",
-      "agent_verification_review",
-      "group_community_safety_review",
-      "founding_supporter_package"
+      "rapid_wallet_risk_review",
+      "priority_scam_case_triage",
+      "agent_group_safety_review",
+      "business_community_safety_review",
+      "founder_protection_package",
+      "same_day_response_desk"
     ].includes(product.id)
   );
 
@@ -16,14 +17,15 @@ export default function HomePage() {
       <h1>8thGuard</h1>
       <p>
         Global crypto fraud intelligence and transaction safety for reviewing wallets,
-        transaction hashes, and P2P agents before funds move.
+        transaction hashes, and P2P agents before funds move. Built for global crypto safety
+        with practical attention to the payment habits and P2P risks users face across Ghana,
+        Africa, and other fast-moving markets.
       </p>
 
-      <h2>Real Wallet Intelligence Preview</h2>
+      <h2>Wallet Intelligence</h2>
       <p>
-        8thGuard is beginning to connect live blockchain signals from public sources and
-        explorer APIs. Current checks may include address format recognition, explorer links,
-        transaction-count previews, and limited chain-specific lookups.
+        8thGuard reviews wallet formats, explorer links, public-chain signals where available,
+        transaction activity, and user-submitted context to help you spot risk before sending funds.
       </p>
       <ul>
         <li>Wallet checks with early risk signals and source notes.</li>
@@ -39,12 +41,16 @@ export default function HomePage() {
         or quoted crypto amounts for 8thGuard digital services only.
       </p>
       <ul>
-        <li>No escrow in the current MVP.</li>
+        <li>No escrow.</li>
         <li>No custody of customer funds.</li>
         <li>No exchange, trading, or user-to-user settlement.</li>
       </ul>
 
-      <h2>Tonight Launch Offers</h2>
+      <h2>Priority Review Services</h2>
+      <p>
+        When the situation is urgent or the amount at risk is meaningful, choose a higher-touch
+        review path with clearer next steps and focused safety guidance.
+      </p>
       <ul>
         {launchOffers.map((product) => (
           <li key={product.id}>
@@ -52,16 +58,27 @@ export default function HomePage() {
           </li>
         ))}
       </ul>
+      <p><a href="/services">View priority review services</a></p>
 
       <h2>Safety boundaries</h2>
       <ul>
         <li>No custody of customer funds.</li>
-        <li>No escrow execution in current MVP.</li>
+        <li>No escrow execution.</li>
         <li>No private-key storage.</li>
-        <li>MVP results are early risk signals, not final fraud proof.</li>
+        <li>Results are early risk signals, not final fraud proof.</li>
       </ul>
-
-      <p>Telegram bot is active once webhook is configured on deployment.</p>
+      <h2>Trust Center</h2>
+      <p>
+        Clear rules protect users and the platform. 8thGuard does not provide escrow, custody,
+        exchange, trading, or guaranteed fraud-proof claims.
+      </p>
+      <ul>
+        <li><a href="/legal/terms">Terms of Service</a></li>
+        <li><a href="/legal/privacy">Privacy Policy</a></li>
+        <li><a href="/legal/risk-disclaimer">Risk Disclaimer</a></li>
+        <li><a href="/legal/payment-policy">Payment Policy</a></li>
+        <li><a href="/legal/refund-policy">Refund Policy</a></li>
+      </ul>
     </main>
   );
 }

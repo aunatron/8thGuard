@@ -14,3 +14,11 @@
 - Founding Supporter Package: $99.99
 
 All prices are USD reference prices. Results are early risk indicators, not final fraud proof.
+
+## Priority review ladder
+- Rapid Wallet Risk Review: $49
+- Priority Scam Case Triage: $99
+- Agent/Group Safety Review: $149
+- Business/Community Safety Review: $299
+- Founder Protection Package: $499
+- Same-Day Response Desk: $999

@@ -1,6 +1,7 @@
 export type InlineKeyboardButton = {
   text: string;
-  callback_data: string;
+  callback_data?: string;
+  url?: string;
 };
 
 export type InlineKeyboardMarkup = {

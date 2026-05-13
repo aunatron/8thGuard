@@ -13,7 +13,13 @@ const PAYSTACK_LINK_ENVS: PaystackLinkEnv[] = [
   { productId: "weekly_early_access_supporter", envName: "NEXT_PUBLIC_PAYSTACK_LINK_WEEKLY_SUPPORTER" },
   { productId: "agent_verification_review", envName: "NEXT_PUBLIC_PAYSTACK_LINK_AGENT_VERIFICATION" },
   { productId: "group_community_safety_review", envName: "NEXT_PUBLIC_PAYSTACK_LINK_GROUP_SAFETY_REVIEW" },
-  { productId: "founding_supporter_package", envName: "NEXT_PUBLIC_PAYSTACK_LINK_FOUNDING_SUPPORTER" }
+  { productId: "founding_supporter_package", envName: "NEXT_PUBLIC_PAYSTACK_LINK_FOUNDING_SUPPORTER" },
+  { productId: "rapid_wallet_risk_review", envName: "NEXT_PUBLIC_PAYSTACK_LINK_RAPID_WALLET_REVIEW" },
+  { productId: "priority_scam_case_triage", envName: "NEXT_PUBLIC_PAYSTACK_LINK_PRIORITY_CASE_TRIAGE" },
+  { productId: "agent_group_safety_review", envName: "NEXT_PUBLIC_PAYSTACK_LINK_AGENT_GROUP_SAFETY" },
+  { productId: "business_community_safety_review", envName: "NEXT_PUBLIC_PAYSTACK_LINK_BUSINESS_COMMUNITY_SAFETY" },
+  { productId: "founder_protection_package", envName: "NEXT_PUBLIC_PAYSTACK_LINK_FOUNDER_PROTECTION" },
+  { productId: "same_day_response_desk", envName: "NEXT_PUBLIC_PAYSTACK_LINK_SAME_DAY_RESPONSE" }
 ];
 
 export type CryptoWalletRail = {
@@ -40,7 +46,8 @@ export function getPaystackPaymentLinks(): Partial<Record<ProductId, string>> {
 export function getPaymentContact() {
   return {
     contactHandle: readEnv("NEXT_PUBLIC_CONTACT_HANDLE"),
-    officialTelegram: readEnv("NEXT_PUBLIC_OFFICIAL_TELEGRAM")
+    officialTelegram: readEnv("NEXT_PUBLIC_OFFICIAL_TELEGRAM"),
+    siteUrl: readEnv("NEXT_PUBLIC_SITE_URL")
   };
 }
 

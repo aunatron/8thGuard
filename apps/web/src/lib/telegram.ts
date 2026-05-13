@@ -79,6 +79,7 @@ function buildPricingMessage(): string {
     "Basic checks: Free",
     ...PRODUCTS.map((product) => `${product.name} - ${formatUsd(product.priceUsd)}`),
     "",
+    "For urgent cases, choose Priority Scam Case Triage, Business/Community Safety Review, Founder Protection Package, or Same-Day Response Desk.",
     "USD is the reference price.",
     "Local rails may convert at checkout.",
     "Crypto payments use USDT/USDC equivalent or quoted crypto amount.",
@@ -120,6 +121,42 @@ function buildPayMessage(): string {
     "Paystack service payment links:",
     ...configuredLinks.map((product) => `${product.name}: ${links[product.id]}`)
   ].join("\n");
+}
+
+function buildPaystackPaymentKeyboard(): InlineKeyboardMarkup {
+  const links = getPaystackPaymentLinks();
+  const priorityOrder: ProductId[] = [
+    "same_day_response_desk",
+    "founder_protection_package",
+    "business_community_safety_review",
+    "agent_group_safety_review",
+    "priority_scam_case_triage",
+    "rapid_wallet_risk_review",
+    "founding_supporter_package",
+    "group_community_safety_review",
+    "agent_verification_review",
+    "priority_scam_report_review",
+    "detailed_wallet_review",
+    "detailed_transaction_review",
+    "agent_risk_review",
+    "weekly_early_access_supporter"
+  ];
+  const rows = priorityOrder
+    .filter((productId) => links[productId])
+    .map((productId) => [{ text: `Pay: ${PRODUCT_BY_ID[productId].name}`, url: links[productId] }]);
+
+  if (rows.length === 0) return paymentKeyboard;
+
+  return {
+    inline_keyboard: [
+      ...rows,
+      [
+        { text: "Crypto Pay", callback_data: "crypto_pay" },
+        { text: "Submit Payment", callback_data: "submit_payment" }
+      ],
+      [{ text: "Payment Warning", callback_data: "payment_warning" }]
+    ]
+  };
 }
 
 function buildCryptoPayMessage(): string {
@@ -170,13 +207,13 @@ function buildSubmitPaymentMessage(): string {
 
 function buildTonightOfferMessage(): string {
   return [
-    "Current Review Services",
-    productLine("detailed_wallet_review").replace("Detailed Wallet Review", "Detailed Review"),
-    productLine("priority_scam_report_review").replace("Priority Scam Report Review", "Priority Scam Review"),
-    productLine("weekly_early_access_supporter"),
-    productLine("agent_verification_review"),
-    productLine("group_community_safety_review"),
-    productLine("founding_supporter_package"),
+    "Priority Review Paths",
+    productLine("rapid_wallet_risk_review"),
+    productLine("priority_scam_case_triage"),
+    productLine("agent_group_safety_review"),
+    productLine("business_community_safety_review"),
+    productLine("founder_protection_package"),
+    productLine("same_day_response_desk"),
     "",
     "Choose the level of review that matches the risk and urgency of the situation.",
     "Results are risk indicators, not final fraud proof."
@@ -286,7 +323,7 @@ export async function buildBotReply(text: string, appName: string): Promise<Tele
   }
 
   if (command === "/pricing") return { command, message: buildPricingMessage(), reply_markup: paymentKeyboard };
-  if (command === "/pay") return { command, message: buildPayMessage(), reply_markup: paymentKeyboard };
+  if (command === "/pay") return { command, message: buildPayMessage(), reply_markup: buildPaystackPaymentKeyboard() };
   if (command === "/crypto_pay") return { command, message: buildCryptoPayMessage(), reply_markup: paymentKeyboard };
   if (command === "/payment_warning") return { command, message: buildPaymentWarningMessage() };
   if (command === "/submit_payment") return { command, message: buildSubmitPaymentMessage() };
