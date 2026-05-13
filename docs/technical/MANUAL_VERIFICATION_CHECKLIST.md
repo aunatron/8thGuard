@@ -23,6 +23,7 @@ Use this checklist before pushing 8thGuard to Vercel.
 - `/contact`
 
 Confirm `/help` lists every supported command.
+Confirm inline keyboard buttons do not loop the full menu when the user taps `Check Wallet`, `Check Transaction`, or `Check Agent`; those buttons should prompt the user to send the matching command with an input value.
 
 ## Wallet check examples
 - EVM: `0x0000000000000000000000000000000000000000`
