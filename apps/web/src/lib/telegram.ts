@@ -2,8 +2,21 @@ import { MAX_INPUT_LENGTH, getEnv } from "./config";
 import { getPaymentContact, getPaystackPaymentLinks, getPublicCryptoWallets } from "./payments/config";
 import { FREE_MVP_OFFER, PRODUCTS, PRODUCT_BY_ID, PRICING_NOTES, formatUsd, type ProductId } from "./payments/products";
 import { checkAgentRisk, checkTransactionRisk, checkWalletRisk } from "./risk";
+import {
+  mainMenuKeyboard,
+  paymentKeyboard,
+  scamReportKeyboard,
+  walletCheckKeyboard,
+  type InlineKeyboardMarkup
+} from "./telegram-keyboards";
 
 type TelegramUser = { id?: number; username?: string; first_name?: string };
+
+export type TelegramBotReply = {
+  command: string;
+  message: string;
+  reply_markup?: InlineKeyboardMarkup;
+};
 
 function sanitizeInput(input: string | undefined): string {
   if (!input) return "";
@@ -185,21 +198,18 @@ function formatExplorerLinks(links: { label: string; url: string }[]): string {
   return links.map((link) => `${link.label}: ${link.url}`).join("\n");
 }
 
-export async function buildBotReply(text: string, appName: string): Promise<{ command: string; message: string }> {
+export async function buildBotReply(text: string, appName: string): Promise<TelegramBotReply> {
   const { command, arg } = parseCommand(text);
   if (command === "/start") {
-    return {
-      command,
-      message: buildStartMessage()
-    };
+    return { command, message: buildStartMessage(), reply_markup: mainMenuKeyboard };
   }
 
   if (command === "/help") {
-    return { command, message: buildCommandHelp(appName) };
+    return { command, message: buildCommandHelp(appName), reply_markup: mainMenuKeyboard };
   }
 
   if (command === "/check_wallet") {
-    if (!arg) return { command, message: "Usage: /check_wallet <address>" };
+    if (!arg) return { command, message: "Usage: /check_wallet <address>", reply_markup: mainMenuKeyboard };
     const risk = await checkWalletRisk(arg);
     return {
       command,
@@ -214,12 +224,13 @@ export async function buildBotReply(text: string, appName: string): Promise<{ co
         formatExplorerLinks(risk.explorerLinks),
         risk.disclaimer,
         "For deeper manual review, use /pricing."
-      ].join("\n")
+      ].join("\n"),
+      reply_markup: walletCheckKeyboard
     };
   }
 
   if (command === "/check_tx") {
-    if (!arg) return { command, message: "Usage: /check_tx <transaction_hash>" };
+    if (!arg) return { command, message: "Usage: /check_tx <transaction_hash>", reply_markup: mainMenuKeyboard };
     const risk = checkTransactionRisk(arg);
     return {
       command,
@@ -239,7 +250,7 @@ export async function buildBotReply(text: string, appName: string): Promise<{ co
   }
 
   if (command === "/check_agent") {
-    if (!arg) return { command, message: "Usage: /check_agent <name_or_username>" };
+    if (!arg) return { command, message: "Usage: /check_agent <name_or_username>", reply_markup: mainMenuKeyboard };
     const risk = checkAgentRisk(arg);
     return {
       command,
@@ -251,13 +262,14 @@ export async function buildBotReply(text: string, appName: string): Promise<{ co
     return {
       command,
       message:
-        "Prepare this evidence: wallet address, Telegram username, transaction hash, amount, screenshots, and a short story of what happened. Do not send sensitive documents in Telegram yet. File upload support is coming soon."
+        "Prepare this evidence: wallet address, Telegram username, transaction hash, amount, screenshots, and a short story of what happened. Do not send sensitive documents in Telegram yet. File upload support is coming soon.",
+      reply_markup: scamReportKeyboard
     };
   }
 
-  if (command === "/pricing") return { command, message: buildPricingMessage() };
-  if (command === "/pay") return { command, message: buildPayMessage() };
-  if (command === "/crypto_pay") return { command, message: buildCryptoPayMessage() };
+  if (command === "/pricing") return { command, message: buildPricingMessage(), reply_markup: paymentKeyboard };
+  if (command === "/pay") return { command, message: buildPayMessage(), reply_markup: paymentKeyboard };
+  if (command === "/crypto_pay") return { command, message: buildCryptoPayMessage(), reply_markup: paymentKeyboard };
   if (command === "/payment_warning") return { command, message: buildPaymentWarningMessage() };
   if (command === "/submit_payment") return { command, message: buildSubmitPaymentMessage() };
   if (command === "/tonight_offer") return { command, message: buildTonightOfferMessage() };
@@ -265,11 +277,45 @@ export async function buildBotReply(text: string, appName: string): Promise<{ co
 
   return {
     command: "unknown",
-    message: "I didn’t recognize that command. Use /help to see what I can do."
+    message: "I didn’t recognize that command. Use /help to see what I can do.",
+    reply_markup: mainMenuKeyboard
   };
 }
 
-export async function sendTelegramMessage(chatId: number, text: string): Promise<void> {
+export async function buildCallbackReply(callbackData: string | undefined, appName: string): Promise<TelegramBotReply> {
+  if (callbackData === "check_wallet") {
+    return { command: "check_wallet", message: "Send /check_wallet <address>", reply_markup: mainMenuKeyboard };
+  }
+
+  if (callbackData === "check_tx") {
+    return { command: "check_tx", message: "Send /check_tx <transaction_hash>", reply_markup: mainMenuKeyboard };
+  }
+
+  if (callbackData === "check_agent") {
+    return { command: "check_agent", message: "Send /check_agent <name_or_username>", reply_markup: mainMenuKeyboard };
+  }
+
+  const commandByCallback: Record<string, string> = {
+    report_scam: "/report_scam",
+    pricing: "/pricing",
+    pay: "/pay",
+    crypto_pay: "/crypto_pay",
+    contact: "/contact",
+    payment_warning: "/payment_warning",
+    submit_payment: "/submit_payment"
+  };
+
+  const command = callbackData ? commandByCallback[callbackData] : undefined;
+  if (command) return buildBotReply(command, appName);
+
+  return {
+    command: "unknown_callback",
+    message: "I didn’t recognize that action. Use /help to see what I can do.",
+    reply_markup: mainMenuKeyboard
+  };
+}
+
+export async function sendTelegramMessage(chatId: number, text: string, replyMarkup?: InlineKeyboardMarkup): Promise<void> {
   const { telegramBotToken } = getEnv();
   if (!telegramBotToken) {
     throw new Error("Missing TELEGRAM_BOT_TOKEN");
@@ -278,11 +324,28 @@ export async function sendTelegramMessage(chatId: number, text: string): Promise
   const response = await fetch(`https://api.telegram.org/bot${telegramBotToken}/sendMessage`, {
     method: "POST",
     headers: { "Content-Type": "application/json" },
-    body: JSON.stringify({ chat_id: chatId, text })
+    body: JSON.stringify({ chat_id: chatId, text, ...(replyMarkup ? { reply_markup: replyMarkup } : {}) })
   });
 
   if (!response.ok) {
     throw new Error(`Telegram sendMessage failed with status ${response.status}`);
+  }
+}
+
+export async function answerTelegramCallbackQuery(callbackQueryId: string): Promise<void> {
+  const { telegramBotToken } = getEnv();
+  if (!telegramBotToken) {
+    throw new Error("Missing TELEGRAM_BOT_TOKEN");
+  }
+
+  const response = await fetch(`https://api.telegram.org/bot${telegramBotToken}/answerCallbackQuery`, {
+    method: "POST",
+    headers: { "Content-Type": "application/json" },
+    body: JSON.stringify({ callback_query_id: callbackQueryId })
+  });
+
+  if (!response.ok) {
+    throw new Error(`Telegram answerCallbackQuery failed with status ${response.status}`);
   }
 }
 

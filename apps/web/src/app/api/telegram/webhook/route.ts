@@ -1,7 +1,13 @@
 import { NextResponse } from "next/server";
 import { logAuditEvent } from "@/lib/audit";
 import { getEnv } from "@/lib/config";
-import { buildBotReply, getActorMeta, sendTelegramMessage } from "@/lib/telegram";
+import {
+  answerTelegramCallbackQuery,
+  buildBotReply,
+  buildCallbackReply,
+  getActorMeta,
+  sendTelegramMessage
+} from "@/lib/telegram";
 
 export async function POST(req: Request) {
   const env = getEnv();
@@ -15,6 +21,38 @@ export async function POST(req: Request) {
 
   try {
     const body = await req.json();
+    const callbackQuery = body?.callback_query;
+    const callbackQueryId: string | undefined = callbackQuery?.id;
+    const callbackData: string | undefined = callbackQuery?.data;
+    const callbackChatId = callbackQuery?.message?.chat?.id;
+    const callbackUser = callbackQuery?.from;
+
+    if (callbackQueryId) {
+      await answerTelegramCallbackQuery(callbackQueryId);
+
+      if (!callbackChatId) {
+        return NextResponse.json({ ok: true, skipped: true });
+      }
+
+      const reply = await buildCallbackReply(callbackData, env.appName);
+
+      await logAuditEvent({
+        event_type: "telegram_callback_received",
+        actor_type: "telegram_user",
+        telegram_user_id: callbackUser?.id,
+        command: reply.command,
+        timestamp: new Date().toISOString(),
+        metadata: {
+          chat_id: callbackChatId,
+          callback_data: callbackData,
+          ...getActorMeta(callbackUser)
+        }
+      });
+
+      await sendTelegramMessage(callbackChatId, reply.message, reply.reply_markup);
+      return NextResponse.json({ ok: true });
+    }
+
     const message = body?.message;
     const chatId = message?.chat?.id;
     const text: string | undefined = message?.text;
@@ -39,7 +77,7 @@ export async function POST(req: Request) {
       }
     });
 
-    await sendTelegramMessage(chatId, reply.message);
+    await sendTelegramMessage(chatId, reply.message, reply.reply_markup);
     return NextResponse.json({ ok: true });
   } catch (error) {
     console.error("telegram webhook error", {
