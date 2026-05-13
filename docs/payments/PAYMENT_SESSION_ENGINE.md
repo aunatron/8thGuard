@@ -2,7 +2,9 @@
 
 Payment sessions connect product selection, official payment rail, proof/reference, entitlement, and audit log.
 
-Telegram v0 now creates a session ID and shows product-specific Paystack and crypto rail buttons. The session is not persisted yet; it is a structured manual workflow that prepares the app for invoices, ledger entries, and entitlement unlock.
+Telegram v0 now creates a session ID and shows product-specific Paystack and crypto rail buttons. If the user provides an email, the bot initializes a real Paystack checkout URL through the backend.
+
+The session is not persisted yet; it is a structured workflow that prepares the app for invoices, ledger entries, and entitlement unlock. Paystack webhooks can notify the Telegram chat because the checkout metadata includes the chat ID.
 
 Fields to track:
 - session ID

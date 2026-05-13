@@ -1,4 +1,5 @@
 import { formatGhs } from "./products";
+import { PRODUCT_BY_ID, type ProductId } from "./products";
 
 export type PaystackVerificationResult = {
   configured: boolean;
@@ -11,6 +12,22 @@ export type PaystackVerificationResult = {
   customerEmail?: string;
   notes: string[];
 };
+
+export type PaystackInitializeResult =
+  | {
+      ok: true;
+      authorizationUrl: string;
+      accessCode: string;
+      reference: string;
+      sessionId: string;
+      productId: ProductId;
+    }
+  | {
+      ok: false;
+      sessionId: string;
+      productId: ProductId;
+      reason: string;
+    };
 
 async function fetchJsonWithTimeout<T>(url: string, init?: RequestInit, timeoutMs = 5500): Promise<T> {
   const controller = new AbortController();
@@ -84,6 +101,122 @@ export async function verifyPaystackReference(reference: string): Promise<Paysta
       reference: cleanReference,
       status: "unknown",
       notes: ["Paystack verification failed or timed out. Check the reference in the Paystack dashboard before fulfillment."]
+    };
+  }
+}
+
+function createPaystackReference(sessionId: string, productId: ProductId): string {
+  const suffix = Math.random().toString(36).slice(2, 8).toUpperCase();
+  return `${sessionId}-${productId.slice(0, 10)}-${suffix}`.replace(/[^A-Za-z0-9\-.=]/g, "-");
+}
+
+function siteUrl(): string | undefined {
+  return process.env.NEXT_PUBLIC_SITE_URL?.trim()?.replace(/\/+$/, "") || undefined;
+}
+
+export async function initializePaystackTransaction(input: {
+  productId: ProductId;
+  sessionId: string;
+  email: string;
+  telegramChatId?: number;
+  telegramUserId?: number;
+  telegramUsername?: string;
+}): Promise<PaystackInitializeResult> {
+  const secretKey = process.env.PAYSTACK_SECRET_KEY?.trim();
+  const product = PRODUCT_BY_ID[input.productId];
+
+  if (!secretKey) {
+    return {
+      ok: false,
+      sessionId: input.sessionId,
+      productId: input.productId,
+      reason: "PAYSTACK_SECRET_KEY is not configured."
+    };
+  }
+
+  if (!product) {
+    return {
+      ok: false,
+      sessionId: input.sessionId,
+      productId: input.productId,
+      reason: "Unknown product."
+    };
+  }
+
+  const cleanEmail = input.email.trim().toLowerCase();
+  if (!/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(cleanEmail)) {
+    return {
+      ok: false,
+      sessionId: input.sessionId,
+      productId: input.productId,
+      reason: "A valid customer email is required for Paystack checkout."
+    };
+  }
+
+  const baseUrl = siteUrl();
+  const callbackUrl =
+    process.env.PAYSTACK_CALLBACK_URL?.trim() ||
+    (baseUrl ? `${baseUrl}/pay/callback?session_id=${encodeURIComponent(input.sessionId)}` : undefined);
+  const reference = createPaystackReference(input.sessionId, input.productId);
+  const metadata = {
+    session_id: input.sessionId,
+    product_id: input.productId,
+    product_name: product.name,
+    telegram_chat_id: input.telegramChatId,
+    telegram_user_id: input.telegramUserId,
+    telegram_username: input.telegramUsername,
+    custom_fields: [
+      { display_name: "8thGuard Session ID", variable_name: "session_id", value: input.sessionId },
+      { display_name: "Product", variable_name: "product", value: product.name },
+      { display_name: "Telegram Username", variable_name: "telegram_username", value: input.telegramUsername || "not_provided" }
+    ]
+  };
+
+  try {
+    const json = await fetchJsonWithTimeout<{
+      status?: boolean;
+      message?: string;
+      data?: { authorization_url?: string; access_code?: string; reference?: string };
+    }>("https://api.paystack.co/transaction/initialize", {
+      method: "POST",
+      headers: {
+        Authorization: `Bearer ${secretKey}`,
+        "Content-Type": "application/json"
+      },
+      body: JSON.stringify({
+        email: cleanEmail,
+        amount: product.paystackSubunit,
+        currency: "GHS",
+        reference,
+        callback_url: callbackUrl,
+        channels: ["card", "bank", "ussd", "mobile_money", "bank_transfer"],
+        metadata: JSON.stringify(metadata)
+      })
+    });
+
+    if (!json.status || !json.data?.authorization_url || !json.data.access_code || !json.data.reference) {
+      return {
+        ok: false,
+        sessionId: input.sessionId,
+        productId: input.productId,
+        reason: json.message || "Paystack did not return a checkout URL."
+      };
+    }
+
+    return {
+      ok: true,
+      authorizationUrl: json.data.authorization_url,
+      accessCode: json.data.access_code,
+      reference: json.data.reference,
+      sessionId: input.sessionId,
+      productId: input.productId
+    };
+  } catch {
+    return {
+      ok: false,
+      sessionId: input.sessionId,
+      productId: input.productId,
+      reason: "Paystack checkout initialization failed or timed out."
     };
   }
 }

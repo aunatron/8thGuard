@@ -2,7 +2,23 @@
 
 This is the current real-payment setup for 8thGuard.
 
-Telegram creates the guided payment session. Paystack or the user's own crypto wallet completes the actual payment. 8thGuard then uses the Paystack reference or public-chain crypto transaction hash as payment evidence.
+Telegram creates the guided payment session. Paystack or the user's own crypto wallet completes the actual payment. 8thGuard then uses the Paystack webhook, Paystack reference, or public-chain crypto transaction hash as payment evidence.
+
+## Automatic Paystack Checkout
+
+The premium Telegram flow does not need static Paystack product pages when `PAYSTACK_SECRET_KEY` is configured.
+
+User flow:
+1. User types `/payment_session quick_wallet_check customer@email.com`.
+2. Bot creates a session ID.
+3. Backend calls Paystack Initialize Transaction API.
+4. Bot returns a `Pay Now with Paystack` button.
+5. User pays through Paystack.
+6. Paystack redirects to `/pay/callback`.
+7. Paystack sends `charge.success` to `/api/paystack/webhook`.
+8. Backend verifies the reference and messages the Telegram chat if the payment is successful.
+
+Static Paystack pages are still useful as fallback links in `/pay`.
 
 ## What To Create In Paystack
 
@@ -71,6 +87,12 @@ Paystack server keys for future API/webhook automation:
 - `PAYSTACK_CALLBACK_URL`
 - `PAYSTACK_WEBHOOK_SECRET`
 
+Recommended values:
+- `PAYSTACK_CALLBACK_URL=https://YOUR_DOMAIN/pay/callback`
+- Paystack webhook URL in dashboard: `https://YOUR_DOMAIN/api/paystack/webhook`
+
+The webhook route validates Paystack's `x-paystack-signature` with `PAYSTACK_SECRET_KEY`.
+
 Official public crypto payment addresses:
 - `NEXT_PUBLIC_CRYPTO_BTC_ADDRESS`
 - `NEXT_PUBLIC_CRYPTO_XRP_ADDRESS`
@@ -102,15 +124,22 @@ Never put secrets in `NEXT_PUBLIC_` env vars. Only public links, public addresse
 User flow:
 1. User opens `/payment_session`.
 2. User taps a product button.
-3. Bot creates a session ID like `8G-260513-X7K2`.
-4. Bot shows product price, Paystack button if configured, and crypto rail buttons.
-5. User pays through Paystack or from their own crypto wallet.
-6. User submits proof:
+3. Bot asks them to type `/payment_session <product_id> <email>` for automatic Paystack checkout.
+4. Bot creates a session ID like `8G-260513-X7K2`.
+5. Bot shows product price, automatic Paystack checkout button, and crypto rail buttons.
+6. User pays through Paystack or from their own crypto wallet.
+7. User submits fallback proof if needed:
    - Paystack: `/submit_payment 8G-260513-X7K2 <paystack_reference>`
    - Paystack verification: `/verify_paystack_payment <paystack_reference> 8G-260513-X7K2`
    - Crypto: `/verify_crypto_payment xrp <tx_hash> 8G-260513-X7K2`
-7. Bot checks public-chain evidence where supported.
-8. Manual review/fulfillment happens until full auto-unlock is built.
+8. Bot checks Paystack/public-chain evidence where supported.
+9. Manual review/fulfillment happens until full entitlement auto-unlock is built.
+
+Test commands:
+- `/payment_session`
+- `/payment_session quick_wallet_check customer@email.com`
+- `/verify_paystack_payment <reference> <session_id>`
+- `/verify_crypto_payment xrp <tx_hash> <session_id>`
 
 Paystack verifier:
 - Uses `PAYSTACK_SECRET_KEY` server-side.

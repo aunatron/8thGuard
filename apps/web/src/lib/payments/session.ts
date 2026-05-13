@@ -1,4 +1,5 @@
 import { getPaystackPaymentLinks, getPublicCryptoWallets } from "./config";
+import type { PaystackInitializeResult } from "./paystackVerification";
 import { PRODUCTS, PRODUCT_BY_ID, formatGhs, formatUsd, type PaymentProduct, type ProductId } from "./products";
 import type { InlineKeyboardMarkup } from "../telegram-keyboards";
 
@@ -84,6 +85,62 @@ export function buildSessionPaymentKeyboard(productId: ProductId): InlineKeyboar
   return { inline_keyboard: rows };
 }
 
+export function buildInitializedSessionPaymentKeyboard(productId: ProductId, paystackUrl?: string): InlineKeyboardMarkup {
+  const rows: InlineKeyboardMarkup["inline_keyboard"] = [];
+
+  if (paystackUrl) {
+    rows.push([{ text: "Pay Now with Paystack", url: paystackUrl }]);
+  }
+
+  rows.push(
+    [
+      { text: "Pay XRP", callback_data: "crypto:xrp" },
+      { text: "Pay BTC", callback_data: "crypto:btc" }
+    ],
+    [
+      { text: "Pay USDT TRC20", callback_data: "crypto:usdt_trc20" },
+      { text: "Pay USDT BEP20/EVM", callback_data: "crypto:usdt_bep20" }
+    ],
+    [{ text: "Submit Tx Hash", callback_data: "verify_crypto_payment" }]
+  );
+
+  return { inline_keyboard: rows };
+}
+
+export function buildPaystackInitializedMessage(result: PaystackInitializeResult): string {
+  const product = PRODUCT_BY_ID[result.productId];
+  if (!result.ok) {
+    return [
+      "8thGuard Paystack Checkout",
+      "",
+      `Session ID: ${result.sessionId}`,
+      `Product: ${product.name}`,
+      "",
+      "Automatic Paystack checkout is not ready for this session.",
+      `Reason: ${result.reason}`,
+      "",
+      "Use /pay for configured payment links or /crypto_pay for official crypto rails."
+    ].join("\n");
+  }
+
+  return [
+    "8thGuard Paystack Checkout",
+    "",
+    `Session ID: ${result.sessionId}`,
+    `Product: ${product.name}`,
+    `Price: ${formatUsd(product.priceUsd)} / ${formatGhs(product.priceGhs)}`,
+    `Paystack reference: ${result.reference}`,
+    "",
+    "Tap Pay Now with Paystack below.",
+    "After payment, Paystack redirects to the 8thGuard callback page and sends a webhook to the backend.",
+    "",
+    "If the automatic webhook is delayed, use:",
+    `/verify_paystack_payment ${result.reference} ${result.sessionId}`,
+    "",
+    "Paystack is for 8thGuard digital service payments only. No exchange, custody, escrow, trading, or user-to-user settlement."
+  ].join("\n");
+}
+
 export function buildPaymentSessionMessage(productId: ProductId): string {
   const session = createPaymentSessionDraft(productId);
   const paystackLinks = getPaystackPaymentLinks();
@@ -98,6 +155,9 @@ export function buildPaymentSessionMessage(productId: ProductId): string {
     `Input needed: ${session.product.requiresInput ? session.product.inputLabel : "Telegram contact"}`,
     "",
     paystackStatus,
+    "For automatic Paystack checkout, send:",
+    `/payment_session ${productId} your@email.com`,
+    "",
     "Crypto payments use official wallet rails only. Put the session ID in the wallet note/memo if your wallet supports it.",
     "",
     "After payment, send:",

@@ -34,7 +34,10 @@ export async function POST(req: Request) {
         return NextResponse.json({ ok: true, skipped: true });
       }
 
-      const reply = await buildCallbackReply(callbackData, env.appName);
+      const reply = await buildCallbackReply(callbackData, env.appName, {
+        chatId: callbackChatId,
+        user: callbackUser
+      });
 
       await logAuditEvent({
         event_type: "telegram_callback_received",
@@ -62,7 +65,10 @@ export async function POST(req: Request) {
       return NextResponse.json({ ok: true, skipped: true });
     }
 
-    const reply = await buildBotReply(text, env.appName);
+    const reply = await buildBotReply(text, env.appName, {
+      chatId,
+      user
+    });
 
     await logAuditEvent({
       event_type: "telegram_command_received",

@@ -2,6 +2,9 @@
 
 - `apps/web/src/app/page.tsx`: premium global homepage with paid pricing, payment rails, safety boundaries, and mini-app readiness.
 - `apps/web/src/app/pay/page.tsx`: paid service catalog with Paystack link readiness and official crypto wallet callouts.
+- `apps/web/src/app/pay/callback/page.tsx`: Paystack redirect callback page that routes users back to Telegram.
+- `apps/web/src/app/api/paystack/initialize/route.ts`: API route for future mini-app/web Paystack initialization.
+- `apps/web/src/app/api/paystack/webhook/route.ts`: Paystack webhook receiver with signature verification and Telegram notification.
 - `apps/web/src/app/api/telegram/webhook/route.ts`: Telegram webhook entrypoint, callback handling, webhook secret validation, and audit logging.
 - `apps/web/src/lib/telegram.ts`: command parser, premium bot responses, inline callback routing, payment UX, and guarded-flow placeholders.
 - `apps/web/src/lib/telegram-keyboards.ts`: main, payment, risk-result, scam-report, and guarded-flow inline keyboards.

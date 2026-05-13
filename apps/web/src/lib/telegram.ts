@@ -1,7 +1,7 @@
 import { MAX_INPUT_LENGTH, getEnv } from "./config";
 import { getPaymentContact, getPaystackPaymentLinks, getPublicCryptoWallets } from "./payments/config";
 import { formatCryptoPaymentVerification, verifyCryptoPayment } from "./payments/cryptoVerification";
-import { formatPaystackVerification, verifyPaystackReference } from "./payments/paystackVerification";
+import { formatPaystackVerification, initializePaystackTransaction, verifyPaystackReference } from "./payments/paystackVerification";
 import {
   PRODUCTS,
   PRODUCT_BY_ID,
@@ -13,9 +13,12 @@ import {
 } from "./payments/products";
 import {
   buildCryptoRailMessage,
+  buildInitializedSessionPaymentKeyboard,
   buildPaymentSessionMessage as buildProductPaymentSessionMessage,
+  buildPaystackInitializedMessage,
   buildProductSessionKeyboard,
   buildSessionPaymentKeyboard,
+  createPaymentSessionDraft,
   parseCryptoRailId,
   productIdFromCallback,
   type CryptoRailId
@@ -37,6 +40,11 @@ export type TelegramBotReply = {
   command: string;
   message: string;
   reply_markup?: InlineKeyboardMarkup;
+};
+
+export type TelegramReplyContext = {
+  chatId?: number;
+  user?: TelegramUser;
 };
 
 function sanitizeInput(input: string | undefined): string {
@@ -76,6 +84,7 @@ export function buildCommandHelp(appName: string): string {
     "Future guarded flow:",
     "/guarded_send - Guarded Send readiness",
     "/payment_session - Payment Session v0 readiness",
+    "/payment_session <product_id> <email> - Create automatic Paystack checkout",
     "/fee_quote - Service and protection fee guidance",
     "/protected_flow - Future protected transaction flow",
     "",
@@ -309,8 +318,15 @@ function buildPaymentSessionMessage(): string {
     "It creates a session ID, shows product price, points to official Paystack/crypto rails, and tells the user how to submit proof.",
     "",
     "Choose a product below or type /payment_session quick_wallet_check.",
+    "To generate a real Paystack checkout button, type /payment_session quick_wallet_check your@email.com.",
     "Future persistence will connect the session ID to invoices, ledger entries, audit logs, and entitlements."
   ].join("\n");
+}
+
+function parsePaymentSessionArgs(arg: string): { productId?: ProductId; email?: string } {
+  const [productIdRaw, email] = arg.trim().split(/\s+/);
+  if (!productIdRaw || !PRODUCT_BY_ID[productIdRaw as ProductId]) return { email };
+  return { productId: productIdRaw as ProductId, email };
 }
 
 function parseVerifyCryptoPaymentArgs(arg: string): { rail?: CryptoRailId; txHash?: string; sessionId?: string } {
@@ -368,7 +384,7 @@ function walletLiveDataLabel(liveDataUsed: boolean, sources: string[]): "Yes" | 
   return "No";
 }
 
-export async function buildBotReply(text: string, appName: string): Promise<TelegramBotReply> {
+export async function buildBotReply(text: string, appName: string, context: TelegramReplyContext = {}): Promise<TelegramBotReply> {
   const { command, arg } = parseCommand(text);
   if (command === "/start") {
     return { command, message: buildStartMessage(), reply_markup: mainMenuKeyboard };
@@ -521,8 +537,8 @@ export async function buildBotReply(text: string, appName: string): Promise<Tele
   if (command === "/guarded_send") return { command, message: buildGuardedSendMessage(), reply_markup: guardedFlowKeyboard };
   if (command === "/payment_session") {
     if (!arg) return { command, message: buildPaymentSessionMessage(), reply_markup: buildProductSessionKeyboard() };
-    const productId = arg.trim().split(/\s+/)[0];
-    if (!PRODUCT_BY_ID[productId as ProductId]) {
+    const parsed = parsePaymentSessionArgs(arg);
+    if (!parsed.productId) {
       return {
         command,
         message: [
@@ -536,7 +552,26 @@ export async function buildBotReply(text: string, appName: string): Promise<Tele
         reply_markup: buildProductSessionKeyboard()
       };
     }
-    const validProductId = productId as ProductId;
+    const validProductId = parsed.productId;
+
+    if (parsed.email) {
+      const session = createPaymentSessionDraft(validProductId);
+      const initialized = await initializePaystackTransaction({
+        productId: validProductId,
+        sessionId: session.sessionId,
+        email: parsed.email,
+        telegramChatId: context.chatId,
+        telegramUserId: context.user?.id,
+        telegramUsername: context.user?.username
+      });
+
+      return {
+        command,
+        message: buildPaystackInitializedMessage(initialized),
+        reply_markup: buildInitializedSessionPaymentKeyboard(validProductId, initialized.ok ? initialized.authorizationUrl : undefined)
+      };
+    }
+
     return {
       command,
       message: buildProductPaymentSessionMessage(validProductId),
@@ -553,7 +588,7 @@ export async function buildBotReply(text: string, appName: string): Promise<Tele
   };
 }
 
-export async function buildCallbackReply(callbackData: string | undefined, appName: string): Promise<TelegramBotReply> {
+export async function buildCallbackReply(callbackData: string | undefined, appName: string, context: TelegramReplyContext = {}): Promise<TelegramBotReply> {
   if (callbackData) {
     const productId = productIdFromCallback(callbackData);
     if (productId) {
@@ -605,7 +640,7 @@ export async function buildCallbackReply(callbackData: string | undefined, appNa
   };
 
   const command = callbackData ? commandByCallback[callbackData] : undefined;
-  if (command) return buildBotReply(command, appName);
+  if (command) return buildBotReply(command, appName, context);
 
   return {
     command: "unknown_callback",
