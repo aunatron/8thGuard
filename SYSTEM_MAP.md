@@ -9,16 +9,19 @@
 - `apps/web/src/app/admin/reviews/page.tsx`: token-protected admin review queue for paid intake.
 - `apps/web/src/app/api/paystack/initialize/route.ts`: API route for future mini-app/web Paystack initialization.
 - `apps/web/src/app/api/paystack/webhook/route.ts`: Paystack webhook receiver with signature verification and Telegram notification.
+- `apps/web/src/app/api/polar/checkout/route.ts`: server-side Polar USD checkout route using configured Polar product IDs.
+- `apps/web/src/app/api/polar/webhook/route.ts`: signed Polar webhook receiver for paid USD orders.
 - `apps/web/src/app/api/reviews/submit/route.ts`: review intake handler with audit logging and optional Supabase persistence.
 - `apps/web/src/app/api/telegram/webhook/route.ts`: Telegram webhook entrypoint, callback handling, webhook secret validation, and audit logging.
 - `apps/web/src/lib/telegram.ts`: command parser, premium bot responses, inline callback routing, payment UX, group-mode detection, quick-check previews, and guarded-flow placeholders.
 - `apps/web/src/lib/telegram-keyboards.ts`: main, payment, risk-result, scam-report, and guarded-flow inline keyboards.
 - `apps/web/src/lib/risk.ts`: risk facade for wallet, transaction, and agent checks.
 - `apps/web/src/lib/reports.ts`: premium result report templates for Wallet Intelligence, Transaction Review, Agent Risk Review, and Priority Scam Report Review. Each includes risk level, risk indicators, network context, recommended action, limits/disclaimer, and 8thGuard branding.
+- `apps/web/src/lib/contracts/*`: Smart Contract Risk Analyzer v0 for chain/address detection, explorer links, static source pattern signals, scoring, and Telegram preview formatting.
 - `apps/web/src/lib/referrals.ts`: referral system with deterministic invite codes, Telegram deep links, and referral attribution tracking.
 - `apps/web/src/lib/wallet/*`: chain detection, explorer links, public data source lookups, and Real Wallet Check v0/v1 orchestration.
 - `apps/web/src/lib/payments/products.ts`: paid-first product catalog with USD/GHS pricing and Paystack subunit values.
-- `apps/web/src/lib/payments/config.ts`: Paystack link env mapping, public crypto wallet env mapping, contact envs, and server-only payment/data-source config.
+- `apps/web/src/lib/payments/config.ts`: Paystack link env mapping, Polar USD checkout link env mapping, public crypto wallet env mapping, contact envs, and server-only payment/data-source config.
 - `apps/web/src/lib/payments/types.ts`: Supabase-ready payment session, invoice, payment, entitlement, ledger, and audit types.
 - `apps/web/src/lib/payments/session.ts`: Telegram-guided payment session IDs, product callbacks, and crypto rail messages.
 - `apps/web/src/lib/payments/records.ts`: optional Supabase records for checkout initialization, payments, and ledger entries.
@@ -27,6 +30,6 @@
 - `apps/web/src/lib/reviews.ts`: review intake normalization, audit logging, and optional Supabase queue reads/writes.
 - `apps/web/src/lib/audit.ts`: structured audit event logging.
 - `apps/web/src/lib/supabase.ts`: optional Supabase REST persistence for audit logs, payments, ledgers, sessions, and review requests.
-- `docs/product/*`: guarded transaction, mini-app, and protection-layer product plans.
+- `docs/product/*`: guarded transaction, smart contract analyzer, mini-app, and protection-layer product plans.
 - `docs/payments/*`: Paystack, crypto rails, entitlement unlock, and payment session policies.
-- `docs/technical/*`: chain adapter, payment session, fee engine, protection engine, and multichain readiness architecture.
+- `docs/technical/*`: chain adapter, contract analyzer, payment session, fee engine, protection engine, and multichain readiness architecture.

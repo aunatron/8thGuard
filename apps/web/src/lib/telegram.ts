@@ -1,5 +1,5 @@
 import { MAX_INPUT_LENGTH, getEnv } from "./config";
-import { getPaymentContact, getPaystackPaymentLinks, getPublicCryptoWallets } from "./payments/config";
+import { buildPolarCheckoutUrl, getPaymentContact, getPaystackPaymentLinks, getPublicCryptoWallets } from "./payments/config";
 import { detectWalletAddress } from "./wallet/detect";
 import { buildReferralLink, extractReferralCode } from "./referrals";
 import { formatCryptoPaymentVerification, verifyCryptoPayment } from "./payments/cryptoVerification";
@@ -24,6 +24,8 @@ import {
   type CryptoRailId
 } from "./payments/session";
 import { checkAgentRisk, checkTransactionRisk, checkWalletRisk } from "./risk";
+import { analyzeContract, type ContractScanMode } from "./contracts/analyze";
+import { formatContractPreview, formatContractPricing, formatGroupContractPreview } from "./contracts/report";
 import {
   cryptoRailKeyboard,
   guardedFlowKeyboard,
@@ -68,11 +70,15 @@ export function buildCommandHelp(appName: string): string {
     "/check_wallet <address> — Wallet risk preview",
     "/check_tx <hash> — Transaction risk preview",
     "/check_agent <name> — Agent risk preview",
+    "/scan_contract <chain> <contract_address> — Contract risk preview",
+    "/scan_token <chain> <token_address> — Token contract risk preview",
+    "/approval_check <chain> <spender_contract> — Approval risk preview",
     "/report_scam — Report a scam",
     "",
     "Services:",
     "/pricing — Full service catalog",
-    "/pay — Pay with card or mobile money",
+    "/contract_pricing — Contract risk reports",
+    "/pay — Payment options",
     "/crypto_pay — Pay with crypto",
     "/payment_session — Start a paid review",
     "",
@@ -119,7 +125,7 @@ function buildPricingMessage(): string {
     "Enterprise & Partner:",
     ...PRODUCTS.filter((p) => p.tier === "enterprise" || p.tier === "supporter").map((p) => `  ${p.name} — ${formatGlobalPrice(p)}`),
     "",
-    "💳 Card, mobile money, and crypto accepted.",
+    "💳 Stripe/Polar, Paystack/Others, and crypto rails accepted.",
     "",
     "Quick checks give you a preview.",
     "Premium reports give you the full picture.",
@@ -138,23 +144,23 @@ function buildContactMessage(): string {
 
 function buildPayMessage(): string {
   const links = getPaystackPaymentLinks();
-  const configuredLinks = PRODUCTS.filter((product) => links[product.id]);
+  const configuredLinks = PRODUCTS.filter((product) => links[product.id] || buildPolarCheckoutUrl(product.id));
 
   const base = [
-    "Card / Mobile Money",
+    "Official Checkout",
     "",
-    "Use the buttons below to pay for 8thGuard digital services through supported local checkout rails.",
+    "Use Stripe/Polar or Paystack/Others to pay for 8thGuard digital services through official checkout rails.",
     "No trading, exchange, custody, escrow, or user-to-user settlement.",
     "For the smoothest flow, choose a service from /payment_session."
   ];
 
   if (configuredLinks.length === 0) {
     return [
-      ...base,
-      "",
-      "Choose a service from /payment_session for available checkout options, or use Crypto Pay.",
-      "",
-      buildContactMessage()
+    ...base,
+    "",
+    "Choose a service from /payment_session for Stripe/Polar, Paystack/Others, or crypto rail options.",
+    "",
+    buildContactMessage()
     ].join("\n");
   }
 
@@ -162,7 +168,11 @@ function buildPayMessage(): string {
     ...base,
     "",
     "Service payment links:",
-    ...configuredLinks.map((product) => `${product.name} (${formatGlobalPrice(product)}): ${links[product.id]}`)
+    ...configuredLinks.flatMap((product) => [
+      `${product.name} (${formatGlobalPrice(product)}):`,
+      ...(buildPolarCheckoutUrl(product.id) ? [`Stripe/Polar: ${buildPolarCheckoutUrl(product.id)}`] : []),
+      ...(links[product.id] ? [`Paystack/Others: ${links[product.id]}`] : [])
+    ])
   ].join("\n");
 }
 
@@ -172,18 +182,30 @@ function buildPaystackPaymentKeyboard(): InlineKeyboardMarkup {
     "quick_wallet_check",
     "quick_transaction_check",
     "quick_agent_check",
+    "quick_contract_scan",
+    "token_contract_risk_scan",
+    "approval_risk_check",
     "detailed_wallet_review",
     "detailed_transaction_review",
     "detailed_agent_review",
+    "deep_contract_review",
     "weekly_premium_access",
     "priority_scam_report_review",
     "agent_verification_review",
     "group_community_safety_review",
+    "developer_prelaunch_scan",
     "founding_partner_package"
   ];
   const rows = priorityOrder
-    .filter((productId) => links[productId])
-    .map((productId) => [{ text: `Pay: ${PRODUCT_BY_ID[productId].name}`, url: links[productId] }]);
+    .filter((productId) => links[productId] || buildPolarCheckoutUrl(productId))
+    .flatMap((productId) => {
+      const product = PRODUCT_BY_ID[productId];
+      const polarLink = buildPolarCheckoutUrl(productId);
+      return [
+        ...(polarLink ? [[{ text: `Stripe/Polar: ${product.name}`, url: polarLink }]] : []),
+        ...(links[productId] ? [[{ text: `Paystack/Others: ${product.name}`, url: links[productId] }]] : [])
+      ];
+    });
 
   if (rows.length === 0) return paymentKeyboard;
 
@@ -235,7 +257,7 @@ function buildPaymentWarningMessage(): string {
     "Never trust screenshots alone.",
     "Only pay through official 8thGuard bot/website instructions.",
     "8thGuard will never ask for seed phrases or private keys.",
-    "Crypto and card/mobile money payments are for 8thGuard digital services only.",
+    "Stripe/Polar, Paystack/Others, and crypto rail payments are for 8thGuard digital services only.",
     "No trading, exchange, custody, escrow, or user-to-user settlement."
   ].join("\n");
 }
@@ -249,7 +271,7 @@ function buildSubmitPaymentMessage(): string {
     "Send:",
     "/submit_payment <session_id> <paystack_reference_or_crypto_tx_hash>",
     "",
-    "For card / mobile money reference:",
+    "For Paystack/Others reference:",
     "/verify_paystack_payment <reference> <session_id>",
     "",
     "For crypto transaction hash:",
@@ -313,6 +335,17 @@ function parseVerifyCryptoPaymentArgs(arg: string): { rail?: CryptoRailId; txHas
 function parseVerifyPaystackArgs(arg: string): { reference?: string; sessionId?: string } {
   const [reference, sessionId] = arg.trim().split(/\s+/);
   return { reference, sessionId };
+}
+
+function parseContractScanArgs(arg: string): { chain?: string; address?: string } {
+  const [chain, address] = arg.trim().split(/\s+/);
+  return { chain, address };
+}
+
+function contractScanUsage(command: string): string {
+  if (command === "/scan_token") return "Send a chain and token contract address.\n\nExample: /scan_token ethereum 0x1234...";
+  if (command === "/approval_check") return "Send a chain and spender contract address.\n\nExample: /approval_check base 0x1234...";
+  return "Send a chain and contract address.\n\nExample: /scan_contract ethereum 0x1234...";
 }
 
 function buildFeeQuoteMessage(): string {
@@ -591,6 +624,28 @@ export async function buildBotReply(text: string, appName: string, context: Tele
   }
 
   if (command === "/pricing") return { command, message: buildPricingMessage(), reply_markup: paymentKeyboard };
+  if (command === "/contract_pricing") return { command, message: formatContractPricing(), reply_markup: paymentKeyboard };
+  if (command === "/scan_contract" || command === "/scan_token" || command === "/approval_check") {
+    const parsed = parseContractScanArgs(arg);
+    if (!parsed.chain || !parsed.address) return { command, message: contractScanUsage(command), reply_markup: mainMenuKeyboard };
+
+    const modeByCommand: Record<string, ContractScanMode> = {
+      "/scan_contract": "contract",
+      "/scan_token": "token",
+      "/approval_check": "approval"
+    };
+    const result = await analyzeContract({
+      chain: parsed.chain,
+      address: parsed.address,
+      mode: modeByCommand[command]
+    });
+
+    return {
+      command,
+      message: isGroupChat(context) ? formatGroupContractPreview(result) : formatContractPreview(result),
+      reply_markup: paymentKeyboard
+    };
+  }
   if (command === "/pay") return { command, message: buildPayMessage(), reply_markup: buildPaystackPaymentKeyboard() };
   if (command === "/crypto_pay") return { command, message: buildCryptoPayMessage(), reply_markup: cryptoRailKeyboard };
   if (command === "/payment_warning") return { command, message: buildPaymentWarningMessage(), reply_markup: paymentKeyboard };
@@ -659,6 +714,7 @@ export async function buildBotReply(text: string, appName: string, context: Tele
           "",
           "Choose a product below or use one of these examples:",
           "/payment_session quick_wallet_check",
+          "/payment_session quick_contract_scan",
           "/payment_session detailed_wallet_review",
           "/payment_session priority_scam_report_review"
         ].join("\n"),
@@ -684,7 +740,7 @@ export async function buildBotReply(text: string, appName: string, context: Tele
         "",
         paymentSessionContactLine(context)
       ].join("\n"),
-      reply_markup: buildInitializedSessionPaymentKeyboard(validProductId, initialized.ok ? initialized.authorizationUrl : undefined)
+      reply_markup: buildInitializedSessionPaymentKeyboard(validProductId, initialized.ok ? initialized.authorizationUrl : undefined, session.sessionId)
     };
   }
   if (command === "/fee_quote") return { command, message: buildFeeQuoteMessage(), reply_markup: guardedFlowKeyboard };
@@ -747,7 +803,7 @@ export async function buildCallbackReply(callbackData: string | undefined, appNa
           "",
           paymentSessionContactLine(context)
         ].join("\n"),
-        reply_markup: buildInitializedSessionPaymentKeyboard(productId, initialized.ok ? initialized.authorizationUrl : undefined)
+        reply_markup: buildInitializedSessionPaymentKeyboard(productId, initialized.ok ? initialized.authorizationUrl : undefined, session.sessionId)
       };
     }
 
@@ -785,6 +841,7 @@ export async function buildCallbackReply(callbackData: string | undefined, appNa
     submit_payment: "/submit_payment",
     verify_paystack_payment: "/verify_paystack_payment",
     verify_crypto_payment: "/verify_crypto_payment",
+    contract_pricing: "/contract_pricing",
     guarded_send: "/guarded_send",
     payment_session: "/payment_session",
     fee_quote: "/fee_quote",

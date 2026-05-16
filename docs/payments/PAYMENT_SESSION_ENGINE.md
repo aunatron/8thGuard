@@ -11,7 +11,7 @@ Fields to track:
 - Telegram user
 - selected product
 - chain/token/amount/receiver wallet when relevant
-- Paystack reference or crypto transaction hash
+- Stripe/Polar order reference, Paystack reference, or crypto transaction hash
 - status
 - invoice
 - payment

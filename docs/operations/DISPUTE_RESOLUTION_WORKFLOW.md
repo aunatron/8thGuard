@@ -4,7 +4,7 @@ Dispute resolution is future readiness for guarded flows and premium review oper
 
 MVP dispute intake:
 - collect product selected
-- collect Paystack reference or crypto transaction hash
+- collect Stripe/Polar order reference, Paystack reference, or crypto transaction hash
 - collect wallet, transaction, agent, or session context
 - collect Telegram contact
 - collect short timeline

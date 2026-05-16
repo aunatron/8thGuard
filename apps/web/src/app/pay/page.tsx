@@ -1,4 +1,4 @@
-import { getPaystackPaymentLinks, getPublicCryptoWallets } from "@/lib/payments/config";
+import { buildPolarCheckoutUrl, getPaystackPaymentLinks, getPublicCryptoWallets } from "@/lib/payments/config";
 import { PRODUCTS, formatGlobalPrice } from "@/lib/payments/products";
 
 export default function PayPage() {
@@ -17,22 +17,26 @@ export default function PayPage() {
 
       <section className="section-band">
         <div className="section-heading">
-          <p className="eyebrow">Card / Mobile Money</p>
-          <h2>Official checkout</h2>
-          <p>Use official 8thGuard checkout rails for digital service payments only.</p>
+          <p className="eyebrow">Payment Options</p>
+          <h2>Stripe/Polar and Paystack/Others</h2>
+          <p>Use official 8thGuard checkout rails for smart contract checks, code-risk reports, and review services only.</p>
         </div>
         <div className="product-grid">
           {PRODUCTS.map((product) => {
             const link = paystackLinks[product.id];
+            const polarLink = buildPolarCheckoutUrl(product.id);
             return (
               <article className="product-card" key={product.id}>
                 <h3>{product.name}</h3>
                 <p>{product.description}</p>
                 <strong>{formatGlobalPrice(product)}</strong>
+                {polarLink && (
+                  <a className="button primary full" href={polarLink}>Stripe/Polar</a>
+                )}
                 {link ? (
-                  <a className="button primary full" href={link}>Pay Now</a>
+                  <a className="button secondary full" href={link}>Paystack/Others</a>
                 ) : (
-                  <span className="status-pill">Available in Telegram checkout</span>
+                  !polarLink && <span className="status-pill">Available in Telegram checkout</span>
                 )}
               </article>
             );

@@ -6,7 +6,7 @@ Mini app goals:
 - show paid catalog
 - collect wallet, transaction, agent, or guarded-send inputs
 - create payment session
-- show Paystack and official crypto rails
+- show Stripe/Polar, Paystack/Others, and official crypto rails
 - accept structured payment proof
 - unlock entitlement after confirmation
 - display early risk signals and manual review status

@@ -22,7 +22,7 @@ export const mainMenuKeyboard: InlineKeyboardMarkup = {
       { text: "Check Agent", callback_data: "check_agent" },
       { text: "Report Scam", callback_data: "report_scam" }
     ],
-    [{ text: "Card / Mobile Money", callback_data: "pay" }],
+    [{ text: "Stripe/Polar + Paystack/Others", callback_data: "pay" }],
     [
       { text: "Crypto Pay", callback_data: "crypto_pay" },
       { text: "Guarded Send", callback_data: "guarded_send" }
@@ -50,7 +50,7 @@ export const paymentKeyboard: InlineKeyboardMarkup = {
       { text: "Pricing", callback_data: "pricing" },
       { text: "Choose Service", callback_data: "payment_session" }
     ],
-    [{ text: "Card / Mobile Money", callback_data: "pay" }],
+    [{ text: "Stripe/Polar + Paystack/Others", callback_data: "pay" }],
     [
       { text: "Crypto Pay", callback_data: "crypto_pay" },
       { text: "Payment Safety", callback_data: "payment_warning" }

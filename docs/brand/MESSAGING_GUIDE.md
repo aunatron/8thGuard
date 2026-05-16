@@ -7,7 +7,7 @@ Paid-first message:
 Free education. Paid utility. Checks and reviews are paid services.
 
 Payment message:
-Pay through official Paystack or official crypto wallet rails only. These rails are for 8thGuard digital service payments only.
+Pay through official Stripe/Polar, Paystack/Others, or official crypto wallet rails only. These rails are for 8thGuard digital service payments only.
 
 Safety message:
 8thGuard never asks for seed phrases or private keys. MVP results are risk indicators, not final fraud proof.

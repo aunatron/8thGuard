@@ -2,7 +2,7 @@
 
 This is the current real-payment setup for 8thGuard.
 
-Telegram creates the guided payment session. Card/mobile money checkout or the user's own crypto wallet completes the actual payment. 8thGuard then uses the payment reference or public-chain crypto transaction hash as payment evidence.
+Telegram creates the guided payment session. Stripe/Polar, Paystack/Others, or the user's own crypto wallet completes the actual payment. 8thGuard then uses the checkout reference or public-chain crypto transaction hash as payment evidence.
 
 ## Button-First Checkout
 
@@ -12,13 +12,27 @@ User flow:
 1. User opens `/payment_session`.
 2. User taps a paid service button.
 3. Bot creates a session ID and shows the global guide price.
-4. Bot returns a `Pay Now` checkout button plus official crypto rail buttons.
+4. Bot returns a Stripe/Polar button, Paystack/Others button where configured, plus official crypto rail buttons.
 5. User pays through checkout or from their own crypto wallet.
 6. Successful Paystack payment can trigger a Telegram confirmation message.
 7. User taps `Submit Review Details` or opens `/submit` to send wallet, transaction, agent, or case context.
 8. If support confirmation is needed, the user sends the payment reference or public-chain transaction hash with the session ID.
 
-Static Paystack pages are still useful as backup links in `/pay`.
+Static Paystack pages are still useful as backup links in `/pay`. Polar Checkout Links are the Stripe/Polar checkout fallback when API checkout is not configured.
+
+## What To Create In Stripe/Polar
+
+Create one Polar product or checkout link for each service that should be available through Stripe/Polar. For processor-facing wording, keep the product close to software analysis:
+
+- Smart contract risk checker
+- Bad-code highlighter
+- Solidity/EVM code-risk report
+- Approval-risk review
+- Automated risk preview
+
+Avoid product-page language that sounds like exchange, custody, escrow, trading, investment, money movement, or guaranteed recovery.
+
+Add Polar product IDs and webhook settings to Vercel using the matching `POLAR_PRODUCT_ID_*`, `POLAR_ACCESS_TOKEN`, and `POLAR_WEBHOOK_SECRET` env vars documented in `docs/payments/POLAR_USD_CHECKOUT.md`. Public Polar Checkout Links can still be added as fallback with `NEXT_PUBLIC_POLAR_LINK_*`.
 
 ## What To Create In Paystack
 
@@ -81,6 +95,28 @@ Public Paystack links:
 - `NEXT_PUBLIC_PAYSTACK_LINK_GROUP_SAFETY_REVIEW`
 - `NEXT_PUBLIC_PAYSTACK_LINK_FOUNDING_PARTNER`
 
+Public Stripe/Polar checkout links:
+- `NEXT_PUBLIC_POLAR_LINK_QUICK_CONTRACT_SCAN`
+- `NEXT_PUBLIC_POLAR_LINK_TOKEN_CONTRACT_RISK_SCAN`
+- `NEXT_PUBLIC_POLAR_LINK_APPROVAL_RISK_CHECK`
+- `NEXT_PUBLIC_POLAR_LINK_DEEP_CONTRACT_REVIEW`
+- `NEXT_PUBLIC_POLAR_LINK_DEVELOPER_PRELAUNCH_SCAN`
+- Optional additional `NEXT_PUBLIC_POLAR_LINK_*` variables for wallet, transaction, agent, weekly, and partner products when those products are approved for Stripe/Polar checkout wording.
+
+Stripe/Polar server checkout and webhook:
+- `POLAR_ACCESS_TOKEN`
+- `POLAR_WEBHOOK_SECRET`
+- `POLAR_SERVER`
+- `POLAR_SUCCESS_URL`
+- `POLAR_RETURN_URL`
+- `POLAR_PRODUCT_ID_QUICK_CONTRACT_SCAN`
+- `POLAR_PRODUCT_ID_TOKEN_CONTRACT_RISK_SCAN`
+- `POLAR_PRODUCT_ID_APPROVAL_RISK_CHECK`
+- `POLAR_PRODUCT_ID_DEEP_CONTRACT_REVIEW`
+- `POLAR_PRODUCT_ID_DEVELOPER_PRELAUNCH_SCAN`
+
+Polar webhook URL in dashboard: `https://YOUR_DOMAIN/api/polar/webhook`
+
 Paystack server keys:
 - `PAYSTACK_PUBLIC_KEY`
 - `PAYSTACK_SECRET_KEY`
@@ -131,7 +167,7 @@ User flow:
 1. User opens `/payment_session`.
 2. User taps a product button.
 3. Bot creates a session ID like `8G-260513-X7K2`.
-4. Bot shows global guide price, `Pay Now`, and crypto rail buttons.
+4. Bot shows global guide price, Stripe/Polar, Paystack/Others where configured, and crypto rail buttons.
 5. User pays through checkout or from their own crypto wallet.
 6. User returns to Telegram and continues the review session.
 7. User opens `/submit` to provide the review context.

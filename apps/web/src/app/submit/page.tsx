@@ -95,7 +95,7 @@ export default async function SubmitReviewPage({
 
           <label>
             Payment reference
-            <input name="payment_reference" defaultValue={params.payment_reference || ""} placeholder="Paystack reference" />
+            <input name="payment_reference" defaultValue={params.payment_reference || ""} placeholder="Stripe/Polar order or Paystack reference" />
           </label>
 
           <label>

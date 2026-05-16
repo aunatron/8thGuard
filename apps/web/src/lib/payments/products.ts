@@ -9,7 +9,12 @@ export type ProductId =
   | "priority_scam_report_review"
   | "agent_verification_review"
   | "group_community_safety_review"
-  | "founding_partner_package";
+  | "founding_partner_package"
+  | "quick_contract_scan"
+  | "token_contract_risk_scan"
+  | "approval_risk_check"
+  | "deep_contract_review"
+  | "developer_prelaunch_scan";
 
 export type ProductTier = "quick" | "premium" | "enterprise" | "supporter";
 
@@ -74,6 +79,42 @@ export const PRODUCTS: PaymentProduct[] = [
     tier: "quick"
   },
   {
+    id: "quick_contract_scan",
+    name: "Quick Contract Scan",
+    priceUsd: 9.99,
+    priceGhs: 125,
+    paystackSubunit: 12500,
+    description: "Quick automated contract risk preview.",
+    serviceType: "contract_scan",
+    requiresInput: true,
+    inputLabel: "Chain and contract address",
+    tier: "quick"
+  },
+  {
+    id: "token_contract_risk_scan",
+    name: "Token Contract Risk Scan",
+    priceUsd: 14.99,
+    priceGhs: 190,
+    paystackSubunit: 19000,
+    description: "Token contract review for red flags like blacklist, mint, tax, pause, and transfer restrictions.",
+    serviceType: "token_contract_risk_scan",
+    requiresInput: true,
+    inputLabel: "Chain and token address",
+    tier: "quick"
+  },
+  {
+    id: "approval_risk_check",
+    name: "Approval Risk Check",
+    priceUsd: 9.99,
+    priceGhs: 125,
+    paystackSubunit: 12500,
+    description: "Review spender/approval risks before approving a contract.",
+    serviceType: "approval_risk_check",
+    requiresInput: true,
+    inputLabel: "Chain and spender contract",
+    tier: "quick"
+  },
+  {
     id: "detailed_wallet_review",
     name: "Detailed Wallet Review",
     priceUsd: 9.99,
@@ -134,6 +175,18 @@ export const PRODUCTS: PaymentProduct[] = [
     tier: "premium"
   },
   {
+    id: "deep_contract_review",
+    name: "Deep Contract Review",
+    priceUsd: 49.99,
+    priceGhs: 625,
+    paystackSubunit: 62500,
+    description: "Deeper contract red-flag review with expanded signals.",
+    serviceType: "deep_contract_review",
+    requiresInput: true,
+    inputLabel: "Chain, contract address, and context",
+    tier: "premium"
+  },
+  {
     id: "agent_verification_review",
     name: "Agent Verification Review",
     priceUsd: 49.99,
@@ -155,6 +208,18 @@ export const PRODUCTS: PaymentProduct[] = [
     serviceType: "community_safety_review",
     requiresInput: true,
     inputLabel: "Group/community details",
+    tier: "enterprise"
+  },
+  {
+    id: "developer_prelaunch_scan",
+    name: "Developer Pre-Launch Scan",
+    priceUsd: 99.99,
+    priceGhs: 1250,
+    paystackSubunit: 125000,
+    description: "Pre-launch automated risk scan for project owners and developers.",
+    serviceType: "developer_prelaunch_scan",
+    requiresInput: true,
+    inputLabel: "Repository or contract source summary",
     tier: "enterprise"
   },
   {

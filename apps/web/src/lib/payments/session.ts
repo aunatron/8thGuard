@@ -1,4 +1,4 @@
-import { getPaystackPaymentLinks, getPublicCryptoWallets } from "./config";
+import { buildPolarCheckoutUrl, getPaystackPaymentLinks, getPublicCryptoWallets } from "./config";
 import type { PaystackInitializeResult } from "./paystackVerification";
 import { PRODUCTS, PRODUCT_BY_ID, formatGlobalPrice, type PaymentProduct, type ProductId } from "./products";
 import type { InlineKeyboardMarkup } from "../telegram-keyboards";
@@ -89,10 +89,15 @@ export function buildStartServicesKeyboard(): InlineKeyboardMarkup {
 export function buildSessionPaymentKeyboard(productId: ProductId): InlineKeyboardMarkup {
   const paystackLinks = getPaystackPaymentLinks();
   const paystackLink = paystackLinks[productId];
+  const polarLink = buildPolarCheckoutUrl(productId);
   const rows: InlineKeyboardMarkup["inline_keyboard"] = [];
 
+  if (polarLink) {
+    rows.push([{ text: "Stripe/Polar", url: polarLink }]);
+  }
+
   if (paystackLink) {
-    rows.push([{ text: "Pay by Card / Mobile Money", url: paystackLink }]);
+    rows.push([{ text: "Paystack/Others", url: paystackLink }]);
   }
 
   rows.push(
@@ -114,11 +119,16 @@ export function buildSessionPaymentKeyboard(productId: ProductId): InlineKeyboar
   return { inline_keyboard: rows };
 }
 
-export function buildInitializedSessionPaymentKeyboard(productId: ProductId, paystackUrl?: string): InlineKeyboardMarkup {
+export function buildInitializedSessionPaymentKeyboard(productId: ProductId, paystackUrl?: string, referenceId?: string): InlineKeyboardMarkup {
   const rows: InlineKeyboardMarkup["inline_keyboard"] = [];
+  const polarUrl = buildPolarCheckoutUrl(productId, referenceId);
+
+  if (polarUrl) {
+    rows.push([{ text: "Stripe/Polar", url: polarUrl }]);
+  }
 
   if (paystackUrl) {
-    rows.push([{ text: "Pay Now", url: paystackUrl }]);
+    rows.push([{ text: "Paystack/Others", url: paystackUrl }]);
   }
 
   rows.push(
@@ -158,7 +168,7 @@ export function buildPaystackInitializedMessage(result: PaystackInitializeResult
     `Product: ${product.name}`,
     `Price guide: ${formatGlobalPrice(product)}`,
     "",
-    "Tap Pay Now to complete payment securely.",
+    "Use Stripe/Polar or Paystack/Others to complete payment securely.",
     "After payment, return to this chat and continue your review session.",
     "",
     "Payment reference:",
@@ -174,7 +184,12 @@ export function buildPaystackInitializedMessage(result: PaystackInitializeResult
 export function buildPaymentSessionMessage(productId: ProductId): string {
   const session = createPaymentSessionDraft(productId);
   const paystackLinks = getPaystackPaymentLinks();
-  const paystackStatus = paystackLinks[productId] ? "Choose Card / Mobile Money below, or select an official crypto wallet rail." : "Choose an official crypto wallet rail below, or contact 8thGuard support for assisted payment.";
+  const checkoutOptions = [
+    buildPolarCheckoutUrl(productId, session.sessionId) ? "Stripe/Polar" : undefined,
+    paystackLinks[productId] ? "Paystack/Others" : undefined,
+    "official crypto wallet rail"
+  ].filter(Boolean);
+  const checkoutStatus = `Choose ${checkoutOptions.join(", ")} below.`;
 
   return [
     "8thGuard Payment Session",
@@ -184,7 +199,7 @@ export function buildPaymentSessionMessage(productId: ProductId): string {
     `Price guide: ${formatGlobalPrice(session.product)}`,
     `Review input: ${session.product.requiresInput ? session.product.inputLabel : "Telegram contact"}`,
     "",
-    paystackStatus,
+    checkoutStatus,
     "",
     "Keep this session ID for your review.",
     "",

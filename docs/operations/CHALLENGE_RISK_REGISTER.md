@@ -10,4 +10,6 @@
 - **Admin review desk exposure risk**: mitigated by `ADMIN_REVIEW_TOKEN`, server-side Supabase keys, and no public client-side review queue.
 - **Review intake sensitive-data risk**: mitigated by no upload field, explicit no seed phrase/private-key/wallet-password warnings, and short context limits.
 - **External API outage risk**: mitigated by graceful partial results, explorer links, and no-crash fallbacks.
+- **Contract preview false-confidence risk**: mitigated by "early contract risk signals," "automated risk preview," and "not a full audit" language plus paid deep-review CTA.
+- **Heavy scanner runtime risk**: mitigated by keeping Slither, Mythril, Echidna, and transaction simulation out of the Vercel request path until queue/worker infrastructure exists.
 - **Escrow/custody drift risk**: mitigated by gated architecture docs and no production escrow, custody, exchange, trading, or user-to-user settlement implementation.

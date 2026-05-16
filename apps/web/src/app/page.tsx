@@ -5,13 +5,14 @@ const productCards = [
   "Wallet Intelligence",
   "Transaction Review",
   "Agent Risk Review",
+  "Smart Contract Risk",
   "Guarded Send",
   "Payment Sessions",
   "Group Safety",
   "Protected Transactions"
 ];
 
-const paymentRails = ["Card / Mobile Money", "Crypto wallets", "BTC", "XRP", "USDT TRC20", "USDT BEP20/EVM", "TON", "Solana"];
+const paymentRails = ["Stripe/Polar", "Paystack/Others", "Crypto wallets", "BTC", "XRP", "USDT TRC20", "USDT BEP20/EVM", "TON", "Solana"];
 
 export default function HomePage() {
   return (
@@ -82,10 +83,34 @@ export default function HomePage() {
 
       <section className="section-band muted">
         <div className="section-heading">
+          <p className="eyebrow">Smart Contract Risk Analyzer</p>
+          <h2>Scan contracts before buying or interacting.</h2>
+          <p>
+            8thGuard gives users an automated risk preview for token contracts, spender approvals, and dApp interactions before they buy, approve, or send funds.
+          </p>
+        </div>
+        <div className="product-grid">
+          <article className="product-card">
+            <h3>Contract red flags</h3>
+            <p>Detect early contract risk signals such as owner controls, minting, pause controls, blacklist logic, upgradeability, and hidden external calls.</p>
+          </article>
+          <article className="product-card">
+            <h3>Token and approval risk</h3>
+            <p>Review token restrictions and spender approval risks before signing transactions or granting allowances.</p>
+          </article>
+          <article className="product-card">
+            <h3>Premium reports</h3>
+            <p>Quick previews stay lightweight. Paid contract reports provide deeper red-flag review while remaining clear that this is not a full audit.</p>
+          </article>
+        </div>
+      </section>
+
+      <section className="section-band">
+        <div className="section-heading">
           <p className="eyebrow">Official Rails</p>
           <h2>Pay through service rails only.</h2>
           <p>
-            Paystack and published crypto wallets are for 8thGuard digital service payments only. They are not trading, exchange, custody, or user-to-user settlement rails.
+            Stripe/Polar, Paystack/Others, and published crypto wallets are for 8thGuard digital service payments only. They are not trading, exchange, custody, or user-to-user settlement rails.
           </p>
         </div>
         <div className="rail-grid">

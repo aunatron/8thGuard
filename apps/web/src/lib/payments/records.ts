@@ -103,3 +103,64 @@ export async function recordPaystackPaymentConfirmed(input: {
     }
   });
 }
+
+export async function recordPolarPaymentConfirmed(input: {
+  sessionId?: string;
+  productId?: ProductId;
+  orderId: string;
+  checkoutId?: string;
+  status: string;
+  amount?: number;
+  currency?: string;
+  customerEmail?: string;
+  customerId?: string;
+  metadata?: Record<string, unknown>;
+}): Promise<void> {
+  const now = new Date().toISOString();
+  const paymentId = `POLAR-${input.orderId}`;
+
+  await insertSupabaseRow("payments", {
+    id: paymentId,
+    invoice_id: input.sessionId ? `INV-${input.sessionId}` : undefined,
+    session_id: input.sessionId,
+    product_id: input.productId,
+    provider: "polar",
+    status: input.status === "paid" ? "confirmed" : input.status,
+    reference: input.orderId,
+    amount_received: typeof input.amount === "number" ? String(input.amount / 100) : undefined,
+    currency: input.currency,
+    channel: "polar_checkout",
+    created_at: now
+  });
+
+  if (typeof input.amount === "number") {
+    await insertSupabaseRow("ledger_entries", {
+      id: `LED-POLAR-${input.orderId}`,
+      payment_id: paymentId,
+      session_id: input.sessionId,
+      direction: "credit",
+      amount: String(input.amount / 100),
+      currency: input.currency || "USD",
+      provider: "polar",
+      description: "8thGuard Stripe/Polar checkout",
+      created_at: now
+    });
+  }
+
+  await logAuditEvent({
+    event_type: "polar_payment_confirmed",
+    actor_type: "system",
+    command: "polar_webhook",
+    timestamp: now,
+    metadata: {
+      session_id: input.sessionId,
+      product_id: input.productId,
+      order_id: input.orderId,
+      checkout_id: input.checkoutId,
+      status: input.status,
+      customer_id: input.customerId,
+      customer_email: input.customerEmail,
+      order_metadata: input.metadata
+    }
+  });
+}

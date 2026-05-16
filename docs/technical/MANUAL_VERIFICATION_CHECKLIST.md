@@ -13,6 +13,10 @@ Use this checklist before pushing 8thGuard to Vercel.
 - `/check_wallet 0x0000000000000000000000000000000000000000`
 - `/check_tx 0x0000000000000000000000000000000000000000000000000000000000000000`
 - `/check_agent sample_agent`
+- `/scan_contract ethereum 0x0000000000000000000000000000000000000000`
+- `/scan_token base 0x0000000000000000000000000000000000000000`
+- `/approval_check bsc 0x0000000000000000000000000000000000000000`
+- `/contract_pricing`
 - `/report_scam`
 - `/pricing`
 - `/pay`
@@ -23,6 +27,8 @@ Use this checklist before pushing 8thGuard to Vercel.
 - `/contact`
 
 Confirm `/help` lists every supported command.
+Confirm contract preview commands return early contract risk signals only and say they are not a full audit.
+Confirm `/scan_contract` group output stays short and directs users to DM the bot for the full paid report.
 Confirm inline keyboard buttons do not loop the full menu when the user taps `Check Wallet`, `Check Transaction`, or `Check Agent`; those buttons should prompt the user to send the matching command with an input value.
 Confirm user-facing bot messages do not expose implementation status, provider setup, placeholders, or internal operational gaps.
 
@@ -38,7 +44,9 @@ External API failures should return partial results and explorer links where pos
 
 ## Payment command checks
 - `/pricing` shows USD reference pricing.
-- `/pay` says Paystack is for 8thGuard service fees only.
+- `/pay` labels payment options as `Stripe/Polar` and `Paystack/Others`.
+- `/pay` shows Stripe/Polar checkout links when `POLAR_PRODUCT_ID_*` or `NEXT_PUBLIC_POLAR_LINK_*` is configured.
+- `/payment_session quick_contract_scan` shows Stripe/Polar when `POLAR_ACCESS_TOKEN`, `NEXT_PUBLIC_SITE_URL`, and `POLAR_PRODUCT_ID_QUICK_CONTRACT_SCAN` are configured.
 - `/crypto_pay` says crypto payments are for 8thGuard digital services only.
 - Payment language must not suggest escrow, custody, exchange, trading, or user-to-user settlement.
 
@@ -51,11 +59,31 @@ External API failures should return partial results and explorer links where pos
 - `NEXT_PUBLIC_PAYSTACK_LINK_DETAILED_WALLET_REVIEW`
 - `NEXT_PUBLIC_PAYSTACK_LINK_DETAILED_TRANSACTION_REVIEW`
 - `NEXT_PUBLIC_PAYSTACK_LINK_AGENT_RISK_REVIEW`
+- `NEXT_PUBLIC_PAYSTACK_LINK_QUICK_CONTRACT_SCAN`
+- `NEXT_PUBLIC_PAYSTACK_LINK_TOKEN_CONTRACT_RISK_SCAN`
+- `NEXT_PUBLIC_PAYSTACK_LINK_APPROVAL_RISK_CHECK`
+- `NEXT_PUBLIC_PAYSTACK_LINK_DEEP_CONTRACT_REVIEW`
 - `NEXT_PUBLIC_PAYSTACK_LINK_PRIORITY_SCAM_REPORT`
 - `NEXT_PUBLIC_PAYSTACK_LINK_WEEKLY_SUPPORTER`
 - `NEXT_PUBLIC_PAYSTACK_LINK_AGENT_VERIFICATION`
 - `NEXT_PUBLIC_PAYSTACK_LINK_GROUP_SAFETY_REVIEW`
+- `NEXT_PUBLIC_PAYSTACK_LINK_DEVELOPER_PRELAUNCH_SCAN`
 - `NEXT_PUBLIC_PAYSTACK_LINK_FOUNDING_SUPPORTER`
+- `NEXT_PUBLIC_POLAR_LINK_QUICK_CONTRACT_SCAN`
+- `NEXT_PUBLIC_POLAR_LINK_TOKEN_CONTRACT_RISK_SCAN`
+- `NEXT_PUBLIC_POLAR_LINK_APPROVAL_RISK_CHECK`
+- `NEXT_PUBLIC_POLAR_LINK_DEEP_CONTRACT_REVIEW`
+- `NEXT_PUBLIC_POLAR_LINK_DEVELOPER_PRELAUNCH_SCAN`
+- `POLAR_ACCESS_TOKEN`
+- `POLAR_WEBHOOK_SECRET`
+- `POLAR_SERVER`
+- `POLAR_SUCCESS_URL`
+- `POLAR_RETURN_URL`
+- `POLAR_PRODUCT_ID_QUICK_CONTRACT_SCAN`
+- `POLAR_PRODUCT_ID_TOKEN_CONTRACT_RISK_SCAN`
+- `POLAR_PRODUCT_ID_APPROVAL_RISK_CHECK`
+- `POLAR_PRODUCT_ID_DEEP_CONTRACT_REVIEW`
+- `POLAR_PRODUCT_ID_DEVELOPER_PRELAUNCH_SCAN`
 - `NEXT_PUBLIC_CRYPTO_BTC_ADDRESS`
 - `NEXT_PUBLIC_CRYPTO_ETH_EVM_ADDRESS`
 - `NEXT_PUBLIC_CRYPTO_USDT_TRC20_ADDRESS`
@@ -75,7 +103,7 @@ External API failures should return partial results and explorer links where pos
 ## Secrets checklist
 - Do not stage or commit `env.txt`.
 - Do not stage or commit `.env`, `.env.local`, `.env.production`, `*.pem`, or `*.key`.
-- Never expose `PAYSTACK_SECRET_KEY`, Telegram bot tokens, private keys, seed phrases, Supabase service role keys, or blockchain API keys in frontend code or docs.
+- Never expose `PAYSTACK_SECRET_KEY`, `POLAR_ACCESS_TOKEN`, `POLAR_WEBHOOK_SECRET`, Telegram bot tokens, private keys, seed phrases, Supabase service role keys, or blockchain API keys in frontend code or docs.
 
 ## Legal and trust pages
 - Confirm `/legal` opens.
