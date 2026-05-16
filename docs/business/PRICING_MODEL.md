@@ -4,14 +4,14 @@ Public pricing uses USD reference pricing. Fixed GHS reference pricing uses 1 US
 
 | Product | USD | GHS |
 | --- | ---: | ---: |
-| Quick Wallet Check | $4.99 | GHS 65 |
-| Quick Transaction Check | $4.99 | GHS 65 |
+| Quick Public Address Risk Check | $4.99 | GHS 65 |
+| Quick Public Activity Risk Check | $4.99 | GHS 65 |
 | Quick Agent Check | $4.99 | GHS 65 |
 | Quick Contract Scan | $9.99 | GHS 125 |
 | Token Contract Risk Scan | $14.99 | GHS 190 |
 | Approval Risk Check | $9.99 | GHS 125 |
-| Detailed Wallet Review | $9.99 | GHS 125 |
-| Detailed Transaction Review | $9.99 | GHS 125 |
+| Detailed Public Address Review | $9.99 | GHS 125 |
+| Detailed Public Transaction Review | $9.99 | GHS 125 |
 | Detailed Agent Review | $9.99 | GHS 125 |
 | Weekly Premium Access | $14.99 | GHS 190 |
 | Priority Scam Report Review | $24.99 | GHS 315 |

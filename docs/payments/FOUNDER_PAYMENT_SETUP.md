@@ -11,8 +11,8 @@ The premium Telegram flow should be button-first. Static product links are optio
 User flow:
 1. User opens `/payment_session`.
 2. User taps a paid service button.
-3. Bot creates a session ID and shows the global guide price.
-4. Bot returns a Stripe/Polar button, Paystack/Others button where configured, plus official crypto rail buttons.
+3. Bot creates a session ID and shows the USD guide price.
+4. Bot returns Stripe/Polar first, then Paystack/Others where configured, plus official crypto rail buttons.
 5. User pays through checkout or from their own crypto wallet.
 6. Successful Paystack payment can trigger a Telegram confirmation message.
 7. User taps `Submit Review Details` or opens `/submit` to send wallet, transaction, agent, or case context.
@@ -42,11 +42,11 @@ Use fixed GHS pricing:
 
 | Product | USD reference | GHS amount | Paystack subunit | Vercel env var |
 | --- | ---: | ---: | ---: | --- |
-| Quick Wallet Check | $4.99 | GHS 65 | 6500 | `NEXT_PUBLIC_PAYSTACK_LINK_QUICK_WALLET_CHECK` |
-| Quick Transaction Check | $4.99 | GHS 65 | 6500 | `NEXT_PUBLIC_PAYSTACK_LINK_QUICK_TRANSACTION_CHECK` |
+| Quick Public Address Risk Check | $4.99 | GHS 65 | 6500 | `NEXT_PUBLIC_PAYSTACK_LINK_QUICK_WALLET_CHECK` |
+| Quick Public Activity Risk Check | $4.99 | GHS 65 | 6500 | `NEXT_PUBLIC_PAYSTACK_LINK_QUICK_TRANSACTION_CHECK` |
 | Quick Agent Check | $4.99 | GHS 65 | 6500 | `NEXT_PUBLIC_PAYSTACK_LINK_QUICK_AGENT_CHECK` |
-| Detailed Wallet Review | $9.99 | GHS 125 | 12500 | `NEXT_PUBLIC_PAYSTACK_LINK_DETAILED_WALLET_REVIEW` |
-| Detailed Transaction Review | $9.99 | GHS 125 | 12500 | `NEXT_PUBLIC_PAYSTACK_LINK_DETAILED_TRANSACTION_REVIEW` |
+| Detailed Public Address Review | $9.99 | GHS 125 | 12500 | `NEXT_PUBLIC_PAYSTACK_LINK_DETAILED_WALLET_REVIEW` |
+| Detailed Public Transaction Review | $9.99 | GHS 125 | 12500 | `NEXT_PUBLIC_PAYSTACK_LINK_DETAILED_TRANSACTION_REVIEW` |
 | Detailed Agent Review | $9.99 | GHS 125 | 12500 | `NEXT_PUBLIC_PAYSTACK_LINK_DETAILED_AGENT_REVIEW` |
 | Weekly Premium Access | $14.99 | GHS 190 | 19000 | `NEXT_PUBLIC_PAYSTACK_LINK_WEEKLY_PREMIUM` |
 | Priority Scam Report Review | $24.99 | GHS 315 | 31500 | `NEXT_PUBLIC_PAYSTACK_LINK_PRIORITY_SCAM_REPORT` |
@@ -167,7 +167,7 @@ User flow:
 1. User opens `/payment_session`.
 2. User taps a product button.
 3. Bot creates a session ID like `8G-260513-X7K2`.
-4. Bot shows global guide price, Stripe/Polar, Paystack/Others where configured, and crypto rail buttons.
+4. Bot shows the USD guide price, Stripe/Polar first, Paystack/Others where configured, and crypto rail buttons.
 5. User pays through checkout or from their own crypto wallet.
 6. User returns to Telegram and continues the review session.
 7. User opens `/submit` to provide the review context.

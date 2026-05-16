@@ -12,6 +12,7 @@ export type PaymentSessionDraft = {
 };
 
 const PRODUCT_CALLBACK_PREFIX = "session:";
+const STRIPE_POLAR_CALLBACK_PREFIX = "stripe_polar:";
 
 export function isProductId(value: string): value is ProductId {
   return Object.prototype.hasOwnProperty.call(PRODUCT_BY_ID, value);
@@ -24,6 +25,12 @@ export function productCallbackData(productId: ProductId): string {
 export function productIdFromCallback(callbackData: string): ProductId | undefined {
   if (!callbackData.startsWith(PRODUCT_CALLBACK_PREFIX)) return undefined;
   const id = callbackData.slice(PRODUCT_CALLBACK_PREFIX.length);
+  return isProductId(id) ? id : undefined;
+}
+
+export function stripePolarProductIdFromCallback(callbackData: string): ProductId | undefined {
+  if (!callbackData.startsWith(STRIPE_POLAR_CALLBACK_PREFIX)) return undefined;
+  const id = callbackData.slice(STRIPE_POLAR_CALLBACK_PREFIX.length);
   return isProductId(id) ? id : undefined;
 }
 
@@ -94,6 +101,8 @@ export function buildSessionPaymentKeyboard(productId: ProductId): InlineKeyboar
 
   if (polarLink) {
     rows.push([{ text: "Stripe/Polar", url: polarLink }]);
+  } else {
+    rows.push([{ text: "Stripe/Polar", callback_data: `${STRIPE_POLAR_CALLBACK_PREFIX}${productId}` }]);
   }
 
   if (paystackLink) {
@@ -125,6 +134,8 @@ export function buildInitializedSessionPaymentKeyboard(productId: ProductId, pay
 
   if (polarUrl) {
     rows.push([{ text: "Stripe/Polar", url: polarUrl }]);
+  } else {
+    rows.push([{ text: "Stripe/Polar", callback_data: `${STRIPE_POLAR_CALLBACK_PREFIX}${productId}` }]);
   }
 
   if (paystackUrl) {
@@ -168,8 +179,8 @@ export function buildPaystackInitializedMessage(result: PaystackInitializeResult
     `Product: ${product.name}`,
     `Price guide: ${formatGlobalPrice(product)}`,
     "",
-    "Use Stripe/Polar or Paystack/Others to complete payment securely.",
-    "After payment, return to this chat and continue your review session.",
+    "Choose Stripe/Polar for USD checkout, or Paystack/Others if that is easier in your region.",
+    "After payment, return here and continue your review session.",
     "",
     "Payment reference:",
     result.reference,
@@ -178,6 +189,21 @@ export function buildPaystackInitializedMessage(result: PaystackInitializeResult
     `/verify_paystack_payment ${result.reference} ${result.sessionId}`,
     "",
     "Checkout is for 8thGuard digital service payments only. No exchange, custody, escrow, trading, or user-to-user settlement."
+  ].join("\n");
+}
+
+export function buildStripePolarInfoMessage(productId: ProductId): string {
+  const product = PRODUCT_BY_ID[productId];
+  return [
+    "Stripe/Polar Checkout",
+    "",
+    `Product: ${product.name}`,
+    `Price: ${formatGlobalPrice(product)}`,
+    "",
+    "Stripe/Polar is the USD checkout rail for this review.",
+    "If a hosted checkout page is not open yet for this product, use Paystack/Others below or contact 8thGuard for the official checkout link.",
+    "",
+    "Only use official 8thGuard payment instructions. No exchange, custody, escrow, trading, or user-to-user settlement."
   ].join("\n");
 }
 

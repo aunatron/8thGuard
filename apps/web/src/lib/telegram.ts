@@ -17,10 +17,13 @@ import {
   buildInitializedSessionPaymentKeyboard,
   buildPaystackInitializedMessage,
   buildProductSessionKeyboard,
+  buildSessionPaymentKeyboard,
   buildStartServicesKeyboard,
+  buildStripePolarInfoMessage,
   createPaymentSessionDraft,
   parseCryptoRailId,
   productIdFromCallback,
+  stripePolarProductIdFromCallback,
   type CryptoRailId
 } from "./payments/session";
 import { checkAgentRisk, checkTransactionRisk, checkWalletRisk } from "./risk";
@@ -149,7 +152,7 @@ function buildPayMessage(): string {
   const base = [
     "Official Checkout",
     "",
-    "Use Stripe/Polar or Paystack/Others to pay for 8thGuard digital services through official checkout rails.",
+    "Choose Stripe/Polar for USD checkout, or Paystack/Others for supported local checkout rails.",
     "No trading, exchange, custody, escrow, or user-to-user settlement.",
     "For the smoothest flow, choose a service from /payment_session."
   ];
@@ -202,7 +205,7 @@ function buildPaystackPaymentKeyboard(): InlineKeyboardMarkup {
       const product = PRODUCT_BY_ID[productId];
       const polarLink = buildPolarCheckoutUrl(productId);
       return [
-        ...(polarLink ? [[{ text: `Stripe/Polar: ${product.name}`, url: polarLink }]] : []),
+        ...(polarLink ? [[{ text: `Stripe/Polar: ${product.name}`, url: polarLink }]] : [[{ text: `Stripe/Polar: ${product.name}`, callback_data: `stripe_polar:${productId}` }]]),
         ...(links[productId] ? [[{ text: `Paystack/Others: ${product.name}`, url: links[productId] }]] : [])
       ];
     });
@@ -816,6 +819,15 @@ export async function buildCallbackReply(callbackData: string | undefined, appNa
           reply_markup: cryptoRailKeyboard
         };
       }
+    }
+
+    const stripePolarProductId = stripePolarProductIdFromCallback(callbackData);
+    if (stripePolarProductId) {
+      return {
+        command: "stripe_polar",
+        message: buildStripePolarInfoMessage(stripePolarProductId),
+        reply_markup: buildSessionPaymentKeyboard(stripePolarProductId)
+      };
     }
   }
 

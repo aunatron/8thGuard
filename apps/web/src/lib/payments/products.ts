@@ -44,7 +44,7 @@ export const PRICING_RATES: Record<Exclude<CurrencyCode, "USD">, number> = {
 export const PRODUCTS: PaymentProduct[] = [
   {
     id: "quick_wallet_check",
-    name: "Quick Wallet Check",
+    name: "Quick Public Address Risk Check",
     priceUsd: 4.99,
     priceGhs: 65,
     paystackSubunit: 6500,
@@ -56,7 +56,7 @@ export const PRODUCTS: PaymentProduct[] = [
   },
   {
     id: "quick_transaction_check",
-    name: "Quick Transaction Check",
+    name: "Quick Public Activity Risk Check",
     priceUsd: 4.99,
     priceGhs: 65,
     paystackSubunit: 6500,
@@ -116,7 +116,7 @@ export const PRODUCTS: PaymentProduct[] = [
   },
   {
     id: "detailed_wallet_review",
-    name: "Detailed Wallet Review",
+    name: "Detailed Public Address Review",
     priceUsd: 9.99,
     priceGhs: 125,
     paystackSubunit: 12500,
@@ -128,7 +128,7 @@ export const PRODUCTS: PaymentProduct[] = [
   },
   {
     id: "detailed_transaction_review",
-    name: "Detailed Transaction Review",
+    name: "Detailed Public Transaction Review",
     priceUsd: 9.99,
     priceGhs: 125,
     paystackSubunit: 12500,
@@ -243,7 +243,7 @@ export const PRODUCT_BY_ID: Record<ProductId, PaymentProduct> = PRODUCTS.reduce(
 
 export const PRICING_NOTES = [
   "USD is the reference price.",
-  "Global guide prices are shown in USD, GBP, EUR, JPY, NGN, and GHS.",
+  "Public guide prices are shown in USD.",
   "Local rails may settle in supported checkout currency.",
   "Crypto payments use USDT/USDC equivalent or quoted crypto amount."
 ];
@@ -275,14 +275,7 @@ export function formatCurrency(priceUsd: number, currency: CurrencyCode): string
 }
 
 export function formatGlobalPrice(product: PaymentProduct): string {
-  return [
-    formatCurrency(product.priceUsd, "USD"),
-    formatCurrency(product.priceUsd, "GBP"),
-    formatCurrency(product.priceUsd, "EUR"),
-    formatCurrency(product.priceUsd, "JPY"),
-    formatCurrency(product.priceUsd, "NGN"),
-    formatCurrency(product.priceUsd, "GHS")
-  ].join(" / ");
+  return formatUsd(product.priceUsd);
 }
 
 export function formatProductLine(product: PaymentProduct): string {

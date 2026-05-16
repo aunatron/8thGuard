@@ -43,9 +43,9 @@ Confirm user-facing bot messages do not expose implementation status, provider s
 External API failures should return partial results and explorer links where possible. They must not crash the Telegram webhook.
 
 ## Payment command checks
-- `/pricing` shows USD reference pricing.
+- `/pricing` shows USD-only reference pricing.
 - `/pay` labels payment options as `Stripe/Polar` and `Paystack/Others`.
-- `/pay` shows Stripe/Polar checkout links when `POLAR_PRODUCT_ID_*` or `NEXT_PUBLIC_POLAR_LINK_*` is configured.
+- `/pay` shows Stripe/Polar before Paystack/Others. If `POLAR_PRODUCT_ID_*` or `NEXT_PUBLIC_POLAR_LINK_*` is missing for a product, the Stripe/Polar button opens an official checkout note.
 - `/payment_session quick_contract_scan` shows Stripe/Polar when `POLAR_ACCESS_TOKEN`, `NEXT_PUBLIC_SITE_URL`, and `POLAR_PRODUCT_ID_QUICK_CONTRACT_SCAN` are configured.
 - `/crypto_pay` says crypto payments are for 8thGuard digital services only.
 - Payment language must not suggest escrow, custody, exchange, trading, or user-to-user settlement.
