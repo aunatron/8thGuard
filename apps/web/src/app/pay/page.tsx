@@ -36,7 +36,7 @@ export default function PayPage() {
                 {link ? (
                   <a className="button secondary full" href={link}>Paystack/Others</a>
                 ) : (
-                  !polarLink && <span className="status-pill">Available in Telegram checkout</span>
+                  !polarLink && <span className="status-pill">Stripe/Polar setup pending</span>
                 )}
               </article>
             );

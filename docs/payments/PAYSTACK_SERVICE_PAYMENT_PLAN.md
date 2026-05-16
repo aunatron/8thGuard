@@ -4,7 +4,7 @@ Paystack/Others is used for supported local and other 8thGuard service fees, not
 
 ## Button-first flow
 1. User selects a product from `/pricing` or the website.
-2. Bot prepares a payment session and shows Stripe/Polar and Paystack/Others buttons where links or server keys are configured.
+2. Bot prepares a payment session and shows redirect-capable Stripe/Polar and Paystack/Others buttons where links or server keys are configured.
 3. Static Paystack links from `NEXT_PUBLIC_PAYSTACK_LINK_*` can appear as backup checkout links.
 4. User pays through supported checkout rails.
 5. 8thGuard confirms the reference and routes the requested review.

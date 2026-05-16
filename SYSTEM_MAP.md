@@ -13,7 +13,7 @@
 - `apps/web/src/app/api/polar/webhook/route.ts`: signed Polar webhook receiver for paid USD orders.
 - `apps/web/src/app/api/reviews/submit/route.ts`: review intake handler with audit logging and optional Supabase persistence.
 - `apps/web/src/app/api/telegram/webhook/route.ts`: Telegram webhook entrypoint, callback handling, webhook secret validation, and audit logging.
-- `apps/web/src/lib/telegram.ts`: command parser, premium bot responses, inline callback routing, payment UX, group-mode detection, quick-check previews, and guarded-flow placeholders.
+- `apps/web/src/lib/telegram.ts`: command parser, premium bot responses, inline callback routing, payment UX, outbound Telegram message spacing, group-mode detection, quick-check previews, and guarded-flow placeholders.
 - `apps/web/src/lib/telegram-keyboards.ts`: main, payment, risk-result, scam-report, and guarded-flow inline keyboards.
 - `apps/web/src/lib/risk.ts`: risk facade for wallet, transaction, and agent checks.
 - `apps/web/src/lib/reports.ts`: premium result report templates for Wallet Intelligence, Transaction Review, Agent Risk Review, and Priority Scam Report Review. Each includes risk level, risk indicators, network context, recommended action, limits/disclaimer, and 8thGuard branding.

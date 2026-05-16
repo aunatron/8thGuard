@@ -1,5 +1,5 @@
 import { MAX_INPUT_LENGTH, getEnv } from "./config";
-import { buildPolarCheckoutUrl, getPaymentContact, getPaystackPaymentLinks, getPublicCryptoWallets } from "./payments/config";
+import { buildPaymentPageUrl, buildPolarCheckoutUrl, getPaymentContact, getPaystackPaymentLinks, getPublicCryptoWallets } from "./payments/config";
 import { detectWalletAddress } from "./wallet/detect";
 import { buildReferralLink, extractReferralCode } from "./referrals";
 import { formatCryptoPaymentVerification, verifyCryptoPayment } from "./payments/cryptoVerification";
@@ -57,6 +57,14 @@ export type TelegramReplyContext = {
 function sanitizeInput(input: string | undefined): string {
   if (!input) return "";
   return input.trim().replace(/\s+/g, " ").slice(0, MAX_INPUT_LENGTH);
+}
+
+function formatTelegramText(text: string): string {
+  return text
+    .split("\n")
+    .map((line) => line.trimEnd())
+    .filter((line) => line.trim().length > 0)
+    .join("\n\n");
 }
 
 export function parseCommand(text: string): { command: string; arg: string } {
@@ -200,12 +208,17 @@ function buildPaystackPaymentKeyboard(): InlineKeyboardMarkup {
     "founding_partner_package"
   ];
   const rows = priorityOrder
-    .filter((productId) => links[productId] || buildPolarCheckoutUrl(productId))
+    .filter((productId) => links[productId] || buildPolarCheckoutUrl(productId) || buildPaymentPageUrl(productId))
     .flatMap((productId) => {
       const product = PRODUCT_BY_ID[productId];
       const polarLink = buildPolarCheckoutUrl(productId);
+      const paymentPageUrl = buildPaymentPageUrl(productId);
       return [
-        ...(polarLink ? [[{ text: `Stripe/Polar: ${product.name}`, url: polarLink }]] : [[{ text: `Stripe/Polar: ${product.name}`, callback_data: `stripe_polar:${productId}` }]]),
+        ...(polarLink
+          ? [[{ text: `Stripe/Polar: ${product.name}`, url: polarLink }]]
+          : paymentPageUrl
+            ? [[{ text: `Payment Page: ${product.name}`, url: paymentPageUrl }]]
+            : []),
         ...(links[productId] ? [[{ text: `Paystack/Others: ${product.name}`, url: links[productId] }]] : [])
       ];
     });
@@ -879,7 +892,7 @@ export async function sendTelegramMessage(chatId: number, text: string, replyMar
   const response = await fetch(`https://api.telegram.org/bot${telegramBotToken}/sendMessage`, {
     method: "POST",
     headers: { "Content-Type": "application/json" },
-    body: JSON.stringify({ chat_id: chatId, text, ...(replyMarkup ? { reply_markup: replyMarkup } : {}) })
+    body: JSON.stringify({ chat_id: chatId, text: formatTelegramText(text), ...(replyMarkup ? { reply_markup: replyMarkup } : {}) })
   });
 
   if (!response.ok) {

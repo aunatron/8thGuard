@@ -142,6 +142,18 @@ export function buildPolarCheckoutUrl(productId: ProductId, referenceId?: string
   return url.toString();
 }
 
+export function buildPaymentPageUrl(productId?: ProductId, referenceId?: string): string | undefined {
+  const siteUrl = readEnv("NEXT_PUBLIC_SITE_URL");
+  if (!siteUrl) return undefined;
+
+  const url = new URL(`${siteUrl.replace(/\/$/, "")}/pay`);
+  if (productId) url.searchParams.set("product", productId);
+  if (referenceId) url.searchParams.set("session_id", referenceId);
+  url.searchParams.set("utm_source", "8thguard");
+  url.searchParams.set("utm_medium", "telegram_web");
+  return url.toString();
+}
+
 export function getPaymentContact() {
   return {
     contactHandle: readEnv("NEXT_PUBLIC_CONTACT_HANDLE"),

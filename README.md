@@ -58,7 +58,7 @@ Button-first checkout:
 - Supabase persistence is optional at runtime, but recommended for production payment sessions, payments, ledger entries, review requests, and audit logs.
 
 ## Vercel envs
-Add checkout backup links as `NEXT_PUBLIC_PAYSTACK_LINK_*` values. Add approved public wallet addresses as `NEXT_PUBLIC_CRYPTO_*` values only after they are ready for publication. Keep `PAYSTACK_SECRET_KEY`, `SUPABASE_SERVICE_ROLE_KEY`, blockchain API keys, admin tokens, and webhook secrets server-only.
+Add checkout backup links as `NEXT_PUBLIC_PAYSTACK_LINK_*` and `NEXT_PUBLIC_POLAR_LINK_*` values. For server-side Stripe/Polar checkout, set `POLAR_ACCESS_TOKEN`, `NEXT_PUBLIC_SITE_URL`, and the matching `POLAR_PRODUCT_ID_*` values. Add approved public wallet addresses as `NEXT_PUBLIC_CRYPTO_*` values only after they are ready for publication. Keep `POLAR_ACCESS_TOKEN`, `PAYSTACK_SECRET_KEY`, `SUPABASE_SERVICE_ROLE_KEY`, blockchain API keys, admin tokens, and webhook secrets server-only.
 
 Optional wallet data source envs:
 - `ETHERSCAN_API_KEY`

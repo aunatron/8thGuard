@@ -39,7 +39,7 @@ Telegram session buttons attach metadata containing `session_id`, `product_id`, 
 
 Do not fulfill a paid report from a redirect alone. Fulfillment should come from the verified webhook event.
 
-When a product does not yet have a Polar product ID or public checkout link configured, Telegram still shows a Stripe/Polar button before Paystack/Others. That button opens a short official-checkout note instead of hiding the USD rail.
+When a product does not yet have a Polar product ID or public checkout link configured, Telegram must not show a fake redirect button. It should show an official payment-page URL when `NEXT_PUBLIC_SITE_URL` is configured, or route the user to Paystack/Others, crypto rails, or official support.
 
 ## Payment Labels
 

@@ -1,4 +1,4 @@
-import { buildPolarCheckoutUrl, getPaystackPaymentLinks, getPublicCryptoWallets } from "./config";
+import { buildPaymentPageUrl, buildPolarCheckoutUrl, getPaystackPaymentLinks, getPublicCryptoWallets } from "./config";
 import type { PaystackInitializeResult } from "./paystackVerification";
 import { PRODUCTS, PRODUCT_BY_ID, formatGlobalPrice, type PaymentProduct, type ProductId } from "./products";
 import type { InlineKeyboardMarkup } from "../telegram-keyboards";
@@ -97,12 +97,13 @@ export function buildSessionPaymentKeyboard(productId: ProductId): InlineKeyboar
   const paystackLinks = getPaystackPaymentLinks();
   const paystackLink = paystackLinks[productId];
   const polarLink = buildPolarCheckoutUrl(productId);
+  const paymentPageUrl = buildPaymentPageUrl(productId);
   const rows: InlineKeyboardMarkup["inline_keyboard"] = [];
 
   if (polarLink) {
     rows.push([{ text: "Stripe/Polar", url: polarLink }]);
-  } else {
-    rows.push([{ text: "Stripe/Polar", callback_data: `${STRIPE_POLAR_CALLBACK_PREFIX}${productId}` }]);
+  } else if (paymentPageUrl) {
+    rows.push([{ text: "Open Official Payment Page", url: paymentPageUrl }]);
   }
 
   if (paystackLink) {
@@ -131,11 +132,12 @@ export function buildSessionPaymentKeyboard(productId: ProductId): InlineKeyboar
 export function buildInitializedSessionPaymentKeyboard(productId: ProductId, paystackUrl?: string, referenceId?: string): InlineKeyboardMarkup {
   const rows: InlineKeyboardMarkup["inline_keyboard"] = [];
   const polarUrl = buildPolarCheckoutUrl(productId, referenceId);
+  const paymentPageUrl = buildPaymentPageUrl(productId, referenceId);
 
   if (polarUrl) {
     rows.push([{ text: "Stripe/Polar", url: polarUrl }]);
-  } else {
-    rows.push([{ text: "Stripe/Polar", callback_data: `${STRIPE_POLAR_CALLBACK_PREFIX}${productId}` }]);
+  } else if (paymentPageUrl) {
+    rows.push([{ text: "Open Official Payment Page", url: paymentPageUrl }]);
   }
 
   if (paystackUrl) {
@@ -194,14 +196,19 @@ export function buildPaystackInitializedMessage(result: PaystackInitializeResult
 
 export function buildStripePolarInfoMessage(productId: ProductId): string {
   const product = PRODUCT_BY_ID[productId];
+  const checkoutUrl = buildPolarCheckoutUrl(productId);
+  const paymentPageUrl = buildPaymentPageUrl(productId);
   return [
     "Stripe/Polar Checkout",
     "",
     `Product: ${product.name}`,
     `Price: ${formatGlobalPrice(product)}`,
     "",
-    "Stripe/Polar is the USD checkout rail for this review.",
-    "If a hosted checkout page is not open yet for this product, use Paystack/Others below or contact 8thGuard for the official checkout link.",
+    checkoutUrl
+      ? "Use the Stripe/Polar button below to open the hosted USD checkout."
+      : paymentPageUrl
+        ? "Open the official payment page below. Stripe/Polar appears there when the product checkout is configured."
+        : "Stripe/Polar is not configured for this product yet. Use Paystack/Others, crypto rails, or contact 8thGuard for the official checkout link.",
     "",
     "Only use official 8thGuard payment instructions. No exchange, custody, escrow, trading, or user-to-user settlement."
   ].join("\n");
