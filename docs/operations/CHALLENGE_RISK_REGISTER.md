@@ -8,6 +8,7 @@
 - **Wrong-network crypto payment risk**: mitigated by explicit network confirmation warnings and public-address-only configuration.
 - **Payment impersonation risk**: mitigated by official bot/website instructions and warnings against random admins.
 - **Channel impersonation and bot-reporting risk**: mitigated by `/official`, backup-channel configuration, and payment warnings that tell users to trust only channels listed on the official website.
+- **Telegram bot identity drift risk**: mitigated by `NEXT_PUBLIC_TELEGRAM_BOT_USERNAME`, `/official`, and replacement-runbook checks before public migration notices.
 - **Admin review desk exposure risk**: mitigated by `ADMIN_REVIEW_TOKEN`, server-side Supabase keys, and no public client-side review queue.
 - **Admin alert leakage risk**: mitigated by sending paid-intake alerts only to `ADMIN_TELEGRAM_CHAT_ID`, omitting the admin token from alerts, and keeping alerts short.
 - **Review delivery leakage risk**: mitigated by token-protected admin delivery, Telegram chat IDs from payment sessions, editable operator review, and audit logging without storing delivered message bodies in audit metadata.

@@ -2,6 +2,7 @@ import { MAX_INPUT_LENGTH, getEnv } from "./config";
 import { buildPaymentPageUrl, buildPolarCheckoutUrl, getPaymentContact, getPaystackPaymentLinks, getPublicCryptoWallets } from "./payments/config";
 import { detectWalletAddress } from "./wallet/detect";
 import { buildReferralLink, extractReferralCode } from "./referrals";
+import { getOfficialChannelsUrl, getTelegramBotUsername, getTelegramResilienceLines } from "./official-channels";
 import { formatCryptoPaymentVerification, verifyCryptoPayment } from "./payments/cryptoVerification";
 import { formatPaystackVerification, initializePaystackTransaction, paymentEmailForTelegram, verifyPaystackReference } from "./payments/paystackVerification";
 import {
@@ -96,6 +97,7 @@ export function buildCommandHelp(appName: string): string {
     "More:",
     "/guarded_send — Pre-send safety review",
     "/referral — Get your invite link",
+    "/official — Verify official 8thGuard channels",
     "/contact — Reach us",
     "/help — This menu",
     "",
@@ -147,10 +149,11 @@ function buildPricingMessage(): string {
 
 function buildContactMessage(): string {
   const { contactHandle, officialTelegram } = getPaymentContact();
-  if (contactHandle && officialTelegram) return `Official contact: ${contactHandle}\nOfficial Telegram: ${officialTelegram}`;
-  if (contactHandle) return `Official contact: ${contactHandle}`;
-  if (officialTelegram) return `Official Telegram: ${officialTelegram}`;
-  return "Use the official 8thGuard Telegram bot or website contact channel for support.";
+  const officialPage = getOfficialChannelsUrl();
+  if (contactHandle && officialTelegram) return `Official contact: ${contactHandle}\nOfficial Telegram: ${officialTelegram}\nOfficial channels: ${officialPage}`;
+  if (contactHandle) return `Official contact: ${contactHandle}\nOfficial channels: ${officialPage}`;
+  if (officialTelegram) return `Official Telegram: ${officialTelegram}\nOfficial channels: ${officialPage}`;
+  return `Use the official 8thGuard bot or website contact channel for support.\nOfficial channels: ${officialPage}`;
 }
 
 function buildPayMessage(): string {
@@ -272,10 +275,36 @@ function buildPaymentWarningMessage(): string {
     "Never pay random admins.",
     "Never trust screenshots alone.",
     "Only pay through official 8thGuard bot/website instructions.",
+    `Verify current channels here: ${getOfficialChannelsUrl()}`,
     "8thGuard will never ask for seed phrases or private keys.",
     "Stripe/Polar, Paystack/Others, and crypto rail payments are for 8thGuard digital services only.",
     "No trading, exchange, custody, escrow, or user-to-user settlement."
   ].join("\n");
+}
+
+function buildOfficialChannelsMessage(): string {
+  return [
+    "Official 8thGuard Channels",
+    "",
+    ...getTelegramResilienceLines(),
+    "",
+    "If a bot, group, number, or payment instruction is not listed there, treat it as unverified.",
+    "8thGuard never asks for seed phrases, private keys, wallet passwords, or custody of funds.",
+    "",
+    "Early risk signals, not final fraud proof."
+  ].join("\n");
+}
+
+function buildOfficialChannelsKeyboard(): InlineKeyboardMarkup {
+  return {
+    inline_keyboard: [
+      [{ text: "Official Channels", url: getOfficialChannelsUrl() }],
+      [
+        { text: "Paid Services", callback_data: "payment_session" },
+        { text: "Payment Safety", callback_data: "payment_warning" }
+      ]
+    ]
+  };
 }
 
 function buildSubmitPaymentMessage(): string {
@@ -733,6 +762,7 @@ export async function buildBotReply(text: string, appName: string, context: Tele
   }
   if (command === "/tonight_offer") return { command, message: buildTonightOfferMessage(), reply_markup: paymentKeyboard };
   if (command === "/contact") return { command, message: buildContactMessage(), reply_markup: mainMenuKeyboard };
+  if (command === "/official") return { command, message: buildOfficialChannelsMessage(), reply_markup: buildOfficialChannelsKeyboard() };
   if (command === "/chat_id") return { command, message: buildChatIdMessage(context), reply_markup: mainMenuKeyboard };
   if (command === "/guarded_send") return { command, message: buildGuardedSendMessage(), reply_markup: guardedFlowKeyboard };
   if (command === "/payment_session") {
@@ -787,7 +817,7 @@ export async function buildBotReply(text: string, appName: string, context: Tele
         reply_markup: mainMenuKeyboard
       };
     }
-    const botUsername = getEnv().appName === "8thGuard" ? "8thGuardBot" : getEnv().appName;
+    const botUsername = getEnv().telegramBotUsername?.replace(/^@/, "") || getTelegramBotUsername();
     const ref = buildReferralLink(botUsername, userId);
     return {
       command,
@@ -883,6 +913,7 @@ export async function buildCallbackReply(callbackData: string | undefined, appNa
     verify_paystack_payment: "/verify_paystack_payment",
     verify_crypto_payment: "/verify_crypto_payment",
     contract_pricing: "/contract_pricing",
+    official: "/official",
     guarded_send: "/guarded_send",
     payment_session: "/payment_session",
     fee_quote: "/fee_quote",
@@ -969,7 +1000,7 @@ export async function buildGroupAutoReply(address: string): Promise<TelegramBotR
       `Network: ${userFacingNetwork(risk.detectedChain, risk.possibleNetworks)}`,
       `Risk: ${risk.level} — ${risk.score}/100`,
       "",
-      "Full paid report: DM @8thGuardBot",
+      `Full paid report: DM @${getTelegramBotUsername()}`,
       "🛡 Check before you send."
     ].join("\n"),
     reply_markup: quickCheckKeyboard

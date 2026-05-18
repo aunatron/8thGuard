@@ -1,4 +1,4 @@
-type OfficialChannel = {
+export type OfficialChannel = {
   label: string;
   value: string;
   href?: string;
@@ -11,11 +11,37 @@ function readEnv(name: string): string | undefined {
   return value || undefined;
 }
 
+export function getOfficialSiteUrl(): string {
+  return readEnv("NEXT_PUBLIC_SITE_URL") || "https://8thguard.com";
+}
+
+export function getOfficialTelegramUrl(): string {
+  return readEnv("NEXT_PUBLIC_OFFICIAL_TELEGRAM") || "https://t.me/8thGuardBot";
+}
+
+export function getBackupTelegramUrl(): string | undefined {
+  return readEnv("NEXT_PUBLIC_BACKUP_TELEGRAM");
+}
+
+export function getTelegramBotUsername(): string {
+  const configuredUsername = readEnv("NEXT_PUBLIC_TELEGRAM_BOT_USERNAME");
+  if (configuredUsername) return configuredUsername.replace(/^@/, "");
+
+  const telegramUrl = getOfficialTelegramUrl();
+  const match = telegramUrl.match(/t\.me\/([^/?#]+)/i);
+  return match?.[1] || "8thGuardBot";
+}
+
+export function getOfficialChannelsUrl(): string {
+  const baseUrl = getOfficialSiteUrl().replace(/\/$/, "");
+  return `${baseUrl}/official`;
+}
+
 export function getOfficialChannels(): OfficialChannel[] {
-  const telegram = readEnv("NEXT_PUBLIC_OFFICIAL_TELEGRAM") || "https://t.me/8thGuardBot";
-  const backupTelegram = readEnv("NEXT_PUBLIC_BACKUP_TELEGRAM");
+  const telegram = getOfficialTelegramUrl();
+  const backupTelegram = getBackupTelegramUrl();
   const whatsapp = readEnv("NEXT_PUBLIC_OFFICIAL_WHATSAPP");
-  const siteUrl = readEnv("NEXT_PUBLIC_SITE_URL") || "https://8thguard.com";
+  const siteUrl = getOfficialSiteUrl();
   const contact = readEnv("NEXT_PUBLIC_CONTACT_HANDLE");
 
   return [
@@ -54,4 +80,15 @@ export function getOfficialChannels(): OfficialChannel[] {
       note: "Never send seed phrases, private keys, wallet passwords, or unnecessary identity documents."
     }
   ];
+}
+
+export function getTelegramResilienceLines(): string[] {
+  const lines = [
+    `Official page: ${getOfficialChannelsUrl()}`,
+    `Active Telegram: ${getOfficialTelegramUrl()}`
+  ];
+  const backup = getBackupTelegramUrl();
+  if (backup) lines.push(`Backup Telegram: ${backup}`);
+  lines.push("Only trust backup channels listed on the official page.");
+  return lines;
 }

@@ -16,8 +16,8 @@
 - `apps/web/src/app/api/reviews/submit/route.ts`: review intake handler with audit logging and optional Supabase persistence.
 - `apps/web/src/app/api/reviews/status/route.ts`: token-protected admin status updates for paid review requests with audit logging.
 - `apps/web/src/app/api/telegram/webhook/route.ts`: Telegram webhook entrypoint, callback handling, webhook secret validation, and audit logging.
-- `apps/web/src/lib/telegram.ts`: command parser, premium bot responses, inline callback routing, payment UX, outbound Telegram message spacing, group-mode detection, quick-check previews, and guarded-flow placeholders.
-- `apps/web/src/lib/telegram-keyboards.ts`: main, payment, risk-result, scam-report, and guarded-flow inline keyboards.
+- `apps/web/src/lib/telegram.ts`: command parser, premium bot responses, `/official` channel verification, inline callback routing, payment UX, outbound Telegram message spacing, group-mode detection, quick-check previews, and guarded-flow placeholders.
+- `apps/web/src/lib/telegram-keyboards.ts`: main, payment, risk-result, scam-report, official-channel, and guarded-flow inline keyboards.
 - `apps/web/src/lib/risk.ts`: risk facade for wallet, transaction, and agent checks.
 - `apps/web/src/lib/reports.ts`: premium result report templates for Wallet Intelligence, Transaction Review, Agent Risk Review, and Priority Scam Report Review. Each includes risk level, risk indicators, network context, recommended action, limits/disclaimer, and 8thGuard branding.
 - `apps/web/src/lib/contracts/*`: Smart Contract Risk Analyzer v0 for chain/address detection, explorer links, static source pattern signals, scoring, and Telegram preview formatting.
@@ -34,7 +34,7 @@
 - `apps/web/src/lib/review-delivery.ts`: copy-ready paid review delivery draft formatter for the admin desk.
 - `apps/web/src/lib/review-notifications.ts`: optional internal Telegram alert for new paid review intake.
 - `apps/web/src/lib/ops-readiness.ts`: token-protected admin readiness summary for Telegram, admin desk, payments, and public site configuration.
-- `apps/web/src/lib/official-channels.ts`: public official-channel registry for Telegram, WhatsApp, backup Telegram, website, and support contact.
+- `apps/web/src/lib/official-channels.ts`: public official-channel registry and Telegram resilience helpers for Telegram, WhatsApp, backup Telegram, website, and support contact.
 - `apps/web/src/lib/audit.ts`: structured audit event logging.
 - `apps/web/src/lib/supabase.ts`: optional Supabase REST persistence for audit logs, payments, ledgers, sessions, entitlements, and review requests.
 - `docs/product/*`: guarded transaction, smart contract analyzer, mini-app, and protection-layer product plans.

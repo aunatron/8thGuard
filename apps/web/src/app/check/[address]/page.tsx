@@ -3,6 +3,7 @@ import Link from "next/link";
 import { checkWalletRisk } from "@/lib/risk";
 import { detectWalletAddress } from "@/lib/wallet/detect";
 import { PRODUCTS, formatGlobalPrice } from "@/lib/payments/products";
+import { getOfficialTelegramUrl, getTelegramBotUsername } from "@/lib/official-channels";
 
 type Props = {
   params: Promise<{ address: string }>;
@@ -46,6 +47,8 @@ export default async function CheckPage({ params }: Props) {
   const { address } = await params;
   const decoded = decodeURIComponent(address);
   const risk = await checkWalletRisk(decoded);
+  const officialTelegram = getOfficialTelegramUrl();
+  const telegramUsername = getTelegramBotUsername();
 
   const quickProducts = PRODUCTS.filter((p) => p.tier === "quick");
   const premiumProducts = PRODUCTS.filter((p) => p.tier === "premium");
@@ -199,7 +202,7 @@ export default async function CheckPage({ params }: Props) {
           💬 Use our Telegram bot for instant checks
         </p>
         <a
-          href="https://t.me/8thGuardBot"
+          href={officialTelegram}
           target="_blank"
           rel="noopener noreferrer"
           style={{
@@ -213,7 +216,7 @@ export default async function CheckPage({ params }: Props) {
             fontSize: "0.875rem",
           }}
         >
-          Open @8thGuardBot →
+          Open @{telegramUsername} →
         </a>
       </div>
 

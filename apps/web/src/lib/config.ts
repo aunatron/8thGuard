@@ -1,6 +1,7 @@
 export function getEnv() {
   return {
     appName: process.env.NEXT_PUBLIC_APP_NAME || "8thGuard",
+    telegramBotUsername: process.env.NEXT_PUBLIC_TELEGRAM_BOT_USERNAME,
     telegramBotToken: process.env.TELEGRAM_BOT_TOKEN,
     telegramWebhookSecret: process.env.TELEGRAM_WEBHOOK_SECRET,
     supabaseUrl: process.env.SUPABASE_URL,

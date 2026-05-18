@@ -24,10 +24,12 @@ Use this checklist before pushing 8thGuard to Vercel.
 - `/payment_warning`
 - `/submit_payment`
 - `/tonight_offer`
+- `/official`
 - `/contact`
 - `/chat_id`
 
 Confirm `/help` lists every supported command.
+Confirm `/official` shows the official website source-of-truth URL, active Telegram link, and backup Telegram link when configured.
 Confirm contract preview commands return early contract risk signals only and say they are not a full audit.
 Confirm `/scan_contract` group output stays short and directs users to DM the bot for the full paid report.
 Confirm inline keyboard buttons do not loop the full menu when the user taps `Check Wallet`, `Check Transaction`, or `Check Agent`; those buttons should prompt the user to send the matching command with an input value.
@@ -71,6 +73,9 @@ External API failures should return partial results and explorer links where pos
 - `TELEGRAM_WEBHOOK_SECRET`
 - `NEXT_PUBLIC_CONTACT_HANDLE`
 - `NEXT_PUBLIC_OFFICIAL_TELEGRAM`
+- `NEXT_PUBLIC_TELEGRAM_BOT_USERNAME`
+- `NEXT_PUBLIC_BACKUP_TELEGRAM`
+- `NEXT_PUBLIC_OFFICIAL_WHATSAPP`
 - `NEXT_PUBLIC_PAYSTACK_LINK_DETAILED_WALLET_REVIEW`
 - `NEXT_PUBLIC_PAYSTACK_LINK_DETAILED_TRANSACTION_REVIEW`
 - `NEXT_PUBLIC_PAYSTACK_LINK_AGENT_RISK_REVIEW`

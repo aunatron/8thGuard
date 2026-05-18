@@ -27,7 +27,10 @@ export const mainMenuKeyboard: InlineKeyboardMarkup = {
       { text: "Crypto Pay", callback_data: "crypto_pay" },
       { text: "Guarded Send", callback_data: "guarded_send" }
     ],
-    [{ text: "Contact", callback_data: "contact" }]
+    [
+      { text: "Official Channels", callback_data: "official" },
+      { text: "Contact", callback_data: "contact" }
+    ]
   ]
 };
 
@@ -58,7 +61,8 @@ export const paymentKeyboard: InlineKeyboardMarkup = {
     [
       { text: "Confirm Payment", callback_data: "submit_payment" },
       { text: "Check Reference", callback_data: "verify_paystack_payment" }
-    ]
+    ],
+    [{ text: "Official Channels", callback_data: "official" }]
   ]
 };
 
