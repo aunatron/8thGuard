@@ -2,6 +2,25 @@ import { logAuditEvent } from "../audit";
 import { insertSupabaseRow } from "../supabase";
 import { PRODUCT_BY_ID, type ProductId } from "./products";
 
+async function recordEntitlement(input: {
+  sessionId?: string;
+  productId?: ProductId;
+  unlockReason: "payment_confirmed" | "manual_admin" | "support_adjustment";
+}): Promise<void> {
+  if (!input.sessionId || !input.productId) return;
+
+  const now = new Date().toISOString();
+  await insertSupabaseRow("entitlements", {
+    id: `ENT-${input.sessionId}-${input.productId}`.slice(0, 120),
+    user_id: `session:${input.sessionId}`,
+    session_id: input.sessionId,
+    product_id: input.productId,
+    status: "active",
+    unlock_reason: input.unlockReason,
+    created_at: now
+  });
+}
+
 export async function recordPaystackCheckoutInitialized(input: {
   sessionId: string;
   productId: ProductId;
@@ -90,6 +109,14 @@ export async function recordPaystackPaymentConfirmed(input: {
     });
   }
 
+  if (input.status === "success") {
+    await recordEntitlement({
+      sessionId: input.sessionId,
+      productId: input.productId,
+      unlockReason: "payment_confirmed"
+    });
+  }
+
   await logAuditEvent({
     event_type: "paystack_payment_confirmed",
     actor_type: "system",
@@ -146,6 +173,12 @@ export async function recordPolarPaymentConfirmed(input: {
       created_at: now
     });
   }
+
+  await recordEntitlement({
+    sessionId: input.sessionId,
+    productId: input.productId,
+    unlockReason: "payment_confirmed"
+  });
 
   await logAuditEvent({
     event_type: "polar_payment_confirmed",

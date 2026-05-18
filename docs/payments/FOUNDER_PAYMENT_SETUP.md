@@ -17,6 +17,7 @@ User flow:
 6. Successful Paystack payment can trigger a Telegram confirmation message.
 7. User taps `Submit Review Details` or opens `/submit` to send wallet, transaction, agent, or case context.
 8. If support confirmation is needed, the user sends the payment reference or public-chain transaction hash with the session ID.
+9. The review desk tracks the request as `paid`, `reviewing`, `needs_more_info`, or `completed` from `/admin/reviews?token=ADMIN_REVIEW_TOKEN`.
 
 Static Paystack pages are still useful as backup links in `/pay`. Polar Checkout Links are the Stripe/Polar checkout fallback when API checkout is not configured.
 
@@ -128,6 +129,7 @@ Revenue operations:
 - `SUPABASE_ANON_KEY`
 - `SUPABASE_SERVICE_ROLE_KEY`
 - `ADMIN_REVIEW_TOKEN`
+- `ADMIN_TELEGRAM_CHAT_ID`
 
 Recommended values:
 - `PAYSTACK_CALLBACK_URL=https://YOUR_DOMAIN/pay/callback`
@@ -186,6 +188,17 @@ Test commands:
 Web routes:
 - `/submit`
 - `/admin/reviews?token=ADMIN_REVIEW_TOKEN`
+
+Admin review desk:
+- Keep the token private.
+- Add `ADMIN_TELEGRAM_CHAT_ID` only for the internal operator chat that should receive paid-intake alerts.
+- If helper bots cannot be added, add the 8thGuard bot to the private ops group and send `/chat_id`; use the returned chat ID as `ADMIN_TELEGRAM_CHAT_ID`.
+- Use `reviewing` when manual analysis starts.
+- Use `needs_more_info` when the customer must provide clearer public wallet, transaction, agent, or case context.
+- Open `Delivery Draft` on the request to start from the standard result format.
+- Edit and send the delivery draft from the desk when the request has a Telegram customer chat ID.
+- Use `completed` only after the paid review result has been delivered.
+- Status changes are audit logged.
 
 Paystack verifier:
 - Uses `PAYSTACK_SECRET_KEY` server-side.

@@ -11,7 +11,9 @@
 - `apps/web/src/app/api/paystack/webhook/route.ts`: Paystack webhook receiver with signature verification and Telegram notification.
 - `apps/web/src/app/api/polar/checkout/route.ts`: server-side Polar USD checkout route using configured Polar product IDs.
 - `apps/web/src/app/api/polar/webhook/route.ts`: signed Polar webhook receiver for paid USD orders.
+- `apps/web/src/app/api/reviews/deliver/route.ts`: token-protected Telegram delivery route for completed paid review results.
 - `apps/web/src/app/api/reviews/submit/route.ts`: review intake handler with audit logging and optional Supabase persistence.
+- `apps/web/src/app/api/reviews/status/route.ts`: token-protected admin status updates for paid review requests with audit logging.
 - `apps/web/src/app/api/telegram/webhook/route.ts`: Telegram webhook entrypoint, callback handling, webhook secret validation, and audit logging.
 - `apps/web/src/lib/telegram.ts`: command parser, premium bot responses, inline callback routing, payment UX, outbound Telegram message spacing, group-mode detection, quick-check previews, and guarded-flow placeholders.
 - `apps/web/src/lib/telegram-keyboards.ts`: main, payment, risk-result, scam-report, and guarded-flow inline keyboards.
@@ -27,9 +29,11 @@
 - `apps/web/src/lib/payments/records.ts`: optional Supabase records for checkout initialization, payments, and ledger entries.
 - `apps/web/src/lib/payments/paystackVerification.ts`: server-side Paystack reference verification with `PAYSTACK_SECRET_KEY`.
 - `apps/web/src/lib/payments/cryptoVerification.ts`: public-chain crypto payment evidence checks for supported rails.
-- `apps/web/src/lib/reviews.ts`: review intake normalization, audit logging, and optional Supabase queue reads/writes.
+- `apps/web/src/lib/reviews.ts`: review intake normalization, product-to-subject defaults, audit logging, and optional Supabase queue reads/writes.
+- `apps/web/src/lib/review-delivery.ts`: copy-ready paid review delivery draft formatter for the admin desk.
+- `apps/web/src/lib/review-notifications.ts`: optional internal Telegram alert for new paid review intake.
 - `apps/web/src/lib/audit.ts`: structured audit event logging.
-- `apps/web/src/lib/supabase.ts`: optional Supabase REST persistence for audit logs, payments, ledgers, sessions, and review requests.
+- `apps/web/src/lib/supabase.ts`: optional Supabase REST persistence for audit logs, payments, ledgers, sessions, entitlements, and review requests.
 - `docs/product/*`: guarded transaction, smart contract analyzer, mini-app, and protection-layer product plans.
 - `docs/payments/*`: Paystack, crypto rails, entitlement unlock, and payment session policies.
 - `docs/technical/*`: chain adapter, contract analyzer, payment session, fee engine, protection engine, and multichain readiness architecture.

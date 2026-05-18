@@ -388,6 +388,21 @@ function buildProtectedFlowMessage(): string {
   ].join("\n");
 }
 
+function buildChatIdMessage(context: TelegramReplyContext): string {
+  return [
+    "8thGuard Chat ID",
+    "",
+    context.chatId ? `Chat ID: ${context.chatId}` : "Chat ID: unavailable in this update.",
+    context.chatType ? `Chat type: ${context.chatType}` : undefined,
+    context.user?.username ? `Requested by: @${context.user.username}` : undefined,
+    "",
+    "For internal paid-review alerts, set this value as ADMIN_TELEGRAM_CHAT_ID in Vercel.",
+    "Keep admin tokens private. Do not paste ADMIN_REVIEW_TOKEN into public chats."
+  ]
+    .filter((line): line is string => Boolean(line))
+    .join("\n");
+}
+
 function isGroupChat(context: TelegramReplyContext): boolean {
   return context.chatType === "group" || context.chatType === "supergroup";
 }
@@ -718,6 +733,7 @@ export async function buildBotReply(text: string, appName: string, context: Tele
   }
   if (command === "/tonight_offer") return { command, message: buildTonightOfferMessage(), reply_markup: paymentKeyboard };
   if (command === "/contact") return { command, message: buildContactMessage(), reply_markup: mainMenuKeyboard };
+  if (command === "/chat_id") return { command, message: buildChatIdMessage(context), reply_markup: mainMenuKeyboard };
   if (command === "/guarded_send") return { command, message: buildGuardedSendMessage(), reply_markup: guardedFlowKeyboard };
   if (command === "/payment_session") {
     if (!arg) return { command, message: buildPaymentSessionMessage(), reply_markup: buildProductSessionKeyboard() };

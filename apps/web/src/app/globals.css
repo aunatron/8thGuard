@@ -136,6 +136,11 @@ a {
   margin-top: 18px;
 }
 
+.button.compact {
+  min-height: 40px;
+  padding: 0 14px;
+}
+
 .signal-panel {
   border: 1px solid rgba(255, 255, 255, 0.24);
   background: rgba(255, 255, 255, 0.11);
@@ -329,7 +334,7 @@ a {
 
 .admin-row {
   display: grid;
-  grid-template-columns: 1fr 1.1fr 1.3fr 0.7fr 1.2fr;
+  grid-template-columns: 1fr 1.1fr 1.3fr 0.7fr 1.2fr 1fr;
   gap: 16px;
   border-bottom: 1px solid var(--line);
   padding: 16px 0;
@@ -351,6 +356,62 @@ a {
   display: block;
   margin-top: 4px;
   color: var(--muted);
+}
+
+.status-form {
+  display: grid;
+  gap: 8px;
+}
+
+.status-form select {
+  width: 100%;
+  border: 1px solid var(--line);
+  border-radius: 6px;
+  padding: 10px 11px;
+  font: inherit;
+  color: var(--ink);
+  background: #fbfcf7;
+}
+
+.delivery-draft {
+  margin-top: 10px;
+}
+
+.delivery-draft summary {
+  cursor: pointer;
+  color: var(--guard-dark);
+  font-weight: 900;
+}
+
+.delivery-draft pre {
+  max-width: min(520px, 80vw);
+  max-height: 360px;
+  overflow: auto;
+  white-space: pre-wrap;
+  border: 1px solid var(--line);
+  border-radius: 6px;
+  background: #fbfcf7;
+  padding: 12px;
+  color: var(--ink);
+  font: 0.88rem/1.55 Arial, Helvetica, sans-serif;
+}
+
+.delivery-form {
+  display: grid;
+  gap: 10px;
+  margin-top: 10px;
+}
+
+.delivery-form textarea {
+  width: 100%;
+  min-height: 260px;
+  resize: vertical;
+  border: 1px solid var(--line);
+  border-radius: 6px;
+  background: #ffffff;
+  padding: 12px;
+  color: var(--ink);
+  font: 0.88rem/1.55 Arial, Helvetica, sans-serif;
 }
 
 .trust-section {

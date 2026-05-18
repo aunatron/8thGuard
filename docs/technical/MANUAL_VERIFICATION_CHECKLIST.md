@@ -25,6 +25,7 @@ Use this checklist before pushing 8thGuard to Vercel.
 - `/submit_payment`
 - `/tonight_offer`
 - `/contact`
+- `/chat_id`
 
 Confirm `/help` lists every supported command.
 Confirm contract preview commands return early contract risk signals only and say they are not a full audit.
@@ -49,6 +50,19 @@ External API failures should return partial results and explorer links where pos
 - `/payment_session quick_contract_scan` shows Stripe/Polar when `POLAR_ACCESS_TOKEN`, `NEXT_PUBLIC_SITE_URL`, and `POLAR_PRODUCT_ID_QUICK_CONTRACT_SCAN` are configured.
 - `/crypto_pay` says crypto payments are for 8thGuard digital services only.
 - Payment language must not suggest escrow, custody, exchange, trading, or user-to-user settlement.
+
+## Paid review desk checks
+- Open `/submit` and submit a test review with a session ID, product, subject, payment reference, and contact.
+- Open `/submit?product_id=detailed_transaction_review` and confirm the review type defaults to `transaction`.
+- Open `/submit?product_id=detailed_agent_review` and confirm the review type defaults to `agent`.
+- Confirm the request appears in `/admin/reviews?token=ADMIN_REVIEW_TOKEN` when Supabase is configured.
+- If `ADMIN_TELEGRAM_CHAT_ID` is configured, confirm the internal operator chat receives a paid-intake alert.
+- If helper bots cannot be added to the ops group, send `/chat_id` to the 8thGuard bot inside that group and use the returned chat ID.
+- Open the request's `Delivery Draft` and confirm it includes request ID, session ID, service, subject, payment evidence, MVP result placeholders, and qualified limits.
+- Edit the delivery draft and send it from the admin desk when the request has a Telegram customer chat ID.
+- Move the request from `paid` to `reviewing`, `needs_more_info`, and `completed`.
+- Confirm each status update stays inside the admin route, keeps the token-protected queue locked without the token, and emits an audit log.
+- Confirm no form asks for seed phrases, private keys, wallet passwords, or unnecessary identity documents.
 
 ## Vercel env var checklist
 - `NEXT_PUBLIC_APP_NAME`
@@ -99,6 +113,8 @@ External API failures should return partial results and explorer links where pos
 - `SOLANA_RPC_URL`
 - `XRPL_RPC_URL`
 - `BTC_MEMPOOL_API_BASE`
+- `ADMIN_REVIEW_TOKEN`
+- `ADMIN_TELEGRAM_CHAT_ID`
 
 ## Secrets checklist
 - Do not stage or commit `env.txt`.

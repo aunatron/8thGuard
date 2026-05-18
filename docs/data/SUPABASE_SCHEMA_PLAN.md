@@ -85,6 +85,17 @@ create table if not exists ledger_entries (
   created_at timestamptz not null default now()
 );
 
+create table if not exists entitlements (
+  id text primary key,
+  user_id text not null,
+  session_id text,
+  product_id text not null,
+  status text not null default 'active',
+  unlock_reason text not null,
+  created_at timestamptz not null default now(),
+  expires_at timestamptz
+);
+
 create table if not exists review_requests (
   id text primary key,
   session_id text not null,
@@ -95,6 +106,7 @@ create table if not exists review_requests (
   network text,
   payment_reference text,
   crypto_tx_hash text,
+  customer_telegram_chat_id bigint,
   telegram_handle text,
   contact_email text,
   context text,

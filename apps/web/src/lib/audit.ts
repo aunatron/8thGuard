@@ -3,6 +3,7 @@ import { insertAuditEventToSupabase } from "./supabase";
 export type AuditEvent = {
   event_type: string;
   actor_type: "telegram_user" | "admin" | "system";
+  actor_id?: string;
   telegram_user_id?: number;
   command: string;
   timestamp: string;

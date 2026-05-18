@@ -70,6 +70,7 @@ export type ReviewRequest = {
   network?: string;
   paymentReference?: string;
   cryptoTxHash?: string;
+  customerTelegramChatId?: number;
   telegramHandle?: string;
   contactEmail?: string;
   context?: string;

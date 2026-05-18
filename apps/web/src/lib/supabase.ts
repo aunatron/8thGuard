@@ -62,6 +62,34 @@ export async function selectSupabaseRows<T>(table: string, query = "select=*&ord
   }
 }
 
+export async function updateSupabaseRows<T>(
+  table: string,
+  query: string,
+  row: Record<string, unknown>
+): Promise<T[]> {
+  const credentials = supabaseCredentials();
+  if (!credentials) return [];
+
+  try {
+    const response = await fetch(`${credentials.url}/rest/v1/${encodeURIComponent(table)}?${query}`, {
+      method: "PATCH",
+      headers: {
+        apikey: credentials.key,
+        Authorization: `Bearer ${credentials.key}`,
+        "Content-Type": "application/json",
+        Prefer: "return=representation"
+      },
+      body: JSON.stringify(row)
+    });
+
+    if (!response.ok) throw new Error(`supabase_update_${response.status}`);
+    return (await response.json()) as T[];
+  } catch (error) {
+    console.error("supabase update failed", { table, error: error instanceof Error ? error.message : "unknown" });
+    return [];
+  }
+}
+
 export async function insertAuditEventToSupabase(event: Record<string, unknown>): Promise<void> {
   if (!hasSupabaseConfig()) {
     return;
@@ -70,7 +98,7 @@ export async function insertAuditEventToSupabase(event: Record<string, unknown>)
   await insertSupabaseRow("audit_logs", {
     event_type: event.event_type,
     actor_type: event.actor_type,
-    actor_id: event.telegram_user_id ? String(event.telegram_user_id) : undefined,
+    actor_id: event.actor_id || (event.telegram_user_id ? String(event.telegram_user_id) : undefined),
     command: event.command,
     metadata: event.metadata || {},
     created_at: event.timestamp || new Date().toISOString()

@@ -42,6 +42,7 @@ npx tsc --noEmit -p apps/web/tsconfig.json
 - `/report_scam`
 - `/pricing`, `/pay`, `/crypto_pay`
 - `/payment_warning`, `/submit_payment`, `/tonight_offer`, `/contact`
+- `/chat_id` for internal Telegram ops setup
 - `/verify_paystack_payment <reference> [session_id]`
 - `/verify_crypto_payment <rail> <tx_hash> [session_id]`
 - `/guarded_send`, `/payment_session`, `/fee_quote`, `/protected_flow`
@@ -54,7 +55,10 @@ Button-first checkout:
 ## Revenue loop
 - Paystack checkout can message the Telegram user after a successful payment.
 - `/submit` collects paid review details: session ID, service, wallet/transaction/agent/case context, payment reference, and contact.
-- `/admin/reviews?token=ADMIN_REVIEW_TOKEN` shows the paid review queue when Supabase is configured.
+- `/admin/reviews?token=ADMIN_REVIEW_TOKEN` shows the paid review queue and lets an approved operator move requests through `paid`, `reviewing`, `needs_more_info`, and `completed`.
+- The admin review desk can send the edited delivery draft back to the Telegram customer when the request is tied to a Telegram-created paid session.
+- Confirmed Paystack and Stripe/Polar payments create ledger entries and active entitlements when session and product metadata are available.
+- Optional `ADMIN_TELEGRAM_CHAT_ID` sends an internal Telegram alert when a paid review request is submitted.
 - Supabase persistence is optional at runtime, but recommended for production payment sessions, payments, ledger entries, review requests, and audit logs.
 
 ## Vercel envs

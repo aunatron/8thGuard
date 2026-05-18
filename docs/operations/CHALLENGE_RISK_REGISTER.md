@@ -8,6 +8,8 @@
 - **Wrong-network crypto payment risk**: mitigated by explicit network confirmation warnings and public-address-only configuration.
 - **Payment impersonation risk**: mitigated by official bot/website instructions and warnings against random admins.
 - **Admin review desk exposure risk**: mitigated by `ADMIN_REVIEW_TOKEN`, server-side Supabase keys, and no public client-side review queue.
+- **Admin alert leakage risk**: mitigated by sending paid-intake alerts only to `ADMIN_TELEGRAM_CHAT_ID`, omitting the admin token from alerts, and keeping alerts short.
+- **Review delivery leakage risk**: mitigated by token-protected admin delivery, Telegram chat IDs from payment sessions, editable operator review, and audit logging without storing delivered message bodies in audit metadata.
 - **Review intake sensitive-data risk**: mitigated by no upload field, explicit no seed phrase/private-key/wallet-password warnings, and short context limits.
 - **External API outage risk**: mitigated by graceful partial results, explorer links, and no-crash fallbacks.
 - **Contract preview false-confidence risk**: mitigated by "early contract risk signals," "automated risk preview," and "not a full audit" language plus paid deep-review CTA.

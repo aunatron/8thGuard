@@ -1,6 +1,12 @@
 import Link from "next/link";
 import { PRODUCTS } from "@/lib/payments/products";
-import { REVIEW_SUBJECT_TYPES } from "@/lib/reviews";
+import {
+  productIdFromForm,
+  REVIEW_SUBJECT_TYPES,
+  subjectPlaceholderForType,
+  subjectTypeFromProductId,
+  subjectTypeFromForm
+} from "@/lib/reviews";
 
 function statusMessage(status?: string, requestId?: string, reason?: string): string | undefined {
   if (status === "received") return `Review details received. Request ID: ${requestId || "8thGuard review"}.`;
@@ -20,6 +26,7 @@ export default async function SubmitReviewPage({
     session_id?: string;
     product_id?: string;
     payment_reference?: string;
+    subject_type?: string;
     status?: string;
     request_id?: string;
     reason?: string;
@@ -27,6 +34,11 @@ export default async function SubmitReviewPage({
 }) {
   const params = await searchParams;
   const message = statusMessage(params.status, params.request_id, params.reason);
+  const selectedProductId = productIdFromForm(params.product_id || null) || "quick_wallet_check";
+  const selectedSubjectType = params.subject_type
+    ? subjectTypeFromForm(params.subject_type)
+    : subjectTypeFromProductId(selectedProductId);
+  const subjectPlaceholder = subjectPlaceholderForType(selectedSubjectType);
 
   return (
     <main>
@@ -63,7 +75,7 @@ export default async function SubmitReviewPage({
 
           <label>
             Paid service
-            <select name="product_id" defaultValue={params.product_id || "quick_wallet_check"} required>
+            <select name="product_id" defaultValue={selectedProductId} required>
               {PRODUCTS.map((product) => (
                 <option key={product.id} value={product.id}>
                   {product.name}
@@ -74,7 +86,7 @@ export default async function SubmitReviewPage({
 
           <label>
             Review type
-            <select name="subject_type" defaultValue="wallet" required>
+            <select name="subject_type" defaultValue={selectedSubjectType} required>
               {REVIEW_SUBJECT_TYPES.map((type) => (
                 <option key={type} value={type}>
                   {type.replace(/_/g, " ")}
@@ -85,7 +97,7 @@ export default async function SubmitReviewPage({
 
           <label>
             Wallet, transaction hash, agent, or case detail
-            <input name="subject_value" required placeholder="Wallet address, tx hash, @agent, or case title" />
+            <input name="subject_value" required placeholder={subjectPlaceholder} />
           </label>
 
           <label>

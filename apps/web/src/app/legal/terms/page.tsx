@@ -2,65 +2,131 @@ export default function TermsPage() {
   return (
     <main>
       <h1>Terms of Service</h1>
-      <p>Effective date: May 13, 2026</p>
+      <p>Effective date: May 13, 2026 | Last updated: May 16, 2026</p>
 
       <h2>1. About 8thGuard</h2>
       <p>
-        8thGuard provides crypto fraud intelligence, wallet review, transaction review, P2P agent review,
-        scam-report preparation, and related digital safety services. 8thGuard is a global service with
-        practical support for users in Ghana and across Africa where local payment rails and P2P activity
-        are common.
+        8thGuard provides crypto safety intelligence, wallet review, transaction review, smart contract
+        risk analysis, P2P agent review, scam-report preparation, and related digital safety services.
+        8thGuard is a global service with practical support for users in regions where local payment rails,
+        P2P activity, and informal crypto agents are common.
       </p>
 
-      <h2>2. Service Boundaries</h2>
+      <h2>2. Platforms</h2>
+      <p>
+        8thGuard operates across multiple platforms and interfaces, which may include Telegram bots,
+        WhatsApp bots, web applications, APIs, and future channels. These Terms apply to all 8thGuard
+        services regardless of the platform or interface used to access them. Platform-specific data
+        handling is described in our Privacy Policy.
+      </p>
+
+      <h2>3. Eligibility</h2>
+      <p>
+        8thGuard services are intended for users aged 18 and older. By using the service or making a
+        payment, you confirm that you are at least 18 years old or the age of majority in your
+        jurisdiction, whichever is higher. If you are accessing the service on behalf of an organization,
+        you confirm that you have authority to bind that organization to these Terms.
+      </p>
+
+      <h2>4. Service Boundaries</h2>
       <ul>
         <li>8thGuard does not provide escrow.</li>
         <li>8thGuard does not custody user funds.</li>
         <li>8thGuard does not operate an exchange, broker, money transmitter, or trading service.</li>
+        <li>8thGuard does not facilitate user-to-user settlement.</li>
         <li>8thGuard does not ask for seed phrases, private keys, or wallet login credentials.</li>
         <li>8thGuard does not guarantee recovery of lost or stolen funds.</li>
+        <li>8thGuard does not provide financial, legal, investment, tax, or law-enforcement advice.</li>
       </ul>
 
-      <h2>3. Risk Information Only</h2>
+      <h2>5. Risk Information Only</h2>
       <p>
-        8thGuard results are risk indicators, not final fraud proof. A wallet, transaction, username, or
-        group may appear risky, clean, new, inactive, or incomplete based on available signals. Users remain
-        responsible for their own decisions before sending funds.
+        8thGuard results are early risk signals and risk indicators, not final fraud proof. A wallet,
+        transaction, username, contract, token, or group may appear risky, clean, new, inactive, or
+        incomplete based on available signals at the time of the check. Users remain solely responsible
+        for their own decisions before sending funds. A low-risk result does not prove safety. A
+        high-caution result does not, by itself, prove someone is a scammer.
       </p>
 
-      <h2>4. User Responsibilities</h2>
+      <h2>6. User Responsibilities</h2>
       <ul>
-        <li>Provide accurate wallet addresses, transaction hashes, usernames, payment references, and context.</li>
+        <li>Provide accurate wallet addresses, transaction hashes, usernames, contract addresses, payment references, and context.</li>
         <li>Verify network, token, amount, and recipient before sending any crypto payment.</li>
         <li>Do not submit unlawful, defamatory, false, private, or sensitive information.</li>
-        <li>Do not submit passwords, seed phrases, private keys, identity documents, or bank credentials in Telegram.</li>
+        <li>Do not submit passwords, seed phrases, private keys, identity documents, or bank credentials through any 8thGuard platform.</li>
+        <li>Do not rely solely on 8thGuard results to make financial decisions.</li>
       </ul>
 
-      <h2>5. Paid Reviews</h2>
+      <h2>7. Paid Reviews and Digital Services</h2>
       <p>
-        Paid reviews are digital service reviews. Payment does not create escrow, custody, fund recovery,
-        law-enforcement action, or a guaranteed outcome. 8thGuard may decline, pause, or cancel a review if
-        the request appears abusive, unlawful, incomplete, or outside the service scope.
+        Paid reviews are digital service reviews delivered immediately or within a short review period.
+        Payment does not create escrow, custody, fund recovery, law-enforcement action, or a guaranteed
+        outcome. By purchasing a quick check or review, you consent to immediate service delivery and
+        acknowledge that once the check result or report is delivered, the service is considered fully
+        performed. 8thGuard may decline, pause, or cancel a review if the request appears abusive,
+        unlawful, incomplete, or outside the service scope.
       </p>
 
-      <h2>6. Acceptable Use</h2>
+      <h2>8. Intellectual Property</h2>
       <p>
-        Users may not use 8thGuard to harass others, publish unverified accusations as proven facts, evade
-        law enforcement, launder funds, facilitate fraud, scrape systems, attack infrastructure, or submit
-        malicious content.
+        Reports, check results, review outputs, and risk assessments generated by 8thGuard are the
+        intellectual property of 8thGuard and are licensed to the purchasing user for personal and
+        internal use only. Users may not resell, redistribute, publicly publish, or represent full
+        8thGuard reports as independent certifications without prior written permission. Quoting brief
+        excerpts with attribution for personal safety purposes is permitted.
       </p>
 
-      <h2>7. Limitation of Liability</h2>
+      <h2>9. Service Availability</h2>
       <p>
-        To the maximum extent permitted by law, 8thGuard is not liable for lost profits, lost crypto assets,
-        market losses, failed transactions, wrong-network transfers, third-party platform errors, indirect
-        damages, or decisions made from incomplete or unavailable public-chain data.
+        8thGuard does not guarantee uninterrupted, error-free, or always-available service. Checks,
+        reviews, and reports depend on third-party APIs, public blockchain data, hosted infrastructure,
+        and external data providers that may experience downtime, rate limits, delays, data gaps, or
+        temporary unavailability. Service delays caused by external factors do not entitle users to
+        refunds unless 8thGuard is unable to deliver the purchased review within a reasonable period and
+        the user requests cancellation before delivery begins. 8thGuard will use reasonable efforts to
+        maintain service availability but makes no uptime guarantees.
       </p>
 
-      <h2>8. Changes</h2>
+      <h2>10. Acceptable Use</h2>
       <p>
-        8thGuard may update these terms as the service develops. Continued use after an update means the
-        updated terms apply.
+        Users may not use 8thGuard to harass others, publish unverified accusations as proven facts,
+        evade law enforcement, launder funds, facilitate fraud, scrape systems, attack infrastructure,
+        or submit malicious content. Users may not use 8thGuard reports to publicly defame, blackmail,
+        extort, or threaten individuals or businesses. Reports are risk indicators for personal safety
+        decisions, not public accusations or certifications.
+      </p>
+
+      <h2>11. Limitation of Liability</h2>
+      <p>
+        To the maximum extent permitted by law, 8thGuard and its officers, directors, employees,
+        agents, and service providers are not liable for lost profits, lost crypto assets, market
+        losses, failed transactions, wrong-network transfers, third-party platform errors, API
+        outages, incomplete data, indirect damages, consequential damages, or decisions made based on
+        incomplete, delayed, or unavailable public-chain data or review results. The total liability
+        of 8thGuard for any claim related to a paid service shall not exceed the amount paid by the
+        user for that specific service.
+      </p>
+
+      <h2>12. Indemnification</h2>
+      <p>
+        You agree to indemnify and hold harmless 8thGuard from any claims, damages, losses, or expenses
+        arising from your use of the service, your violation of these Terms, or your reliance on
+        8thGuard results for decisions beyond the stated scope of the service.
+      </p>
+
+      <h2>13. Governing Law</h2>
+      <p>
+        These Terms are governed by the laws of the Republic of Ghana. Disputes shall first be resolved
+        through direct contact with 8thGuard support. If unresolved, disputes may be submitted to the
+        courts of competent jurisdiction in Ghana. 8thGuard reserves the right to update the governing
+        jurisdiction as its legal structure evolves.
+      </p>
+
+      <h2>14. Changes</h2>
+      <p>
+        8thGuard may update these Terms as the service develops. Material changes will be communicated
+        through the platforms where the service operates. Continued use after an update means the
+        updated Terms apply. Users are encouraged to review these Terms periodically.
       </p>
     </main>
   );

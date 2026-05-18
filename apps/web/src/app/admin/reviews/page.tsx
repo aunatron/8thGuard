@@ -1,6 +1,7 @@
 import { getEnv } from "@/lib/config";
 import { PRODUCT_BY_ID } from "@/lib/payments/products";
-import { listReviewRequests } from "@/lib/reviews";
+import { buildReviewDeliveryDraft } from "@/lib/review-delivery";
+import { listReviewRequests, REVIEW_STATUS_OPTIONS } from "@/lib/reviews";
 
 function shortDate(value: string): string {
   try {
@@ -17,7 +18,7 @@ function shortDate(value: string): string {
 export default async function AdminReviewsPage({
   searchParams
 }: {
-  searchParams: Promise<{ token?: string }>;
+  searchParams: Promise<{ token?: string; status?: string; reason?: string; request_id?: string }>;
 }) {
   const params = await searchParams;
   const { adminReviewToken } = getEnv();
@@ -35,6 +36,24 @@ export default async function AdminReviewsPage({
   }
 
   const { configured, reviews } = await listReviewRequests();
+  const statusMessage =
+    params.status === "updated"
+      ? `Review status updated for ${params.request_id || "selected request"}.`
+      : params.status === "delivered"
+        ? `Review result delivered for ${params.request_id || "selected request"}.`
+      : params.status === "error"
+        ? params.reason === "supabase_not_configured"
+          ? "Supabase is not connected for this environment. Status changes need the live review queue."
+          : params.reason === "request_not_found"
+            ? "That review request was not found in the queue."
+            : params.reason === "no_customer_chat"
+              ? "Telegram delivery needs a paid session created from Telegram so the customer chat ID is available."
+              : params.reason === "delivery_failed"
+                ? "Telegram delivery failed. Check the bot token, chat access, and Telegram status."
+                : params.reason === "message_required"
+                  ? "Add a review result before sending."
+                  : "Review status could not be updated."
+        : undefined;
 
   return (
     <main>
@@ -45,6 +64,10 @@ export default async function AdminReviewsPage({
       </section>
 
       <section className="section-band">
+        {statusMessage && (
+          <div className={params.status === "updated" ? "form-alert success" : "form-alert"}>{statusMessage}</div>
+        )}
+
         {!configured && (
           <div className="form-alert">
             Supabase is not connected for this environment. Add the database env vars to activate the live review queue.
@@ -62,10 +85,12 @@ export default async function AdminReviewsPage({
             <span>Subject</span>
             <span>Status</span>
             <span>Contact</span>
+            <span>Desk Action</span>
           </div>
 
           {reviews.map((review) => {
             const product = PRODUCT_BY_ID[review.productId];
+            const deliveryDraft = buildReviewDeliveryDraft(review);
             return (
               <article className="admin-row" key={review.id}>
                 <span>
@@ -83,6 +108,39 @@ export default async function AdminReviewsPage({
                   {review.telegramHandle || review.contactEmail || "No contact supplied"}
                   {review.paymentReference && <small>Ref: {review.paymentReference}</small>}
                   {review.cryptoTxHash && <small>Tx: {review.cryptoTxHash}</small>}
+                </span>
+                <span>
+                  <form className="status-form" action="/api/reviews/status" method="post">
+                    <input type="hidden" name="token" value={params.token || ""} />
+                    <input type="hidden" name="request_id" value={review.id} />
+                    <select name="status" defaultValue={review.status} aria-label={`Update ${review.id} status`}>
+                      {REVIEW_STATUS_OPTIONS.map((status) => (
+                        <option key={status} value={status}>
+                          {status.replace(/_/g, " ")}
+                        </option>
+                      ))}
+                    </select>
+                    <button className="button primary compact" type="submit">Update</button>
+                  </form>
+                  <details className="delivery-draft">
+                    <summary>Delivery Draft</summary>
+                    <pre>{deliveryDraft}</pre>
+                    <form className="delivery-form" action="/api/reviews/deliver" method="post">
+                      <input type="hidden" name="token" value={params.token || ""} />
+                      <input type="hidden" name="request_id" value={review.id} />
+                      <textarea
+                        name="message"
+                        rows={16}
+                        defaultValue={deliveryDraft}
+                        aria-label={`Delivery result for ${review.id}`}
+                      />
+                      {review.customerTelegramChatId ? (
+                        <button className="button primary compact" type="submit">Send Result</button>
+                      ) : (
+                        <small>Telegram delivery needs a Telegram-created paid session.</small>
+                      )}
+                    </form>
+                  </details>
                 </span>
               </article>
             );
