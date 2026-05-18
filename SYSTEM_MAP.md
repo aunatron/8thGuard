@@ -5,6 +5,7 @@
 - `apps/web/src/app/check/[address]/page.tsx`: public wallet check page — SEO-indexed per-wallet risk preview with paywall CTA for full reports.
 - `apps/web/src/app/pay/page.tsx`: paid service catalog with Paystack link readiness and official crypto wallet callouts.
 - `apps/web/src/app/pay/callback/page.tsx`: Paystack redirect callback page that routes users back to Telegram.
+- `apps/web/src/app/official/page.tsx`: public source-of-truth page for official website, Telegram, WhatsApp, backup channels, and payment safety warnings.
 - `apps/web/src/app/submit/page.tsx`: paid review intake page for session ID, service, payment reference, wallet/tx/agent/case context, and contact.
 - `apps/web/src/app/admin/reviews/page.tsx`: token-protected admin review queue for paid intake.
 - `apps/web/src/app/api/paystack/initialize/route.ts`: API route for future mini-app/web Paystack initialization.
@@ -33,6 +34,7 @@
 - `apps/web/src/lib/review-delivery.ts`: copy-ready paid review delivery draft formatter for the admin desk.
 - `apps/web/src/lib/review-notifications.ts`: optional internal Telegram alert for new paid review intake.
 - `apps/web/src/lib/ops-readiness.ts`: token-protected admin readiness summary for Telegram, admin desk, payments, and public site configuration.
+- `apps/web/src/lib/official-channels.ts`: public official-channel registry for Telegram, WhatsApp, backup Telegram, website, and support contact.
 - `apps/web/src/lib/audit.ts`: structured audit event logging.
 - `apps/web/src/lib/supabase.ts`: optional Supabase REST persistence for audit logs, payments, ledgers, sessions, entitlements, and review requests.
 - `docs/product/*`: guarded transaction, smart contract analyzer, mini-app, and protection-layer product plans.

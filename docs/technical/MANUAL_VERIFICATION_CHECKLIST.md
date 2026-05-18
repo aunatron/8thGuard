@@ -123,6 +123,8 @@ External API failures should return partial results and explorer links where pos
 - Never expose `PAYSTACK_SECRET_KEY`, `POLAR_ACCESS_TOKEN`, `POLAR_WEBHOOK_SECRET`, Telegram bot tokens, private keys, seed phrases, Supabase service role keys, or blockchain API keys in frontend code or docs.
 
 ## Legal and trust pages
+- Confirm `/official` opens.
+- Confirm `/official` lists only public channel URLs/statuses and does not expose admin tokens or secret values.
 - Confirm `/legal` opens.
 - Confirm `/legal/terms` opens.
 - Confirm `/legal/privacy` opens.

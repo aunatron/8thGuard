@@ -216,6 +216,32 @@ a {
   color: var(--muted);
 }
 
+.official-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(260px, 1fr));
+  gap: 16px;
+}
+
+.official-card {
+  min-height: 238px;
+  border: 1px solid var(--line);
+  border-radius: 8px;
+  background: var(--panel);
+  padding: 22px;
+}
+
+.official-card h2 {
+  font-size: clamp(1.45rem, 2.2vw, 2.35rem);
+}
+
+.official-value {
+  display: block;
+  margin: 16px 0;
+  color: var(--guard-dark);
+  font-weight: 900;
+  overflow-wrap: anywhere;
+}
+
 .split-section {
   display: grid;
   grid-template-columns: minmax(0, 0.8fr) minmax(320px, 1.2fr);

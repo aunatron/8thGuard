@@ -28,6 +28,7 @@ export default function HomePage() {
           <div className="hero-actions">
             <a className="button primary" href="/pay">View Paid Services</a>
             <a className="button secondary" href="/services">Explore Reviews</a>
+            <a className="button secondary" href="/official">Official Channels</a>
           </div>
         </div>
         <div className="signal-panel" aria-label="8thGuard risk signal preview">
