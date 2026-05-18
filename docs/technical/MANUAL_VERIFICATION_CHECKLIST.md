@@ -56,6 +56,7 @@ External API failures should return partial results and explorer links where pos
 - Open `/submit?product_id=detailed_transaction_review` and confirm the review type defaults to `transaction`.
 - Open `/submit?product_id=detailed_agent_review` and confirm the review type defaults to `agent`.
 - Confirm the request appears in `/admin/reviews?token=ADMIN_REVIEW_TOKEN` when Supabase is configured.
+- Confirm the Operations Readiness panel appears only after the admin token is accepted and shows configured/missing states without secret values.
 - If `ADMIN_TELEGRAM_CHAT_ID` is configured, confirm the internal operator chat receives a paid-intake alert.
 - If helper bots cannot be added to the ops group, send `/chat_id` to the 8thGuard bot inside that group and use the returned chat ID.
 - Open the request's `Delivery Draft` and confirm it includes request ID, session ID, service, subject, payment evidence, MVP result placeholders, and qualified limits.

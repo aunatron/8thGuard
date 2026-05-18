@@ -191,6 +191,7 @@ Web routes:
 
 Admin review desk:
 - Keep the token private.
+- Use the Operations Readiness panel in `/admin/reviews?token=ADMIN_REVIEW_TOKEN` to confirm required env groups are configured without exposing secret values.
 - Add `ADMIN_TELEGRAM_CHAT_ID` only for the internal operator chat that should receive paid-intake alerts.
 - If helper bots cannot be added, add the 8thGuard bot to the private ops group and send `/chat_id`; use the returned chat ID as `ADMIN_TELEGRAM_CHAT_ID`.
 - Use `reviewing` when manual analysis starts.

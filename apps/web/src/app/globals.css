@@ -327,6 +327,58 @@ a {
   border-color: var(--ink);
 }
 
+.readiness-panel {
+  display: grid;
+  grid-template-columns: minmax(0, 0.55fr) minmax(320px, 1.45fr);
+  gap: 28px;
+  align-items: start;
+  margin-bottom: 36px;
+}
+
+.readiness-panel h2 {
+  font-size: clamp(1.8rem, 3vw, 3rem);
+}
+
+.readiness-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(220px, 1fr));
+  gap: 14px;
+}
+
+.readiness-card {
+  border: 1px solid var(--line);
+  border-radius: 8px;
+  background: #fbfcf7;
+  padding: 18px;
+}
+
+.readiness-item {
+  display: grid;
+  grid-template-columns: 12px minmax(0, 1fr);
+  gap: 10px;
+  align-items: start;
+  padding: 10px 0;
+  border-top: 1px solid var(--line);
+}
+
+.readiness-dot {
+  width: 10px;
+  height: 10px;
+  margin-top: 8px;
+  border-radius: 999px;
+  background: var(--danger);
+}
+
+.readiness-dot.ready {
+  background: var(--guard);
+}
+
+.readiness-item small {
+  display: block;
+  margin-top: 3px;
+  color: var(--muted);
+}
+
 .admin-table {
   display: grid;
   border-top: 1px solid var(--line);
@@ -452,6 +504,7 @@ a {
 
   .hero-section,
   .split-section,
+  .readiness-panel,
   .trust-section {
     grid-template-columns: 1fr;
   }

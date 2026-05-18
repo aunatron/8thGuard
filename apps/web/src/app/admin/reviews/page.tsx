@@ -1,4 +1,5 @@
 import { getEnv } from "@/lib/config";
+import { getOpsReadiness } from "@/lib/ops-readiness";
 import { PRODUCT_BY_ID } from "@/lib/payments/products";
 import { buildReviewDeliveryDraft } from "@/lib/review-delivery";
 import { listReviewRequests, REVIEW_STATUS_OPTIONS } from "@/lib/reviews";
@@ -36,6 +37,9 @@ export default async function AdminReviewsPage({
   }
 
   const { configured, reviews } = await listReviewRequests();
+  const readinessGroups = getOpsReadiness();
+  const readyCount = readinessGroups.flatMap((group) => group.items).filter((item) => item.ready).length;
+  const itemCount = readinessGroups.flatMap((group) => group.items).length;
   const statusMessage =
     params.status === "updated"
       ? `Review status updated for ${params.request_id || "selected request"}.`
@@ -64,6 +68,29 @@ export default async function AdminReviewsPage({
       </section>
 
       <section className="section-band">
+        <div className="readiness-panel">
+          <div>
+            <p className="eyebrow">Operations Readiness</p>
+            <h2>{readyCount}/{itemCount} checks ready.</h2>
+          </div>
+          <div className="readiness-grid">
+            {readinessGroups.map((group) => (
+              <article className="readiness-card" key={group.title}>
+                <h3>{group.title}</h3>
+                {group.items.map((item) => (
+                  <div className="readiness-item" key={item.label}>
+                    <span className={item.ready ? "readiness-dot ready" : "readiness-dot"} aria-hidden="true" />
+                    <span>
+                      <strong>{item.label}</strong>
+                      <small>{item.ready ? "Configured" : item.note}</small>
+                    </span>
+                  </div>
+                ))}
+              </article>
+            ))}
+          </div>
+        </div>
+
         {statusMessage && (
           <div className={params.status === "updated" ? "form-alert success" : "form-alert"}>{statusMessage}</div>
         )}

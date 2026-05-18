@@ -32,6 +32,7 @@
 - `apps/web/src/lib/reviews.ts`: review intake normalization, product-to-subject defaults, audit logging, and optional Supabase queue reads/writes.
 - `apps/web/src/lib/review-delivery.ts`: copy-ready paid review delivery draft formatter for the admin desk.
 - `apps/web/src/lib/review-notifications.ts`: optional internal Telegram alert for new paid review intake.
+- `apps/web/src/lib/ops-readiness.ts`: token-protected admin readiness summary for Telegram, admin desk, payments, and public site configuration.
 - `apps/web/src/lib/audit.ts`: structured audit event logging.
 - `apps/web/src/lib/supabase.ts`: optional Supabase REST persistence for audit logs, payments, ledgers, sessions, entitlements, and review requests.
 - `docs/product/*`: guarded transaction, smart contract analyzer, mini-app, and protection-layer product plans.
